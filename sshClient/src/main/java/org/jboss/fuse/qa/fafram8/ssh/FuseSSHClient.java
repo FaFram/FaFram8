@@ -18,6 +18,28 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class FuseSSHClient extends SSHClient {
+
+	/**
+	 * Constructor.
+	 */
+	public FuseSSHClient() {
+	}
+
+	/**
+	 * Copy constructor.
+	 *
+	 * @param client client to be copied
+	 */
+	public FuseSSHClient(SSHClient client) {
+		log.trace("Creating copy of FuseSSHClient: " + client);
+		this.host = client.getHost();
+		this.port = client.getPort();
+		this.username = client.getUsername();
+		this.password = client.getPassword();
+		this.privateKey = client.getPrivateKey();
+		this.passphrase = client.getPassphrase();
+	}
+
 	@Override
 	public String executeCommand(String command, boolean suppressLog) throws KarafSessionDownException,
 			SSHClientException {

@@ -11,8 +11,8 @@ import java.util.concurrent.Callable;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Thread worker class. OpenStack client is created with shared session from OpenStackClient singleton. Worker purpose
- * is spawn one single server per thread, wait for "active" status and register created server to OpenStackProvisionProvider.
+ * Thread worker class. OpenStack client is created with shared session from OpenStackClient. Worker purpose
+ * is spawn one single server per thread, wait for "active" status.
  * <p/>
  *
  * @author : Roman Jakubco (rjakubco@redhat.com)

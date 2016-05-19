@@ -504,7 +504,7 @@ public class SystemProperty {
 	/**
 	 * Getter.
 	 *
-	 * @return keepContainers propery
+	 * @return keepContainers property
 	 */
 	public static boolean isKeepContainers() {
 		return System.getProperty(FaframConstant.KEEP_CONTAINERS) != null
@@ -538,6 +538,15 @@ public class SystemProperty {
 			forceSet(FaframConstant.KEEP_CONTAINERS, "true");
 			forceSet(FaframConstant.KEEP_OS_RESOURCES, "true");
 		}
+	}
+
+	/**
+	 * Getter.
+	 *
+	 * @return no.threads property
+	 */
+	public static boolean isNoThreads() {
+		return System.getProperty(FaframConstant.NO_THREADS) != null;
 	}
 
 	/**

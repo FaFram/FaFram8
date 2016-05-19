@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * Created by avano on 1.2.16.
  */
 @Slf4j
-public class SshContainer extends Container {
+public class SshContainer extends Container implements ThreadContainer {
 	/**
 	 * Constructor.
 	 */
@@ -61,6 +61,11 @@ public class SshContainer extends Container {
 
 	@Override
 	public void create() {
+		create(super.getParent().getExecutor());
+	}
+
+	@Override
+	public void create(Executor executor) {
 		if (super.getParent() == null) {
 			// Search the parent by its name
 			final Container parent = ContainerManager.getContainer(super.getParentName());
@@ -97,10 +102,10 @@ public class SshContainer extends Container {
 		// Recreate the executor because the values could be changed in the process
 		super.getNode().setExecutor(super.getNode().createExecutor());
 
-		getExecutor().executeCommand(String.format("container-create-ssh --user %s --password %s --host %s %s %s",
+		executor.executeCommand(String.format("container-create-ssh --user %s --password %s --host %s %s %s",
 				super.getNode().getUsername(), super.getNode().getPassword(), super.getNode().getHost(), OptionUtils.getCommand(super.getOptions()), super.getName()));
 		super.setCreated(true);
-		getExecutor().waitForProvisioning(this);
+		executor.waitForProvisioning(this);
 		super.setExecutor(super.createExecutor());
 		super.getExecutor().connect();
 		super.getNode().getExecutor().connect();
@@ -116,12 +121,17 @@ public class SshContainer extends Container {
 
 	@Override
 	public void destroy() {
+		destroy(super.getParent().getExecutor());
+	}
+
+	@Override
+	public void destroy(Executor executor) {
 		if (SystemProperty.suppressStart() || !super.isCreated()) {
 			return;
 		}
 
 		log.info("Destroying container " + super.getName());
-		getExecutor().executeCommand("container-delete --force " + super.getName());
+		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
 	}
 

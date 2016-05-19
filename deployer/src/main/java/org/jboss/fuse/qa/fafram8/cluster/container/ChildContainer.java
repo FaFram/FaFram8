@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  * Created by avano on 1.2.16.
  */
 @Slf4j
-public class ChildContainer extends Container {
+public class ChildContainer extends Container implements ThreadContainer {
 	/**
 	 * Constructor.
 	 */
@@ -69,7 +69,11 @@ public class ChildContainer extends Container {
 			}
 			super.setParent(parent);
 		}
+		create(super.getParent().getExecutor());
+	}
 
+	@Override
+	public void create(Executor executor) {
 		if (SystemProperty.suppressStart()) {
 			return;
 		}
@@ -84,21 +88,22 @@ public class ChildContainer extends Container {
 		if (super.getOptions().containsKey(Option.JMX_PASSWORD)) {
 			jmxPass = super.getOptions().get(Option.JMX_PASSWORD).get(0);
 		}
-		super.getParent().getExecutor().executeCommand(String.format("container-create-child %s --jmx-user %s --jmx-password %s %s %s",
+
+		executor.executeCommand(String.format("container-create-child %s --jmx-user %s --jmx-password %s %s %s",
 				OptionUtils.getCommand(super.getOptions()), jmxUser, jmxPass, super.getParent().getName(), super.getName()));
 		super.setCreated(true);
-		super.getParent().getExecutor().waitForProvisioning(this);
+		executor.waitForProvisioning(this);
 		super.setOnline(true);
 		// Set node object
 		super.setNode(super.getParent().getNode());
 		// Create a new executor
 		try {
-			final Executor executor = super.createExecutor();
+			final Executor childExecutor = super.createExecutor();
 			final String port = super.getParent().getExecutor().executeCommandSilently("zk:get /fabric/registry/ports/containers/"
 					+ super.getName() + "/org.apache.karaf.shell/sshPort").trim();
-			executor.getClient().setPort(Integer.parseInt(port));
-			executor.connect();
-			super.setExecutor(executor);
+			childExecutor.getClient().setPort(Integer.parseInt(port));
+			childExecutor.connect();
+			super.setExecutor(childExecutor);
 		} catch (Exception ex) {
 			log.warn("Couldn't create executor / couldn't parse ssh port, child.executeCommand() won't work!");
 		}
@@ -112,12 +117,17 @@ public class ChildContainer extends Container {
 
 	@Override
 	public void destroy() {
+		destroy(super.getParent().getExecutor());
+	}
+
+	@Override
+	public void destroy(Executor executor) {
 		if (SystemProperty.suppressStart() || !super.isCreated()) {
 			return;
 		}
 
 		log.info("Destroying container " + super.getName());
-		super.getParent().getExecutor().executeCommand("container-delete --force " + super.getName());
+		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
 	}
 

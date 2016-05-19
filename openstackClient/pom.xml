@@ -12,6 +12,7 @@
 	</parent>
 
 	<artifactId>fafram8-openstack-client</artifactId>
+	<name>Fafram8 OpenStack Client</name>
 
 	<properties>
 		<openstack.version>2.0.5</openstack.version>
