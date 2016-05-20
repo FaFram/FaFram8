@@ -83,7 +83,7 @@ public class Executor {
 		return executeCommand(cmd, true);
 	}
 
-	/**ja by s
+	/**
 	 * Executes a command.
 	 *
 	 * @param cmd command
