@@ -1,16 +1,16 @@
 package org.jboss.fuse.qa.fafram8.modifier;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
+import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,10 +23,6 @@ public class ModifierExecutor {
 	private static Set<Modifier> modifiers = new LinkedHashSet<>();
 	private static Set<Modifier> postModifiers = new LinkedHashSet<>();
 	private static Set<Modifier> customModifiers = new LinkedHashSet<>();
-
-	@Setter
-	@Getter
-	private static RootContainer container = null;
 
 	/**
 	 * Constructor.
@@ -182,5 +178,22 @@ public class ModifierExecutor {
 		modifiers.clear();
 		postModifiers.clear();
 		customModifiers.clear();
+	}
+
+	/**
+	 * Gets RootContainer with given host (Fafram8 doesn't support 2 root containers on the same node).
+	 *
+	 * @param host host
+	 * @return root container with given host
+	 */
+	public static Container getRootContainerByHost(String host) {
+		for (Container container : ContainerManager.getContainerList()) {
+			if (container instanceof RootContainer) {
+				if (host.equals(container.getNode().getHost())) {
+					return container;
+				}
+			}
+		}
+		throw new FaframException("Container with given host doesn't exist!");
 	}
 }

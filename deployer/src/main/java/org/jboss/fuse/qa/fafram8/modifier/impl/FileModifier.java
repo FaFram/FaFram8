@@ -2,6 +2,7 @@ package org.jboss.fuse.qa.fafram8.modifier.impl;
 
 import org.apache.commons.io.FileUtils;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exceptions.CopyFileException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
@@ -67,7 +68,8 @@ public final class FileModifier extends Modifier {
 	 * Moves files on localhost.
 	 */
 	private void moveLocalFile() {
-		final String oldFilePath = ModifierExecutor.getContainer().getFusePath() + File.separator + fileToReplace;
+		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+		final String oldFilePath = container.getFusePath() + File.separator + fileToReplace;
 		try {
 			FileUtils.forceDelete(new File(oldFilePath));
 		} catch (Exception ex) {
@@ -92,7 +94,8 @@ public final class FileModifier extends Modifier {
 	 * Moves files on remote.
 	 */
 	private void moveRemoteFile() {
-		final String path = ModifierExecutor.getContainer().getFusePath() + File.separator + fileToReplace;
+		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+		final String path = container.getFusePath() + File.separator + fileToReplace;
 
 		try {
 			log.debug("Copying file: {} to remote location: {}", fileToUse, path);

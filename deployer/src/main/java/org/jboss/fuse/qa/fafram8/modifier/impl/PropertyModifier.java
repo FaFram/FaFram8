@@ -1,5 +1,6 @@
 package org.jboss.fuse.qa.fafram8.modifier.impl;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exceptions.CopyFileException;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
@@ -114,11 +115,12 @@ public final class PropertyModifier extends Modifier {
 	 * Modifies properties on localhost.
 	 */
 	private void localExecute() {
+		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 		final Properties p = new Properties();
 
 		Path path = Paths.get(filePath);
 		if (!path.isAbsolute()) {
-			path = Paths.get(ModifierExecutor.getContainer().getFusePath() + File.separator + filePath);
+			path = Paths.get(container.getFusePath() + File.separator + filePath);
 		}
 		// load property file if it exists
 		if (Files.exists(path)) {
@@ -150,8 +152,9 @@ public final class PropertyModifier extends Modifier {
 	 * Modifies properties on remote.
 	 */
 	private void remoteExecute() {
+		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 		final Properties p = new Properties();
-		final String path = ModifierExecutor.getContainer().getFusePath() + File.separator + filePath;
+		final String path = container.getFusePath() + File.separator + filePath;
 
 		final NodeSSHClient sshClient = (NodeSSHClient) super.getExecutor().getClient();
 

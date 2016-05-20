@@ -4,7 +4,6 @@ import org.jboss.fuse.qa.fafram8.executor.Executor;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Modifier interface.
@@ -13,14 +12,20 @@ import lombok.Setter;
 @EqualsAndHashCode
 public abstract class Modifier {
 	@Getter
-	@Setter
 	private Executor executor;
 	@Getter
-	@Setter
 	private String host;
 
 	/**
 	 * This method will be called before fuse is started.
 	 */
 	public abstract void execute();
+
+	public void setExecutor(Executor executor) {
+		this.executor = executor;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
 }

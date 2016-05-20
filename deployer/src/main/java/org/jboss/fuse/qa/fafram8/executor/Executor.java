@@ -11,7 +11,6 @@ import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
 import org.jboss.fuse.qa.fafram8.ssh.SSHClient;
-import org.jboss.fuse.qa.fafram8.util.CommandHistory;
 import org.jboss.fuse.qa.fafram8.util.callables.Response;
 
 import java.util.ArrayList;
@@ -61,7 +60,7 @@ public class Executor {
 			if (!silent) {
 				log.debug("Response: " + response);
 			}
-			CommandHistory.log(cmd, response);
+//			CommandHistory.log(cmd, response);
 			return response;
 		} catch (KarafSessionDownException e) {
 			log.error("Karaf session is down!");

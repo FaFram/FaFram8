@@ -103,7 +103,6 @@ public class RootContainer extends Container {
 			}
 		}
 
-		ModifierExecutor.setContainer(this);
 		// If we shouldn't skip default user and the usersMod is null == we dont add specific user to the container, so add fafram/fafram
 		if (usersMod == null && !SystemProperty.skipDefaultUser()) {
 			// Add default user which is now fafram/fafram with only role Administrator for more transparent tests
