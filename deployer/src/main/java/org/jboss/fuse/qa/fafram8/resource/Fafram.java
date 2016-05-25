@@ -12,6 +12,7 @@ import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.jboss.fuse.qa.fafram8.cluster.broker.Broker;
 import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
+import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.configuration.ConfigurationParser;
 import org.jboss.fuse.qa.fafram8.deployer.Deployer;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
@@ -214,7 +215,11 @@ public class Fafram extends ExternalResource {
 		if (running) {
 			// If we are running modifiers in the test, execute them directly
 			for (Modifier mod : modifiers) {
-				mod.execute();
+				for (Container c : ContainerManager.getContainerList()) {
+					if (c instanceof RootContainer) {
+						mod.execute(c);
+					}
+				}
 			}
 		}
 		return this;
@@ -717,6 +722,7 @@ public class Fafram extends ExternalResource {
 
 	/**
 	 * Get product version (from {@link Fafram#getProductPath()}).
+	 *
 	 * @return product version, eg {@code 6.2.1.redhat-084} or empty string if regex doesn't match.
 	 */
 	public String getProductVersion() {

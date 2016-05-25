@@ -43,6 +43,21 @@ public final class Deployer {
 	 * Creates all containers from the container list.
 	 */
 	public static void deploy() {
+		// Convert all parentName attributes to parent container object on all containers
+		for (Container container : ContainerManager.getContainerList()) {
+			if (!(container instanceof RootContainer)) {
+				if (container.getParent() == null) {
+					// Search the parent by its name
+					final Container parent = ContainerManager.getContainer(container.getParentName());
+					if (parent == null) {
+						throw new FaframException(String.format("Specified parent (%s) of container %s does not exist in container list!",
+								container.getParentName(), container.getName()));
+					}
+					container.setParent(parent);
+				}
+			}
+		}
+
 		if (SystemProperty.isNoThreads()) {
 			for (Container c : ContainerManager.getContainerList()) {
 				if (!c.isCreated()) {
@@ -80,6 +95,7 @@ public final class Deployer {
 		final Set<Future> futureSet = new HashSet<>();
 
 		final ConcurrentHashMap<String, ContainerSummoner> joiningThreads = new ConcurrentHashMap<>();
+
 		for (Container c : ContainerManager.getContainerList()) {
 			final ContainerSummoner containerSummoner;
 			if (!c.isCreated()) {
@@ -147,7 +163,7 @@ public final class Deployer {
 		// Map containing all created annihilators with the name of theirs container
 		final ConcurrentHashMap<Container, ContainerAnnihilator> joiningThreads = new ConcurrentHashMap<>();
 		final List<Container> list = ContainerManager.getContainerList();
-		for (int i = list.size() - 1; i != 0; i--) {
+		for (int i = list.size() - 1; i >= 0; i--) {
 			final Container c = list.get(i);
 			final ContainerAnnihilator containerAnnihilator;
 			if (c.isCreated()) {

@@ -42,8 +42,8 @@ public final class RootNameModifier extends Modifier {
 	}
 
 	@Override
-	public void execute() {
-		if ("localhost".equals(container.getNode().getHost())) {
+	public void execute(Container container) {
+		if ("localhost".equals(this.container.getNode().getHost())) {
 			final File configFile = new File(container.getFusePath() + File.separator + "etc" + File.separator + "system.properties");
 			try {
 				String fileContent = FileUtils.readFileToString(configFile);

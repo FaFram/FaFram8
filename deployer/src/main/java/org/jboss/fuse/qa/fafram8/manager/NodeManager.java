@@ -1,5 +1,6 @@
 package org.jboss.fuse.qa.fafram8.manager;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 
@@ -25,7 +26,7 @@ public interface NodeManager {
 	 *
 	 * @param host host
 	 */
-	void prepareFuse(String host);
+	void prepareFuse(Container host);
 
 	/**
 	 * Starts fuse.

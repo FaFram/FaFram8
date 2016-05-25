@@ -67,6 +67,8 @@ public class SshContainer extends Container implements ThreadContainer {
 
 	@Override
 	public void create(Executor executor) {
+		// This should be already done in almost all cases but left here for double checking -> adding containers in tests is probably only exception when parent
+		// will be not set
 		if (super.getParent() == null) {
 			// Search the parent by its name
 			final Container parent = ContainerManager.getContainer(super.getParentName());
@@ -99,7 +101,7 @@ public class SshContainer extends Container implements ThreadContainer {
 		}
 
 		log.info("Creating container " + this);
-
+		executor.connect();
 		// Recreate the executor because the values could be changed in the process
 		super.getNode().setExecutor(super.getNode().createExecutor());
 

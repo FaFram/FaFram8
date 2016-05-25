@@ -80,7 +80,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 		}
 
 		log.info("Creating container " + this);
-
+		executor.connect();
 		String jmxUser = super.getUser();
 		String jmxPass = super.getPassword();
 		if (super.getOptions().containsKey(Option.JMX_USER)) {

@@ -134,7 +134,8 @@ public class RootContainer extends Container {
 				nodeManager.prepareZip();
 				nodeManager.unzipArtifact(this);
 				super.setCreated(true);
-				nodeManager.prepareFuse(super.getNode().getHost());
+//				nodeManager.prepareFuse(super.getNode().getHost());
+				nodeManager.prepareFuse(this);
 				if (!SystemProperty.suppressStart()) {
 					nodeManager.startFuse();
 					ContainerManager.patchStandaloneBeforeFabric(this);
@@ -159,9 +160,9 @@ public class RootContainer extends Container {
 	@Override
 	public void destroy() {
 		if ("localhost".equals(super.getNode().getHost())) {
-			ModifierExecutor.executePostModifiers();
+			ModifierExecutor.executePostModifiers(this);
 		} else {
-			ModifierExecutor.executePostModifiers(super.getNode().getExecutor());
+			ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
 		}
 
 		if (!super.isCreated()) {

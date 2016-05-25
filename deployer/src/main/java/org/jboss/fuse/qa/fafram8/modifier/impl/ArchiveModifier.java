@@ -36,25 +36,25 @@ public class ArchiveModifier extends Modifier {
 	private String[] archiveFiles = SystemProperty.getArchivePattern().split(" *, " + "*"); //ignore spaces around comma
 
 	@Override
-	public void execute() {
+	public void execute(Container container) {
 		if (archiveFiles.length == 0) {
 			log.info("Nothing to archive.");
 			return;
 		}
 
 		if (super.getExecutor() != null) {
-			archiveRemoteFiles();
+			archiveRemoteFiles(container);
 		} else {
-			archiveLocalFiles();
+			archiveLocalFiles(container);
 		}
 	}
 
 	/**
 	 * Archives files on localhost.
 	 */
-	private void archiveLocalFiles() {
+	private void archiveLocalFiles(Container container) {
 		log.info("Archiving files with patterns: {}", archiveFiles);
-		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+//		final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 
 		try {
 			// setup Ant Directory Scanner
@@ -89,11 +89,11 @@ public class ArchiveModifier extends Modifier {
 	/**
 	 * Archives files on remote.
 	 */
-	private void archiveRemoteFiles() {
+	private void archiveRemoteFiles(Container container) {
 		final int endIndex = 6;
 		final String randomFolder = super.getExecutor().getClient().getHost() + "-" + UUID.randomUUID().toString().substring(0, endIndex);
 		final NodeSSHClient sshClient = (NodeSSHClient) super.getExecutor().getClient();
-		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+//		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 
 		for (String s : archiveFiles) {
 			final String response = super.getExecutor().executeCommand(
@@ -130,7 +130,7 @@ public class ArchiveModifier extends Modifier {
 	 * @return absolute target path
 	 */
 	private Path getTargetPath(String fileName) {
-		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+		final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 		if (System.getenv("WORKSPACE") == null) {
 			return Paths.get(archiveTargetPath.toString(), StringUtils.substringBetween(
 					Paths.get(container.getFusePath(), fileName).toAbsolutePath().toString(),

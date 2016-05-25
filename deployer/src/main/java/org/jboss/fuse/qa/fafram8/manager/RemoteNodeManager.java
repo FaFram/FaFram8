@@ -1,5 +1,6 @@
 package org.jboss.fuse.qa.fafram8.manager;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.downloader.Downloader;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
@@ -82,8 +83,9 @@ public class RemoteNodeManager implements NodeManager {
 	}
 
 	@Override
-	public void prepareFuse(String host) {
+	public void prepareFuse(Container host) {
 		ModifierExecutor.executeModifiers(host, executor);
+		ModifierExecutor.executeCustomModifiers(host, executor);
 	}
 
 	@Override

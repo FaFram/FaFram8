@@ -1,5 +1,6 @@
 package org.jboss.fuse.qa.fafram8.modifier;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 
 import lombok.EqualsAndHashCode;
@@ -19,7 +20,7 @@ public abstract class Modifier {
 	/**
 	 * This method will be called before fuse is started.
 	 */
-	public abstract void execute();
+	public abstract void execute(Container container);
 
 	public void setExecutor(Executor executor) {
 		this.executor = executor;

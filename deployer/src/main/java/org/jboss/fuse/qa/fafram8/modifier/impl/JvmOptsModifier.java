@@ -4,7 +4,6 @@ import org.apache.commons.io.IOUtils;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
-import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,20 +62,20 @@ public final class JvmOptsModifier extends Modifier {
 	}
 
 	@Override
-	public void execute() {
+	public void execute(Container container) {
 		if (super.getExecutor() == null) {
-			localExecute();
+			localExecute(container);
 		} else {
-			remoteExecute();
+			remoteExecute(container);
 		}
 	}
 
 	/**
 	 * Adds random modifier to bin/setenv on localhost.
 	 */
-	public void localExecute() {
+	public void localExecute(Container container) {
 		try {
-			final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+//			final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 			final String filePath = container.getFusePath() + File.separator + "bin" + File.separator + "setenv";
 			final FileInputStream fis = new FileInputStream(filePath);
 			String content = IOUtils.toString(fis);
@@ -97,8 +96,8 @@ public final class JvmOptsModifier extends Modifier {
 	/**
 	 * Adds random modifier to bin/setenv on remote host.
 	 */
-	public void remoteExecute() {
-		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+	public void remoteExecute(Container container) {
+//		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 		final String filePath = container.getFusePath() + File.separator + "bin" + File.separator + "setenv";
 
 		final String response = super.getExecutor().executeCommandSilently("printf \" \nexport JAVA_OPTS=\\\"-Xms\\$JAVA_MIN_MEM -Xmx\\$JAVA_MAX_MEM "

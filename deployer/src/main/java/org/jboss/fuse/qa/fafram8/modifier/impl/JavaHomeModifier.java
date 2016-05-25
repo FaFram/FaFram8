@@ -5,7 +5,6 @@ import org.apache.commons.io.FileUtils;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
-import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 
 import java.io.File;
 
@@ -41,11 +40,11 @@ public final class JavaHomeModifier extends Modifier {
 	}
 
 	@Override
-	public void execute() {
+	public void execute(Container container) {
 		if (super.getExecutor() != null) {
-			modifyRemoteJavaHome();
+			modifyRemoteJavaHome(container);
 		} else {
-			modifyLocalJavaHome();
+			modifyLocalJavaHome(container);
 		}
 	}
 
@@ -62,8 +61,8 @@ public final class JavaHomeModifier extends Modifier {
 	/**
 	 * Modifies JAVA_HOME on local.
 	 */
-	private void modifyLocalJavaHome() {
-		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+	private void modifyLocalJavaHome(Container container) {
+//		final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 		// Files locations
 		final File setenv = new File(container.getFusePath() + File.separator + "bin" + File.separator + "setenv");
 		final File setenvBat = new File(container.getFusePath() + File.separator + "bin" + File.separator + "setenv.bat");
@@ -91,8 +90,8 @@ public final class JavaHomeModifier extends Modifier {
 	/**
 	 *Modifies JAVA_HOME on remote.
 	 */
-	private void modifyRemoteJavaHome() {
-		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+	private void modifyRemoteJavaHome(Container container) {
+//		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 		final String path = container.getFusePath() + File.separator + "bin" + File.separator + "setenv";
 		String content = String.format("export JAVA_HOME=%s%n", javaHomePath);
 		// Remove original files

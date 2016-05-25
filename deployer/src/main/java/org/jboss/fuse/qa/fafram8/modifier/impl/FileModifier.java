@@ -7,7 +7,6 @@ import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exceptions.CopyFileException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
-import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 
 import java.io.File;
 
@@ -56,19 +55,19 @@ public final class FileModifier extends Modifier {
 	}
 
 	@Override
-	public void execute() {
+	public void execute(Container container) {
 		if (super.getExecutor() == null) {
-			moveLocalFile();
+			moveLocalFile(container);
 		} else {
-			moveRemoteFile();
+			moveRemoteFile(container);
 		}
 	}
 
 	/**
 	 * Moves files on localhost.
 	 */
-	private void moveLocalFile() {
-		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+	private void moveLocalFile(Container container) {
+//		final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 		final String oldFilePath = container.getFusePath() + File.separator + fileToReplace;
 		try {
 			FileUtils.forceDelete(new File(oldFilePath));
@@ -93,8 +92,8 @@ public final class FileModifier extends Modifier {
 	/**
 	 * Moves files on remote.
 	 */
-	private void moveRemoteFile() {
-		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
+	private void moveRemoteFile(Container container) {
+//		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 		final String path = container.getFusePath() + File.separator + fileToReplace;
 
 		try {

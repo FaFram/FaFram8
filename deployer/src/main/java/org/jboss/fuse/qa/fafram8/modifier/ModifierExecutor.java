@@ -91,7 +91,7 @@ public class ModifierExecutor {
 	 *
 	 * @param host host to execute on
 	 */
-	public static void executeModifiers(String host) {
+	public static void executeModifiers(Container host) {
 		executeModifiers(host, null);
 	}
 
@@ -101,16 +101,16 @@ public class ModifierExecutor {
 	 * @param executor executor
 	 * @param host host to execute on
 	 */
-	public static void executeModifiers(String host, Executor executor) {
+	public static void executeModifiers(Container host, Executor executor) {
 		executeModifiersFromCollection(host, executor, modifiers);
 	}
 
 	/**
 	 * Executes the post modifiers.
 	 */
-	public static void executePostModifiers() {
+	public static void executePostModifiers(Container container) {
 		ModifierExecutor.getInstance();
-		executePostModifiers(null);
+		executePostModifiers(container, null);
 	}
 
 	/**
@@ -118,15 +118,15 @@ public class ModifierExecutor {
 	 *
 	 * @param executor executor
 	 */
-	public static void executePostModifiers(Executor executor) {
-		executeModifiersFromCollection(null, executor, postModifiers);
+	public static void executePostModifiers(Container container, Executor executor) {
+		executeModifiersFromCollection(container, executor, postModifiers);
 	}
 
 	/**
 	 * Executes the custom modifiers.
 	 */
-	public static void executeCustomModifiers() {
-		executeCustomModifiers(null);
+	public static void executeCustomModifiers(Container container) {
+		executeCustomModifiers(container, null);
 	}
 
 	/**
@@ -134,8 +134,8 @@ public class ModifierExecutor {
 	 *
 	 * @param executor executor
 	 */
-	public static void executeCustomModifiers(Executor executor) {
-		executeModifiersFromCollection(null, executor, customModifiers);
+	public static void executeCustomModifiers(Container container, Executor executor) {
+		executeModifiersFromCollection(container, executor, customModifiers);
 	}
 
 	/**
@@ -144,19 +144,19 @@ public class ModifierExecutor {
 	 * @param executor executor
 	 * @param col collection
 	 */
-	private static void executeModifiersFromCollection(String host, Executor executor, Collection<Modifier> col) {
+	private static void executeModifiersFromCollection(Container container, Executor executor, Collection<Modifier> col) {
 		synchronized (col) {
 			for (Modifier c : col) {
 				try {
 					// If the host in the modifier is null, it is applicable for all containers
 					// If c.getHost() != host, then this modifier does not belong to that container, so skip it
-					if ((c.getHost() == null) || c.getHost().equals(host)) {
+					if ((c.getHost() == null) || c.getHost().equals(container.getNode().getHost())) {
 						// If executor is not null, then set the executor to the modifier so that it will know it should do it on remote
 						if (executor != null) {
 							c.setExecutor(executor);
 						}
 						log.debug("Executing modifier {}.", c);
-						c.execute();
+						c.execute(container);
 
 						// Unset the executor so that we will not have multiple instances of one modifier in the collection
 						if (executor != null) {
