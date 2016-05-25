@@ -1,6 +1,7 @@
 package org.jboss.fuse.qa.fafram8.cluster.container;
 
 import org.jboss.fuse.qa.fafram8.cluster.resolver.Resolver;
+import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
@@ -92,7 +93,13 @@ public class ChildContainer extends Container implements ThreadContainer {
 		executor.executeCommand(String.format("container-create-child %s --jmx-user %s --jmx-password %s %s %s",
 				OptionUtils.getCommand(super.getOptions()), jmxUser, jmxPass, super.getParent().getName(), super.getName()));
 		super.setCreated(true);
-		executor.waitForProvisioning(this);
+		try {
+			executor.waitForProvisioning(this);
+		} catch (FaframException e) {
+			ContainerSummoner.setStopWork(true);
+			throw e;
+		}
+
 		super.setOnline(true);
 		// Set node object
 		super.setNode(super.getParent().getNode());

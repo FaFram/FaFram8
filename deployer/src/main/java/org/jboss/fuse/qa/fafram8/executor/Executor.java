@@ -60,6 +60,7 @@ public class Executor {
 			if (!silent) {
 				log.debug("Response: " + response);
 			}
+			// TODO(rjakubco): Make it thread safe
 //			CommandHistory.log(cmd, response);
 			return response;
 		} catch (KarafSessionDownException e) {
@@ -82,7 +83,7 @@ public class Executor {
 		return executeCommand(cmd, true);
 	}
 
-	/**
+	/**ja by s
 	 * Executes a command.
 	 *
 	 * @param cmd command

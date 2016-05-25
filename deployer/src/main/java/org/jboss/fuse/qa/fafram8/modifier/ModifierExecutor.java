@@ -48,7 +48,9 @@ public class ModifierExecutor {
 		// Force the initialization
 		ModifierExecutor.getInstance();
 
-		addModifiersToCollection(modifiers, modifier);
+		synchronized (modifiers) {
+			addModifiersToCollection(modifiers, modifier);
+		}
 	}
 
 	/**
@@ -143,26 +145,28 @@ public class ModifierExecutor {
 	 * @param col collection
 	 */
 	private static void executeModifiersFromCollection(String host, Executor executor, Collection<Modifier> col) {
-		for (Modifier c : col) {
-			try {
-				// If the host in the modifier is null, it is applicable for all containers
-				// If c.getHost() != host, then this modifier does not belong to that container, so skip it
-				if ((c.getHost() == null) || c.getHost().equals(host)) {
-					// If executor is not null, then set the executor to the modifier so that it will know it should do it on remote
-					if (executor != null) {
-						c.setExecutor(executor);
-					}
-					log.debug("Executing modifier {}.", c);
-					c.execute();
+		synchronized (col) {
+			for (Modifier c : col) {
+				try {
+					// If the host in the modifier is null, it is applicable for all containers
+					// If c.getHost() != host, then this modifier does not belong to that container, so skip it
+					if ((c.getHost() == null) || c.getHost().equals(host)) {
+						// If executor is not null, then set the executor to the modifier so that it will know it should do it on remote
+						if (executor != null) {
+							c.setExecutor(executor);
+						}
+						log.debug("Executing modifier {}.", c);
+						c.execute();
 
-					// Unset the executor so that we will not have multiple instances of one modifier in the collection
-					if (executor != null) {
-						c.setExecutor(null);
+						// Unset the executor so that we will not have multiple instances of one modifier in the collection
+						if (executor != null) {
+							c.setExecutor(null);
+						}
 					}
+				} catch (Exception e) {
+					log.error("Failed to execute modifiers.", e);
+					throw new FaframException(e);
 				}
-			} catch (Exception e) {
-				log.error("Failed to execute modifiers.", e);
-				throw new FaframException(e);
 			}
 		}
 	}

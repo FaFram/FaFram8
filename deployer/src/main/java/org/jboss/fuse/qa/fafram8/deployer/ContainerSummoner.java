@@ -4,11 +4,13 @@ import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.ThreadContainer;
-import org.jboss.fuse.qa.fafram8.exception.ContainerThreadException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.ssh.FuseSSHClient;
 
+import java.util.concurrent.Callable;
+
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,34 +19,49 @@ import lombok.extern.slf4j.Slf4j;
  * @author : Roman Jakubco (rjakubco@redhat.com)
  */
 @Slf4j
-public class ContainerSummoner implements Runnable {
+public class ContainerSummoner implements Callable {
 	@Getter
 	private Container container;
 
-	public ContainerSummoner(Container container) {
+	@Getter
+	@Setter
+	private volatile boolean ready = false;
+
+	private ContainerSummoner containerSummoner;
+
+	@Setter
+	@Getter
+	private static volatile boolean stopWork = false;
+
+	@Getter
+	private String name;
+
+	public ContainerSummoner(Container container, ContainerSummoner containerSummoner) {
 		this.container = container;
+		this.containerSummoner = containerSummoner;
+		this.name = container.getName();
 	}
 
 	@Override
-	public void run() {
+	public Container call() throws InterruptedException {
+		Thread.currentThread().setName(container.getName());
 		if (container instanceof ChildContainer || container instanceof SshContainer) {
-			final Thread t = Deployer.getThreads().get(container.getParent().getName());
-			if (t == null) {
-				throw new ContainerThreadException("Container :" + container + " have without created thread!");
-			} else {
-				try {
-					log.trace("Container: " + container.getName() + " waiting for thread: " + t.getName() + " to finish.");
-					t.join();
-				} catch (InterruptedException e) {
-					throw new ContainerThreadException("Exception when waiting for thread creating container's parent :" + container.getParent()
-							+ " when creating container:" + container);
+			log.trace("Container " + container.getName() + " starting waiting for container thread: " + containerSummoner.getName());
+			while (!containerSummoner.isReady()) {
+				if (ContainerSummoner.stopWork) {
+					Thread.currentThread().interrupt();
+					return null;
 				}
-				final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()));
-				executor.connect();
-				((ThreadContainer) container).create(executor);
 			}
+			log.trace("Container " + container.getName() + " finished waiting!");
+			final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()));
+			executor.connect();
+			((ThreadContainer) container).create(executor);
 		} else {
 			container.create();
 		}
+
+		this.ready = true;
+		return container;
 	}
 }

@@ -2,6 +2,7 @@ package org.jboss.fuse.qa.fafram8.cluster.container;
 
 import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.cluster.resolver.Resolver;
+import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
@@ -105,7 +106,13 @@ public class SshContainer extends Container implements ThreadContainer {
 		executor.executeCommand(String.format("container-create-ssh --user %s --password %s --host %s %s %s",
 				super.getNode().getUsername(), super.getNode().getPassword(), super.getNode().getHost(), OptionUtils.getCommand(super.getOptions()), super.getName()));
 		super.setCreated(true);
-		executor.waitForProvisioning(this);
+		try {
+			executor.waitForProvisioning(this);
+		} catch (FaframException e) {
+			ContainerSummoner.setStopWork(true);
+			throw e;
+		}
+
 		super.setExecutor(super.createExecutor());
 		super.getExecutor().connect();
 		super.getNode().getExecutor().connect();

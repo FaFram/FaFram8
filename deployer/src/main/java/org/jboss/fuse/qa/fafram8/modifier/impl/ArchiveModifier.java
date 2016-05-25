@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

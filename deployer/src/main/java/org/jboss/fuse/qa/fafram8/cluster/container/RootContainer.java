@@ -7,6 +7,7 @@ import static org.jboss.fuse.qa.fafram8.modifier.impl.PropertyModifier.putProper
 import static org.jboss.fuse.qa.fafram8.modifier.impl.RootNameModifier.setRootName;
 
 import org.jboss.fuse.qa.fafram8.cluster.node.Node;
+import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.manager.LocalNodeManager;
@@ -145,6 +146,7 @@ public class RootContainer extends Container {
 				}
 			} catch (FaframException ex) {
 				ex.printStackTrace();
+				ContainerSummoner.setStopWork(true);
 				nodeManager.stopAndClean(true);
 				throw new FaframException(ex);
 			}

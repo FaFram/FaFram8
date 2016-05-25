@@ -97,7 +97,7 @@ public class RemoteNodeManager implements NodeManager {
 				fuseExecutor.waitForBroker();
 			}
 		} catch (Exception e) {
-			throw new FaframException("Could not start container: " + e);
+			throw new FaframException("Could not start container: ", e);
 		}
 	}
 
