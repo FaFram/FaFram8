@@ -11,6 +11,8 @@ import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
 import org.jboss.fuse.qa.fafram8.ssh.SSHClient;
+import org.jboss.fuse.qa.fafram8.util.CommandHistory;
+import org.jboss.fuse.qa.fafram8.util.ContainerCommandHistory;
 import org.jboss.fuse.qa.fafram8.util.callables.Response;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,13 +40,23 @@ public class Executor {
 	private SSHClient client;
 	private int provisionRetries = 0;
 
+	@Getter
+	@Setter
+	private ContainerCommandHistory history;
+
+	@Getter
+	@Setter
+	private String name;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param client ssh client instance
 	 */
-	public Executor(SSHClient client) {
+	public Executor(SSHClient client, String name) {
 		this.client = client;
+		this.name = name;
+		history = new ContainerCommandHistory(name);
 	}
 
 	/**
@@ -61,7 +74,11 @@ public class Executor {
 				log.debug("Response: " + response);
 			}
 			// TODO(rjakubco): Make it thread safe
-//			CommandHistory.log(cmd, response);
+			if (SystemProperty.isNoThreads()) {
+				CommandHistory.log(cmd, response);
+			} else {
+				history.log(cmd, response);
+			}
 			return response;
 		} catch (KarafSessionDownException e) {
 			log.error("Karaf session is down!");
@@ -83,7 +100,8 @@ public class Executor {
 		return executeCommand(cmd, true);
 	}
 
-	/**ja by s
+	/**
+	 * ja by s
 	 * Executes a command.
 	 *
 	 * @param cmd command
@@ -352,6 +370,7 @@ public class Executor {
 	/**
 	 * Waits for the successful provisioning of container for defined period of time. It may restart the container if the provision status is
 	 * "requires full restart or if the provision status contains "NoNodeException".
+	 *
 	 * @param c container
 	 * @param time time in seconds
 	 */
@@ -362,6 +381,7 @@ public class Executor {
 	/**
 	 * Waits for the defined provision status of the container for defined period of time. It may restart the container if the provision status is
 	 * "requires full restart or if the provision status contains "NoNodeException".
+	 *
 	 * @param c container
 	 * @param status provision status
 	 * @param time time in seconds
@@ -569,7 +589,7 @@ public class Executor {
 
 	/**
 	 * Gets all the child containers and returns all their names.
-	 * <p>
+	 * <p/>
 	 * TODO(avano): this could be reworked in the future after the changes to deploying
 	 *
 	 * @return list of child container names

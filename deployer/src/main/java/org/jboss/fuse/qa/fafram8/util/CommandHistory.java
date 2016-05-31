@@ -69,4 +69,20 @@ public class CommandHistory {
 			throw new FaframException(e);
 		}
 	}
+
+	/**
+	 * Logs the command and it's response into a file.
+	 */
+	public static void log(String history) {
+		if (history == null) {
+			return;
+		}
+		// Force initialization
+		CommandHistory.getInstance();
+		try {
+			FileUtils.write(file, history, true);
+		} catch (IOException e) {
+			throw new FaframException(e);
+		}
+	}
 }

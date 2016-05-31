@@ -94,7 +94,7 @@ public class ContainerAnnihilator implements Callable {
 
 			// If SSH container we need to do this
 			if (container instanceof SshContainer) {
-				final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()));
+				final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()), container.getName());
 				executor.connect();
 				((ThreadContainer) container).destroy(executor);
 			} else {
@@ -103,7 +103,7 @@ public class ContainerAnnihilator implements Callable {
 		} else {
 			// Container is instance of ChildContainer
 			try {
-				final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()));
+				final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()), container.getName());
 				executor.connect();
 				((ThreadContainer) container).destroy(executor);
 			} catch (Exception ex) {

@@ -54,7 +54,7 @@ public class ContainerSummoner implements Callable {
 				}
 			}
 			log.trace("Container " + container.getName() + " finished waiting!");
-			final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()));
+			final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()), container.getName());
 			executor.connect();
 			((ThreadContainer) container).create(executor);
 		} else {

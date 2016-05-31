@@ -234,8 +234,12 @@ public abstract class Container implements Comparable<Container> {
 	 * @return executor instance
 	 */
 	public Executor createExecutor() {
-		final SSHClient fuseClient = new FuseSSHClient().host(this.getNode().getHost()).port(this.getFuseSshPort()).username(this.getUser()).password(this.getPassword());
-		return new Executor(fuseClient);
+		final SSHClient fuseClient = new FuseSSHClient()
+				.host(this.getNode().getHost())
+				.port(this.getFuseSshPort())
+				.username(this.getUser())
+				.password(this.getPassword());
+		return new Executor(fuseClient, this.getName());
 	}
 
 	/**

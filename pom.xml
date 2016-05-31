@@ -105,6 +105,7 @@
 				<version>${maven.surefire.version}</version>
 				<configuration>
 					<skipTests>${skip.test.fafram}</skipTests>
+					<trimStackTrace>false</trimStackTrace>
 					<systemPropertyVariables>
 						<fuse.version>${fuse.version}</fuse.version>
 						<fuse.id>${fuse.id}</fuse.id>
@@ -199,6 +200,7 @@
 						<version>${maven.surefire.version}</version>
 						<configuration combine.self="override">
 							<skipTests>false</skipTests>
+							<trimStackTrace>false</trimStackTrace>
 							<systemPropertyVariables>
 								<fuse.version>${fuse.version}</fuse.version>
 								<fuse.id>${fuse.id}</fuse.id>

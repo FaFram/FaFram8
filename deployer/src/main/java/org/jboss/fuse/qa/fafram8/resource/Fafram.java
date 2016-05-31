@@ -29,6 +29,7 @@ import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.StaticProvider;
+import org.jboss.fuse.qa.fafram8.util.CommandHistory;
 import org.jboss.fuse.qa.fafram8.util.callables.Response;
 import org.jboss.fuse.qa.fafram8.validator.Validator;
 
@@ -108,15 +109,7 @@ public class Fafram extends ExternalResource {
 			Deployer.deploy();
 			ContainerManager.createEnsemble();
 		} catch (Exception ex) {
-			if (!SystemProperty.isKeepOsResources()) {
-				provisionProvider.cleanIpTables(ContainerManager.getContainerList());
-				provisionProvider.releaseResources();
-			}
-			Deployer.destroy(true);
-			ContainerManager.clearAllLists();
-			SystemProperty.clearAllProperties();
-			ModifierExecutor.clearAllModifiers();
-
+			tearDown(true);
 			// Rethrow the exception so that we will know what happened
 			if (ex instanceof ValidatorException) {
 				throw ex;
@@ -138,10 +131,19 @@ public class Fafram extends ExternalResource {
 	 * Stop method.
 	 */
 	public void tearDown() {
+		tearDown(false);
+	}
+
+	/**
+	 * Stop method.
+	 */
+	public void tearDown(boolean force) {
 		try {
 			// There can be a problem with stopping containers
-			Deployer.destroy(false);
+			Deployer.destroy(force);
+			log();
 		} catch (Exception ex) {
+			log();
 			ex.printStackTrace();
 
 			if (!SystemProperty.isKeepOsResources()) {
@@ -872,5 +874,15 @@ public class Fafram extends ExternalResource {
 	 */
 	public <T> Response<T> waitFor(Callable<Response<T>> methodBlock, long secondsTimeout) {
 		return rootContainer.getExecutor().waitFor(methodBlock, secondsTimeout);
+	}
+
+	public void log() {
+		for (Container c : ContainerManager.getContainerList()) {
+			CommandHistory.log(c.getNode().getExecutor().getHistory().getLog());
+		}
+
+		for (Container c : ContainerManager.getContainerList()) {
+			CommandHistory.log(c.getExecutor().getHistory().getLog());
+		}
 	}
 }

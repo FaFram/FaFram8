@@ -65,7 +65,7 @@ public class Node {
 				.port(this.getPort())
 				.username(this.getUsername())
 				.password(this.getPassword());
-		return new Executor(nodeClient);
+		return new Executor(nodeClient, this.host);
 	}
 
 	/**
