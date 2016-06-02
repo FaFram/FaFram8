@@ -13,10 +13,13 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Command history test.
  * Created by avano on 24.11.15.
  */
+@Slf4j
 public class CommandHistoryTest {
 	private Fafram fafram = new Fafram();
 

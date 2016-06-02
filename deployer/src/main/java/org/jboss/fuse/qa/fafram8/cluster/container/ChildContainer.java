@@ -70,7 +70,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 			}
 			super.setParent(parent);
 		}
-		create(super.getParent().getExecutor());
+		create(getExecutor());
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 	@Override
 	public void destroy() {
-		destroy(super.getParent().getExecutor());
+		destroy(getExecutor());
 	}
 
 	@Override
@@ -134,6 +134,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 		}
 
 		log.info("Destroying container " + super.getName());
+		executor.connect();
 		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
 	}
@@ -146,20 +147,21 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 	@Override
 	public void start(boolean force) {
-		super.getParent().getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
-		super.getParent().getExecutor().waitForProvisioning(this);
+		getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
+		getExecutor().waitForProvisioning(this);
 	}
 
 	@Override
 	public void stop(boolean force) {
-		super.getParent().getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
-		super.getParent().getExecutor().waitForContainerStop(this);
+		getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
+		getExecutor().waitForContainerStop(this);
 		super.setOnline(false);
 	}
 
 	@Override
 	public void kill() {
 		super.getExecutor().executeCommand("exec pkill -9 -f " + super.getName());
+		super.setOnline(false);
 	}
 
 	@Override
@@ -190,6 +192,14 @@ public class ChildContainer extends Container implements ThreadContainer {
 	@Override
 	public void waitForProvisionStatus(String status, int time) {
 		super.getParent().getExecutor().waitForProvisionStatus(this, status, time);
+	}
+
+	@Override
+	public Executor getExecutor() {
+		if (super.getParent() == null) {
+			return null;
+		}
+		return super.getParent().getExecutor();
 	}
 
 	/**
@@ -316,6 +326,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param jmxUser jmx user
 		 * @return this
 		 */
@@ -326,6 +337,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param jmxPassword jmx password
 		 * @return this
 		 */
@@ -336,6 +348,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param zkPass zookeeper password
 		 * @return this
 		 */
@@ -346,6 +359,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param manualIp manual ip
 		 * @return this
 		 */
@@ -356,6 +370,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param addr bind address
 		 * @return this
 		 */
@@ -366,6 +381,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param datastore datastore option
 		 * @return this
 		 */
@@ -377,9 +393,9 @@ public class ChildContainer extends Container implements ThreadContainer {
 		/**
 		 * Setter for additional create options that does not have special method.
 		 *
-		 * @deprecated Use other setters, they should be complete.
 		 * @param options options string
 		 * @return this
+		 * @deprecated Use other setters, they should be complete.
 		 */
 		@Deprecated
 		public ChildBuilder options(String options) {

@@ -545,8 +545,9 @@ public class SystemProperty {
 	 *
 	 * @return no.threads property
 	 */
-	public static boolean isNoThreads() {
-		return System.getProperty(FaframConstant.NO_THREADS) != null;
+	public static boolean isWithThreads() {
+		return true;
+//		return System.getProperty(FaframConstant.WITH_THREADS) != null;
 	}
 
 	/**

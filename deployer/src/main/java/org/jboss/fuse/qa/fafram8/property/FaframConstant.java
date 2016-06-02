@@ -191,5 +191,5 @@ public final class FaframConstant {
 	public static final String USE_DEFAULT_REPOSITORIES = "use.default.repositories";
 
 	// Property used when you don't want to use threads for creating/destroying containers
-	public static final String NO_THREADS = "no.threads";
+	public static final String WITH_THREADS = "with.threads";
 }

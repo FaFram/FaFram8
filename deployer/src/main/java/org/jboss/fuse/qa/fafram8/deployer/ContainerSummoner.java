@@ -10,7 +10,6 @@ import org.jboss.fuse.qa.fafram8.ssh.FuseSSHClient;
 import java.util.concurrent.Callable;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,12 +23,10 @@ public class ContainerSummoner implements Callable {
 	private Container container;
 
 	@Getter
-	@Setter
 	private volatile boolean ready = false;
 
 	private ContainerSummoner containerSummoner;
 
-	@Setter
 	@Getter
 	private static volatile boolean stopWork = false;
 
@@ -40,6 +37,10 @@ public class ContainerSummoner implements Callable {
 		this.container = container;
 		this.containerSummoner = containerSummoner;
 		this.name = container.getName();
+	}
+
+	public static void setStopWork(boolean stopWork) {
+		ContainerSummoner.stopWork = stopWork;
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public class ContainerSummoner implements Callable {
 			}
 			log.trace("Container " + container.getName() + " finished waiting!");
 			final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()), container.getName());
-			executor.connect();
+
 			((ThreadContainer) container).create(executor);
 		} else {
 			container.create();
@@ -63,5 +64,10 @@ public class ContainerSummoner implements Callable {
 
 		this.ready = true;
 		return container;
+	}
+
+	public void setReady(boolean ready) {
+		log.error("Setting ready in summoner to " + ready);
+		this.ready = ready;
 	}
 }

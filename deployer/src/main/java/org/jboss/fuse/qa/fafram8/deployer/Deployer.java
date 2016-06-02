@@ -33,6 +33,11 @@ public final class Deployer {
 	@Setter
 	private static volatile boolean fail = false;
 
+	@Getter
+	private static ConcurrentHashMap<String, ContainerSummoner> summoningThreads = new ConcurrentHashMap<>();
+	@Getter
+	private static ConcurrentHashMap<Container, ContainerAnnihilator> annihilatingThreads = new ConcurrentHashMap<>();
+
 	/**
 	 * Private constructor.
 	 */
@@ -58,14 +63,15 @@ public final class Deployer {
 			}
 		}
 
-		if (SystemProperty.isNoThreads()) {
+		if (SystemProperty.isWithThreads()) {
+			log.info("Deploying with threads!");
+			deployWithThreads();
+		} else {
 			for (Container c : ContainerManager.getContainerList()) {
 				if (!c.isCreated()) {
 					c.create();
 				}
 			}
-		} else {
-			deployWithThreads();
 		}
 	}
 
@@ -79,12 +85,15 @@ public final class Deployer {
 		if (SystemProperty.isKeepContainers()) {
 			return;
 		}
+		// Doing thread cleaning is not the best idea because it is not really stable.
+		// For now just do it in the stable old way
+		destroyWithoutThreads(force);
 
-		if (SystemProperty.isNoThreads()) {
-			destroyWithoutThreads(force);
-		} else {
-			destroyWithThreads(force);
-		}
+//		if (SystemProperty.isWithThreads()) {
+//			destroyWithThreads(force);
+//		} else {
+//
+//		}
 	}
 
 	/**
@@ -94,50 +103,43 @@ public final class Deployer {
 		final ExecutorService executorService = Executors.newFixedThreadPool(10);
 		final Set<Future> futureSet = new HashSet<>();
 
-		final ConcurrentHashMap<String, ContainerSummoner> joiningThreads = new ConcurrentHashMap<>();
-
 		for (Container c : ContainerManager.getContainerList()) {
 			final ContainerSummoner containerSummoner;
 			if (!c.isCreated()) {
 				if (c instanceof RootContainer) {
 					containerSummoner = new ContainerSummoner(c, null);
 				} else {
-					final ContainerSummoner parentSummoner = joiningThreads.get(c.getParent().getName());
+					final ContainerSummoner parentSummoner = summoningThreads.get(c.getParent().getName());
 					containerSummoner = new ContainerSummoner(c, parentSummoner);
 				}
-				joiningThreads.putIfAbsent(c.getName(), containerSummoner);
+				summoningThreads.putIfAbsent(c.getName(), containerSummoner);
 				log.debug("Creating thread for spawning container: " + c.getName());
 				futureSet.add(executorService.submit(containerSummoner));
 			}
 		}
 
+		Exception storedException = null;
 		boolean flag = false;
 		for (Future future : futureSet) {
 			try {
-				if (future.get() == null) {
-					ContainerSummoner.setStopWork(true);
-					flag = true;
-					break;
-				}
+				future.get();
 			} catch (Exception e) {
-				// TODO(rjakubco): I don't think this will ever happen
-				ContainerSummoner.setStopWork(true);
-				log.error("Exception thrown from the thread ", e);
+				log.trace("Exception thrown from the thread ", e);
 				flag = true;
+				storedException = e;
 				break;
 			}
 		}
 
 		if (flag || ContainerSummoner.isStopWork()) {
-			log.error("Shutting down spawning threads");
+			log.debug("Shutting down spawning threads because flag " + flag + " or " + ContainerSummoner.isStopWork());
 			ContainerSummoner.setStopWork(true);
 			for (Future future : futureSet) {
 				future.cancel(true);
 			}
 			executorService.shutdownNow();
 
-			// TODO(rjakubco): Find a way to make more specific exception
-			throw new FaframException("Deployment failed");
+			throw new FaframException("Deployment failed: " + storedException, storedException);
 		}
 
 		executorService.shutdown();
@@ -152,6 +154,7 @@ public final class Deployer {
 	}
 
 	/**
+	 * NOT USED!
 	 * Destroys containers using threads.
 	 *
 	 * @param force flag if the exceptions should be ignored
@@ -161,7 +164,7 @@ public final class Deployer {
 		final Set<Future> futureSet = new HashSet<>();
 
 		// Map containing all created annihilators with the name of theirs container
-		final ConcurrentHashMap<Container, ContainerAnnihilator> joiningThreads = new ConcurrentHashMap<>();
+
 		final List<Container> list = ContainerManager.getContainerList();
 		for (int i = list.size() - 1; i >= 0; i--) {
 			final Container c = list.get(i);
@@ -172,7 +175,7 @@ public final class Deployer {
 					final Set<ContainerAnnihilator> children = new HashSet<>();
 					// Find threads of child containers
 					for (Container child : getChildContainers(c)) {
-						children.add(joiningThreads.get(child));
+						children.add(annihilatingThreads.get(child));
 					}
 
 					containerAnnihilator = new ContainerAnnihilator(c, children, force);
@@ -180,9 +183,36 @@ public final class Deployer {
 					// Annihilator for child container
 					containerAnnihilator = new ContainerAnnihilator(c, null, force);
 				}
-				joiningThreads.putIfAbsent(c, containerAnnihilator);
+				annihilatingThreads.putIfAbsent(c, containerAnnihilator);
 				log.debug("Creating thread for deleting container: " + c.getName());
 				futureSet.add(executorService.submit(containerAnnihilator));
+			}
+		}
+
+		Exception storedException = null;
+		boolean flag = false;
+		for (Future future : futureSet) {
+			try {
+				future.get();
+			} catch (Exception e) {
+				log.error("Exception thrown from the thread ", e);
+				flag = true;
+				storedException = e;
+				break;
+			}
+		}
+
+		if (flag || ContainerAnnihilator.isStopWork()) {
+			// TODO(rjakubco): Create better error message
+			log.error("Shutting down annihilating threads because flag " + flag + " or " + ContainerAnnihilator.isStopWork());
+			ContainerAnnihilator.setStopWork(true);
+			for (Future future : futureSet) {
+				future.cancel(true);
+			}
+			executorService.shutdownNow();
+
+			if (!force) {
+				throw new FaframException("Deployment failed: ", storedException);
 			}
 		}
 
@@ -194,7 +224,9 @@ public final class Deployer {
 			}
 		} catch (InterruptedException ie) {
 			ContainerAnnihilator.setStopWork(true);
-			throw new InvokerPoolInterruptedException(ie.getMessage());
+			if (!force) {
+				throw new InvokerPoolInterruptedException(ie.getMessage());
+			}
 		}
 	}
 

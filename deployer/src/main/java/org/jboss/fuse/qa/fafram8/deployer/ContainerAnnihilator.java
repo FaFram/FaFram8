@@ -42,42 +42,6 @@ public class ContainerAnnihilator implements Callable {
 		this.containerAnnihilators = containerAnnihilators;
 	}
 
-//	@Override
-//	public void run() {
-//		if (container instanceof RootContainer || container instanceof SshContainer) {
-//			for (Thread child : getChildrenThreads(container)) {
-//				try {
-//					log.trace("Container: " + container.getName() + " waiting for thread: " + child.getName() + " to finish.");
-//					child.join();
-//				} catch (InterruptedException e) {
-//					throw new ContainerThreadException("Exception when waiting for thread destroying container's child :" + child.getName()
-//							+ " when destroying container:" + container);
-//				}
-//			}
-//
-//			// If SSH container we need to do this
-//			if (container instanceof SshContainer) {
-//				final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()));
-//				executor.connect();
-//				((ThreadContainer) container).destroy(executor);
-//			} else {
-//				container.destroy();
-//			}
-//		} else {
-//			// Container is instance of ChildContainer
-//			try {
-//				final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()));
-//				executor.connect();
-//				((ThreadContainer) container).destroy(executor);
-//			} catch (Exception ex) {
-//				log.warn("Exception when deleting container!", ex);
-//				if (!force) {
-//					throw new FaframException("Error while destroying root container! " + ex);
-//				}
-//			}
-//		}
-//	}
-
 	@Override
 	public Container call() {
 		Thread.currentThread().setName(container.getName());
@@ -95,7 +59,6 @@ public class ContainerAnnihilator implements Callable {
 			// If SSH container we need to do this
 			if (container instanceof SshContainer) {
 				final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()), container.getName());
-				executor.connect();
 				((ThreadContainer) container).destroy(executor);
 			} else {
 				container.destroy();
@@ -104,7 +67,6 @@ public class ContainerAnnihilator implements Callable {
 			// Container is instance of ChildContainer
 			try {
 				final Executor executor = new Executor(new FuseSSHClient(container.getParent().getExecutor().getClient()), container.getName());
-				executor.connect();
 				((ThreadContainer) container).destroy(executor);
 			} catch (Exception ex) {
 				log.warn("Exception when deleting container!", ex);

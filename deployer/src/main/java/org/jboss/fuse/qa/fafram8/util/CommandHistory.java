@@ -71,7 +71,9 @@ public class CommandHistory {
 	}
 
 	/**
-	 * Logs the command and it's response into a file.
+	 * Logs the command history of one Executor to file.
+	 *
+	 * @param history whole history of commands and responses from ExecutorCommandHistory
 	 */
 	public static void log(String history) {
 		if (history == null) {

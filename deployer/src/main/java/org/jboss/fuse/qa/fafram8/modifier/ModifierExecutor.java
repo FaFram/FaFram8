@@ -89,20 +89,20 @@ public class ModifierExecutor {
 	/**
 	 * Executes the modifiers before the fuse starts.
 	 *
-	 * @param host host to execute on
+	 * @param container host to execute on
 	 */
-	public static void executeModifiers(Container host) {
-		executeModifiers(host, null);
+	public static void executeModifiers(Container container) {
+		executeModifiers(container, null);
 	}
 
 	/**
 	 * Executes the modifiers before the fuse starts.
 	 *
 	 * @param executor executor
-	 * @param host host to execute on
+	 * @param container host to execute on
 	 */
-	public static void executeModifiers(Container host, Executor executor) {
-		executeModifiersFromCollection(host, executor, modifiers);
+	public static void executeModifiers(Container container, Executor executor) {
+		executeModifiersFromCollection(container, executor, modifiers);
 	}
 
 	/**

@@ -130,7 +130,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 	@Override
 	public void destroy() {
-		destroy(super.getParent().getExecutor());
+		destroy(getExecutor());
 	}
 
 	@Override
@@ -140,6 +140,7 @@ public class SshContainer extends Container implements ThreadContainer {
 		}
 
 		log.info("Destroying container " + super.getName());
+		executor.connect();
 		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
 	}
@@ -167,6 +168,7 @@ public class SshContainer extends Container implements ThreadContainer {
 	@Override
 	public void kill() {
 		super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());
+		super.setOnline(false);
 	}
 
 	@Override
@@ -201,6 +203,9 @@ public class SshContainer extends Container implements ThreadContainer {
 
 	@Override
 	public Executor getExecutor() {
+		if (super.getParent() == null) {
+			return null;
+		}
 		return super.getParent().getExecutor();
 	}
 
@@ -466,6 +471,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param zkPass zookeeper password
 		 * @return this
 		 */
@@ -476,6 +482,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param manualIp manual ip
 		 * @return this
 		 */
@@ -486,6 +493,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param addr bind address
 		 * @return this
 		 */
@@ -496,6 +504,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param datastore datastore options
 		 * @return this
 		 */
@@ -506,6 +515,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param passPhrase pass phrase
 		 * @return this
 		 */
@@ -516,6 +526,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param port ssh port
 		 * @return this
 		 */
@@ -526,6 +537,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param privateKey private key path
 		 * @return this
 		 */
@@ -536,6 +548,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param minPort min port
 		 * @return this
 		 */
@@ -546,6 +559,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param repos fallback repos
 		 * @return this
 		 */
@@ -556,6 +570,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param uri proxy uri
 		 * @return this
 		 */
@@ -566,6 +581,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param port max port
 		 * @return this
 		 */
@@ -576,6 +592,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param retries ssh retries
 		 * @return this
 		 */
@@ -586,6 +603,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Sets the "--with-admin-access" flag.
+		 *
 		 * @return this
 		 */
 		public SshBuilder withAdminAccess() {
@@ -595,6 +613,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Sets the "--disable-distribution-upload" flag.
+		 *
 		 * @return this
 		 */
 		public SshBuilder disableDistributionUpload() {
@@ -605,9 +624,9 @@ public class SshContainer extends Container implements ThreadContainer {
 		/**
 		 * Setter for additional create options that does not have special method.
 		 *
-		 * @deprecated Use other setters, they should be complete.
 		 * @param options options string
 		 * @return this
+		 * @deprecated Use other setters, they should be complete.
 		 */
 		@Deprecated
 		public SshBuilder options(String options) {

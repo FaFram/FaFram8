@@ -12,7 +12,7 @@ import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
 import org.jboss.fuse.qa.fafram8.ssh.SSHClient;
 import org.jboss.fuse.qa.fafram8.util.CommandHistory;
-import org.jboss.fuse.qa.fafram8.util.ContainerCommandHistory;
+import org.jboss.fuse.qa.fafram8.util.ExecutorCommandHistory;
 import org.jboss.fuse.qa.fafram8.util.callables.Response;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class Executor {
 
 	@Getter
 	@Setter
-	private ContainerCommandHistory history;
+	private ExecutorCommandHistory history;
 
 	@Getter
 	@Setter
@@ -56,7 +56,7 @@ public class Executor {
 	public Executor(SSHClient client, String name) {
 		this.client = client;
 		this.name = name;
-		history = new ContainerCommandHistory(name);
+		history = new ExecutorCommandHistory(name);
 	}
 
 	/**
@@ -74,10 +74,10 @@ public class Executor {
 				log.debug("Response: " + response);
 			}
 			// TODO(rjakubco): Make it thread safe
-			if (SystemProperty.isNoThreads()) {
-				CommandHistory.log(cmd, response);
-			} else {
+			if (SystemProperty.isWithThreads()) {
 				history.log(cmd, response);
+			} else {
+				CommandHistory.log(cmd, response);
 			}
 			return response;
 		} catch (KarafSessionDownException e) {

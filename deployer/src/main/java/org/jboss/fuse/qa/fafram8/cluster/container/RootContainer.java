@@ -213,6 +213,7 @@ public class RootContainer extends Container {
 	@Override
 	public void kill() {
 		nodeManager.kill();
+		super.setOnline(false);
 	}
 
 	@Override

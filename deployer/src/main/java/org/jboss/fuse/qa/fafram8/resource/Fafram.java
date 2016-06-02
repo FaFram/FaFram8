@@ -14,6 +14,7 @@ import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.configuration.ConfigurationParser;
+import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.deployer.Deployer;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exception.ValidatorException;
@@ -139,9 +140,9 @@ public class Fafram extends ExternalResource {
 	 */
 	public void tearDown(boolean force) {
 		try {
+			log();
 			// There can be a problem with stopping containers
 			Deployer.destroy(force);
-			log();
 		} catch (Exception ex) {
 			log();
 			ex.printStackTrace();
@@ -161,6 +162,12 @@ public class Fafram extends ExternalResource {
 			provisionProvider.cleanIpTables(ContainerManager.getContainerList());
 			provisionProvider.releaseResources();
 		}
+
+		// Thread related cleaning
+		ContainerSummoner.setStopWork(false);
+		Deployer.setFail(false);
+		Deployer.getAnnihilatingThreads().clear();
+		Deployer.getSummoningThreads().clear();
 
 		SystemProperty.clearAllProperties();
 		ModifierExecutor.clearAllModifiers();
@@ -877,12 +884,21 @@ public class Fafram extends ExternalResource {
 	}
 
 	public void log() {
+//		log.error("Logging commands");
 		for (Container c : ContainerManager.getContainerList()) {
-			CommandHistory.log(c.getNode().getExecutor().getHistory().getLog());
+//			log.error(c.getName());
+			if (c.getNode() != null) {
+				if (c.getNode().getExecutor() != null) {
+					CommandHistory.log(c.getNode().getExecutor().getHistory().getLog());
+				}
+			}
 		}
 
 		for (Container c : ContainerManager.getContainerList()) {
-			CommandHistory.log(c.getExecutor().getHistory().getLog());
+//			log.error(c.getName());
+			if (c.getExecutor() != null) {
+				CommandHistory.log(c.getExecutor().getHistory().getLog());
+			}
 		}
 	}
 }
