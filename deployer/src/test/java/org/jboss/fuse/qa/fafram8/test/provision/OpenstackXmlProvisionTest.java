@@ -26,7 +26,7 @@ public class OpenstackXmlProvisionTest {
 	@BeforeClass
 	public static void init() {
 		System.setProperty(FaframConstant.KEEP_OS_RESOURCES, "false");
-		System.setProperty(FaframConstant.FUSE_ZIP, FaframTestBase.CURRENT_HTTP_URL);
+		System.setProperty(FaframConstant.FUSE_ZIP, FaframTestBase.CURRENT_LOCAL_URL);
 	}
 
 	@AfterClass

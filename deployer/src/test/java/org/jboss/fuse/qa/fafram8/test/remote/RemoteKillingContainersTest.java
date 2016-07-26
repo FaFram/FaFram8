@@ -35,7 +35,7 @@ public class RemoteKillingContainersTest {
 	private Container ssh = SshContainer.builder().name(sshName).parent(root).build();
 
 
-	public Fafram fafram = new Fafram().fuseZip(FaframTestBase.CURRENT_HTTP_URL).provider(FaframProvider.OPENSTACK).containers(root, child, ssh);
+	public Fafram fafram = new Fafram().fuseZip(FaframTestBase.CURRENT_LOCAL_URL).provider(FaframProvider.OPENSTACK).containers(root, child, ssh);
 
 	@Before
 	public void setUp() throws Exception {
