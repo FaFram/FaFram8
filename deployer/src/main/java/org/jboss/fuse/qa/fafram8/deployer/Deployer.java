@@ -4,6 +4,7 @@ import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
+import org.jboss.fuse.qa.fafram8.exception.FaframThreadException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.openstack.exception.InvokerPoolInterruptedException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
@@ -139,7 +140,7 @@ public final class Deployer {
 			}
 			executorService.shutdownNow();
 
-			throw new FaframException("Deployment failed: " + storedException, storedException);
+			throw new FaframThreadException("Deployment failed: " + storedException, storedException);
 		}
 
 		executorService.shutdown();
@@ -154,11 +155,14 @@ public final class Deployer {
 	}
 
 	/**
-	 * NOT USED!
+	 * NOT USED
+	 * TODO(rjakubco): Upgrade and improve
 	 * Destroys containers using threads.
 	 *
 	 * @param force flag if the exceptions should be ignored
+	 * @deprecated Not used at the moment for it is not stable enough
 	 */
+	@Deprecated
 	private static void destroyWithThreads(boolean force) {
 		final ExecutorService executorService = Executors.newFixedThreadPool(10);
 		final Set<Future> futureSet = new HashSet<>();

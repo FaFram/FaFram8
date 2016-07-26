@@ -65,9 +65,4 @@ public class ContainerSummoner implements Callable {
 		this.ready = true;
 		return container;
 	}
-
-	public void setReady(boolean ready) {
-		log.error("Setting ready in summoner to " + ready);
-		this.ready = ready;
-	}
 }

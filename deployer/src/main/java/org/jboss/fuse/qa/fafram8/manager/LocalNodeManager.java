@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.downloader.Downloader;
+import org.jboss.fuse.qa.fafram8.exception.ContainerException;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
@@ -143,7 +144,7 @@ public class LocalNodeManager implements NodeManager {
 				executor.waitForBroker();
 			}
 		} catch (Exception e) {
-			throw new FaframException("Could not start container: " + e);
+			throw new ContainerException("Could not start root container: " + e);
 		}
 	}
 

@@ -3,7 +3,10 @@ package org.jboss.fuse.qa.fafram8.executor;
 import org.apache.commons.lang3.StringUtils;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
+import org.jboss.fuse.qa.fafram8.exception.ConnectionException;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
+import org.jboss.fuse.qa.fafram8.exception.PatchException;
+import org.jboss.fuse.qa.fafram8.exception.ProvisionException;
 import org.jboss.fuse.qa.fafram8.exceptions.CopyFileException;
 import org.jboss.fuse.qa.fafram8.exceptions.KarafSessionDownException;
 import org.jboss.fuse.qa.fafram8.exceptions.SSHClientException;
@@ -157,7 +160,7 @@ public class Executor {
 			if (elapsed > SystemProperty.getStartWaitTime()) {
 				log.error("Connection couldn't be established after " + SystemProperty.getStartWaitTime()
 						+ " seconds");
-				throw new FaframException("Connection couldn't be established after "
+				throw new ConnectionException("Connection couldn't be established after "
 						+ SystemProperty.getStartWaitTime() + " seconds");
 			}
 			try {
@@ -213,7 +216,7 @@ public class Executor {
 			if (elapsed > SystemProperty.getStartWaitTime()) {
 				log.error("Connection couldn't be established after " + SystemProperty.getStartWaitTime()
 						+ " seconds");
-				throw new FaframException("Connection couldn't be established after "
+				throw new ConnectionException("Connection couldn't be established after "
 						+ SystemProperty.getStartWaitTime() + " seconds");
 			}
 
@@ -286,7 +289,7 @@ public class Executor {
 			// Check if the time is up
 			if (elapsed > SystemProperty.getStopWaitTime()) {
 				log.error("Connection could be established after " + SystemProperty.getStopWaitTime() + " seconds");
-				throw new FaframException(
+				throw new ConnectionException(
 						"Connection could be established after " + SystemProperty.getStopWaitTime() + " seconds");
 			}
 
@@ -444,7 +447,7 @@ public class Executor {
 			log.trace("Waiting for: {} , current provision status: {}", status, provisionStatus);
 			if (!status.equals(provisionStatus) && (provisionStatus.contains("error") || provisionStatus.contains("success"))) {
 				log.error("Container {} did not provision to state \"{}\" but ended in state: \"{}\"", waitFor, status, provisionStatus);
-				throw new FaframException("Container " + waitFor + " failed to provision to state \"" + status + "\"  and ended in provision status \"" + provisionStatus + "\"");
+				throw new ProvisionException("Container " + waitFor + " failed to provision to state \"" + status + "\"  and ended in provision status \"" + provisionStatus + "\"");
 			}
 
 			if (!isSuccessful) {
@@ -472,7 +475,7 @@ public class Executor {
 	private void handleProvisionRetries(String container, String status) {
 		if (provisionRetries > 1) {
 			log.error("Container " + container + " did not provision to state \"" + status + "\" after 3 retries");
-			throw new FaframException("Container " + container + " did not provision to state \"" + status + "\" after 3 retries");
+			throw new ProvisionException("Container " + container + " did not provision to state \"" + status + "\" after 3 retries");
 		}
 	}
 
@@ -486,7 +489,7 @@ public class Executor {
 	private void handleProvisionWaitTime(int elapsed, String container, String status, String containerActualStatus, int time) {
 		if (elapsed > time) {
 			log.error("Container " + container + " failed to provision to state \"" + status + "\" in time and ended in status:" + containerActualStatus);
-			throw new FaframException("Container " + container + " failed to provision to state \"" + status + "\" in time and ended in status:"
+			throw new ProvisionException("Container " + container + " failed to provision to state \"" + status + "\" in time and ended in status:"
 					+ containerActualStatus);
 		}
 	}
@@ -545,7 +548,7 @@ public class Executor {
 				final String action = "true".equals(String.valueOf(status)) ? "install" : "rollback";
 				log.error("Standalone container failed to " + action + " patch after "
 						+ SystemProperty.getPatchWaitTime() + " seconds.");
-				throw new FaframException(
+				throw new PatchException(
 						"Container failed to " + action + " patch after " + SystemProperty.getPatchWaitTime() + " seconds.");
 			}
 
