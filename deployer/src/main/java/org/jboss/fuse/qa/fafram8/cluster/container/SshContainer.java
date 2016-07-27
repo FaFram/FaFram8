@@ -192,6 +192,15 @@ public class SshContainer extends Container implements ThreadContainer {
 		getExecutor().waitForProvisionStatus(this, status, time);
 	}
 
+	@Override
+	public Executor getExecutor() {
+		// If we need to call .toString() before the parent is set
+		if (super.getParent() == null) {
+			return null;
+		}
+		return super.getParent().getExecutor();
+	}
+
 	/**
 	 * Delete SSH container folder from static node.
 	 */

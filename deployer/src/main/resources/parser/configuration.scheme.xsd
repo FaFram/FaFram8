@@ -3,34 +3,34 @@
 	<xs:element name="fafram">
 		<xs:complexType>
 			<xs:all>
-				<xs:element name="configuration" type="configurationType"/>
-				<xs:element name="users" type="usersType"/>
-				<xs:element name="commands" type="commandsType"/>
-				<xs:element name="bundles" type="bundlesType"/>
-				<xs:element name="ensemble" type="xs:string"/>
-				<xs:element name="containers" type="containersType"/>
-				<xs:element name="brokers" type="brokersType"/>
+				<xs:element name="configuration" type="configurationType" minOccurs="0"/>
+				<xs:element name="users" type="usersType" minOccurs="0"/>
+				<xs:element name="commands" type="commandsType" minOccurs="0"/>
+				<xs:element name="bundles" type="bundlesType" minOccurs="0"/>
+				<xs:element name="ensemble" type="xs:string" minOccurs="0"/>
+				<xs:element name="containers" type="containersType" minOccurs="0"/>
+				<xs:element name="brokers" type="brokersType" minOccurs="0"/>
 			</xs:all>
 		</xs:complexType>
 	</xs:element>
 
 	<xs:complexType name="configurationType">
 		<xs:all>
-			<xs:element name="provider" type="xs:string"/>
-			<xs:element name="hostUser" type="xs:string"/>
-			<xs:element name="hostPassword" type="xs:string"/>
-			<xs:element name="hostPort" type="xs:string"/>
-			<xs:element name="fuseUser" type="xs:string"/>
-			<xs:element name="fusePassword" type="xs:string"/>
-			<xs:element name="fuseZip" type="xs:string"/>
-			<xs:element name="startWaitTime" type="xs:string"/>
-			<xs:element name="stopWaitTime" type="xs:string"/>
-			<xs:element name="provisionWaitTime" type="xs:string"/>
-			<xs:element name="skipBrokerWait"/>
-			<xs:element name="offline"/>
-			<xs:element name="withoutDefaultUser"/>
-			<xs:element name="iptables" type="noValuePathAttr"/>
-			<xs:element name="jdk" type="noValuePathAttr"/>
+			<xs:element name="provider" type="xs:string" minOccurs="0"/>
+			<xs:element name="hostUser" type="xs:string" minOccurs="0"/>
+			<xs:element name="hostPassword" type="xs:string" minOccurs="0"/>
+			<xs:element name="hostPort" type="xs:string" minOccurs="0"/>
+			<xs:element name="fuseUser" type="xs:string" minOccurs="0"/>
+			<xs:element name="fusePassword" type="xs:string" minOccurs="0"/>
+			<xs:element name="fuseZip" type="xs:string" minOccurs="0"/>
+			<xs:element name="startWaitTime" type="xs:string" minOccurs="0"/>
+			<xs:element name="stopWaitTime" type="xs:string" minOccurs="0"/>
+			<xs:element name="provisionWaitTime" type="xs:string" minOccurs="0"/>
+			<xs:element name="skipBrokerWait" minOccurs="0"/>
+			<xs:element name="offline" minOccurs="0"/>
+			<xs:element name="withoutDefaultUser" minOccurs="0"/>
+			<xs:element name="iptables" type="noValuePathAttr" minOccurs="0"/>
+			<xs:element name="jdk" type="noValuePathAttr" minOccurs="0"/>
 		</xs:all>
 	</xs:complexType>
 
@@ -73,10 +73,10 @@
 
 	<xs:complexType name="containerType">
 		<xs:all>
-			<xs:element name="name" type="xs:string"/>
-			<xs:element name="jvmOpts" type="xs:string"/>
-			<xs:element name="commands" type="commandsType"/>
-			<xs:element name="profiles" type="profilesType"/>
+			<xs:element name="name" type="xs:string" minOccurs="1"/>
+			<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>
+			<xs:element name="commands" type="commandsType" minOccurs="0"/>
+			<xs:element name="profiles" type="profilesType" minOccurs="0"/>
 		</xs:all>
 		<xs:attribute name="id" type="xs:string"/>
 		<xs:attribute name="ref" type="xs:string"/>
@@ -94,7 +94,7 @@
 		<xs:complexContent>
 			<xs:extension base="containerType">
 				<xs:all>
-					<xs:element name="jvmMemoryOpts">
+					<xs:element name="jvmMemoryOpts" minOccurs="0">
 						<xs:complexType>
 							<xs:attribute name="xms" type="xs:string"/>
 							<xs:attribute name="xmx" type="xs:string"/>
@@ -102,10 +102,10 @@
 							<xs:attribute name="maxPermMem" type="xs:string"/>
 						</xs:complexType>
 					</xs:element>
-					<xs:element name="workingDir" type="xs:string"/>
-					<xs:element name="users" type="usersType"/>
-					<xs:element name="node" type="nodeType"/>
-					<xs:element name="bundles" type="bundlesType"/>
+					<xs:element name="workingDir" type="xs:string" minOccurs="0"/>
+					<xs:element name="users" type="usersType" minOccurs="0"/>
+					<xs:element name="node" type="nodeType" minOccurs="0"/>
+					<xs:element name="bundles" type="bundlesType" minOccurs="0"/>
 				</xs:all>
 				<xs:attribute name="fabric" type="xs:boolean"/>
 			</xs:extension>
@@ -123,13 +123,13 @@
 		<xs:complexContent>
 			<xs:extension base="containerType">
 				<xs:all>
-					<xs:element name="parentName" type="xs:string"/>
-					<xs:element name="version" type="xs:string"/>
-					<xs:element name="jvmOpts" type="xs:string"/>
-					<xs:element name="jmxUser" type="xs:string"/>
-					<xs:element name="jmxPassword" type="xs:string"/>
-					<xs:element name="resolver" type="resolverType"/>
-					<xs:element name="manualIp" type="xs:string"/>
+					<xs:element name="parentName" type="xs:string" minOccurs="1"/>
+					<xs:element name="version" type="xs:string" minOccurs="0"/>
+					<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>
+					<xs:element name="jmxUser" type="xs:string" minOccurs="0"/>
+					<xs:element name="jmxPassword" type="xs:string" minOccurs="0"/>
+					<xs:element name="resolver" type="resolverType" minOccurs="0"/>
+					<xs:element name="manualIp" type="xs:string" minOccurs="0"/>
 				</xs:all>
 				<xs:attribute name="fabric" type="xs:boolean"/>
 			</xs:extension>
@@ -150,19 +150,19 @@
 		<xs:complexContent>
 			<xs:extension base="containerType">
 				<xs:all>
-					<xs:element name="node" type="nodeType"/>
-					<xs:element name="version" type="xs:string"/>
-					<xs:element name="env" type="xs:string"/>
-					<xs:element name="jvmOpts" type="xs:string"/>
-					<xs:element name="resolver" type="resolverType"/>
-					<xs:element name="manualIp" type="xs:string"/>
-					<xs:element name="workingDir" type="xs:string"/>
-					<xs:element name="zookeeperPassword" type="xs:string"/>
-					<xs:element name="privateKey" type="xs:string"/>
-					<xs:element name="passPhrase" type="xs:string"/>
-					<xs:element name="proxyUri" type="xs:string"/>
-					<xs:element name="minPort" type="xs:positiveInteger"/>
-					<xs:element name="maxPort" type="xs:positiveInteger"/>
+					<xs:element name="node" type="nodeType" minOccurs="1"/>
+					<xs:element name="version" type="xs:string" minOccurs="0"/>
+					<xs:element name="env" type="xs:string" minOccurs="0"/>
+					<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>
+					<xs:element name="resolver" type="resolverType" minOccurs="0"/>
+					<xs:element name="manualIp" type="xs:string" minOccurs="0"/>
+					<xs:element name="workingDir" type="xs:string" minOccurs="0"/>
+					<xs:element name="zookeeperPassword" type="xs:string" minOccurs="0"/>
+					<xs:element name="privateKey" type="xs:string" minOccurs="0"/>
+					<xs:element name="passPhrase" type="xs:string" minOccurs="0"/>
+					<xs:element name="proxyUri" type="xs:string" minOccurs="0"/>
+					<xs:element name="minPort" type="xs:positiveInteger" minOccurs="0"/>
+					<xs:element name="maxPort" type="xs:positiveInteger" minOccurs="0"/>
 				</xs:all>
 				<xs:attribute name="fabric" type="xs:boolean"/>
 			</xs:extension>
@@ -177,9 +177,9 @@
 
 	<xs:complexType name="brokerType">
 		<xs:all>
-			<xs:element name="name" type="xs:string"/>
-			<xs:element name="ssl" type="xs:boolean"/>
-			<xs:element name="kind">
+			<xs:element name="name" type="xs:string" minOccurs="0"/>
+			<xs:element name="ssl" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="kind" minOccurs="0">
 				<xs:simpleType>
 					<xs:restriction>
 						<xs:enumeration value="MasterSlave"/>
@@ -187,12 +187,12 @@
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
-			<xs:element name="parentProfile" type="xs:string"/>
-			<xs:element name="group" type="xs:string"/>
-			<xs:element name="data" type="xs:string"/>
-			<xs:element name="networks" type="networksType"/>
-			<xs:element name="pids" type="pidsType"/>
-			<xs:element name="containerFilter" type="xs:string"/>
+			<xs:element name="parentProfile" type="xs:string" minOccurs="0"/>
+			<xs:element name="group" type="xs:string" minOccurs="0"/>
+			<xs:element name="data" type="xs:string" minOccurs="0"/>
+			<xs:element name="networks" type="networksType" minOccurs="0"/>
+			<xs:element name="pids" type="pidsType" minOccurs="0"/>
+			<xs:element name="containerFilter" type="xs:string" minOccurs="0"/>
 		</xs:all>
 	</xs:complexType>
 

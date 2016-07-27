@@ -26,16 +26,19 @@ public class NodeModel {
 	private int port;
 
 	@XmlAttribute
-	private String username;
+	private String user;
 
 	@XmlAttribute
 	private String password;
 
+	/**
+	 * Creates a node object from the specified attributes.
+	 * @return node object
+	 */
 	public Node createNode() {
-		// TODO(avano): if * == null
 		return Node.builder().host(host)
 				.port(port)
-				.username(username)
+				.username(user)
 				.password(password).build();
 	}
 }

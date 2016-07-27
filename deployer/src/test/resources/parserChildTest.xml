@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fafram xmlns="urn:org.jboss.fuse.qa">
+	<containers>
+		<child id="t1" template="true">
+			<name>1</name>
+			<parentName>1</parentName>
+			<version>1</version>
+			<jvmOpts>1</jvmOpts>
+			<jmxUser>1</jmxUser>
+			<jmxPassword>1</jmxPassword>
+			<resolver>localhostname</resolver>
+			<manualIp>1</manualIp>
+			<commands>
+				<command>1</command>
+			</commands>
+			<profiles>
+				<profile>1</profile>
+			</profiles>
+		</child>
+		<child id="t2" template="true" ref="t1">
+			<name>2</name>
+			<parentName>2</parentName>
+			<version>2</version>
+			<resolver>localip</resolver>
+			<manualIp>2</manualIp>
+			<commands>
+				<command>2</command>
+			</commands>
+		</child>
+		<child id="t3" ref="t2">
+			<name>3</name>
+			<parentName>3</parentName>
+			<version>1</version>
+			<resolver>localip</resolver>
+			<profiles>
+				<profile>3</profile>
+			</profiles>
+		</child>
+	</containers>
+</fafram>

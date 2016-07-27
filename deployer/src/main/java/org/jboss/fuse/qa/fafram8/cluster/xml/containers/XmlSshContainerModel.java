@@ -17,7 +17,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class XmlSshContainerModel extends XmlContainerModel {
-	@XmlElement(required = true)
+	@XmlElement
 	private NodeModel node;
 
 	@XmlElement
@@ -52,5 +52,4 @@ public class XmlSshContainerModel extends XmlContainerModel {
 
 	@XmlElement
 	private int maxPort;
-
 }

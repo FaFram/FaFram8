@@ -1,9 +1,9 @@
 package org.jboss.fuse.qa.fafram8.cluster.xml.containers;
 
 import org.jboss.fuse.qa.fafram8.cluster.xml.toplevel.BundlesModel;
-import org.jboss.fuse.qa.fafram8.cluster.xml.util.UsersModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.JvmMemoryOptsModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.NodeModel;
+import org.jboss.fuse.qa.fafram8.cluster.xml.util.UsersModel;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

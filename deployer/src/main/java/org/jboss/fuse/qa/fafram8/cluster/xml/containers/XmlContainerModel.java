@@ -19,7 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class XmlContainerModel {
-	@XmlElement(required = true)
+	@XmlElement
 	private String name;
 
 	@XmlElement

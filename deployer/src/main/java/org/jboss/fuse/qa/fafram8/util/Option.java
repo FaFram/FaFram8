@@ -49,7 +49,7 @@ public enum Option {
 			return "--jvm-opts";
 		}
 	},
-	JVM_MEM_OPTS(false) {
+	JVM_MEM_OPTS(true) {
 		@Override
 		public String toString() {
 			return "jvmMemOpts";
