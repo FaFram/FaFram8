@@ -14,7 +14,6 @@ import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
 import org.jboss.fuse.qa.fafram8.ssh.SSHClient;
-import org.jboss.fuse.qa.fafram8.util.CommandHistory;
 import org.jboss.fuse.qa.fafram8.util.ExecutorCommandHistory;
 import org.jboss.fuse.qa.fafram8.util.callables.Response;
 
@@ -76,12 +75,7 @@ public class Executor {
 			if (!silent) {
 				log.debug("Response: " + response);
 			}
-			// TODO(rjakubco): Make it thread safe
-			if (SystemProperty.isWithThreads()) {
-				history.log(cmd, response);
-			} else {
-				CommandHistory.log(cmd, response);
-			}
+			history.log(cmd, response);
 			return response;
 		} catch (KarafSessionDownException e) {
 			log.error("Karaf session is down!");

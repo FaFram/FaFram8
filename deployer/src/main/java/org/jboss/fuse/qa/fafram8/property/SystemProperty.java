@@ -210,7 +210,7 @@ public class SystemProperty {
 	 * @return karaf start wait time
 	 */
 	public static int getStartWaitTime() {
-		return Integer.parseInt(System.getProperty(FaframConstant.START_WAIT_TIME, "60"));
+		return Integer.parseInt(System.getProperty(FaframConstant.START_WAIT_TIME, "120"));
 	}
 
 	/**
@@ -546,8 +546,8 @@ public class SystemProperty {
 	 * @return no.threads property
 	 */
 	public static boolean isWithThreads() {
-		return true;
-//		return System.getProperty(FaframConstant.WITH_THREADS) != null;
+//		return true;
+		return System.getProperty(FaframConstant.WITH_THREADS) != null;
 	}
 
 	/**

@@ -70,7 +70,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 			}
 			super.setParent(parent);
 		}
-		create(getExecutor());
+		create(super.getParent().getExecutor());
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 	@Override
 	public void destroy() {
-		destroy(getExecutor());
+		destroy(super.getParent().getExecutor());
 	}
 
 	@Override
@@ -137,6 +137,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 		executor.connect();
 		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
+		ContainerManager.getContainerList().remove(this);
 	}
 
 	@Override
@@ -147,14 +148,14 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 	@Override
 	public void start(boolean force) {
-		getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
-		getExecutor().waitForProvisioning(this);
+		super.getParent().getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
+		super.getParent().getExecutor().waitForProvisioning(this);
 	}
 
 	@Override
 	public void stop(boolean force) {
-		getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
-		getExecutor().waitForContainerStop(this);
+		super.getParent().getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
+		super.getParent().getExecutor().waitForContainerStop(this);
 		super.setOnline(false);
 	}
 
@@ -192,14 +193,6 @@ public class ChildContainer extends Container implements ThreadContainer {
 	@Override
 	public void waitForProvisionStatus(String status, int time) {
 		super.getParent().getExecutor().waitForProvisionStatus(this, status, time);
-	}
-
-	@Override
-	public Executor getExecutor() {
-		if (super.getParent() == null) {
-			return null;
-		}
-		return super.getParent().getExecutor();
 	}
 
 	/**

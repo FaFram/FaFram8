@@ -140,11 +140,11 @@ public class Fafram extends ExternalResource {
 	 */
 	public void tearDown(boolean force) {
 		try {
-			log();
+			CommandHistory.writeLogs();
 			// There can be a problem with stopping containers
 			Deployer.destroy(force);
 		} catch (Exception ex) {
-			log();
+			CommandHistory.writeLogs();
 			ex.printStackTrace();
 
 			if (!SystemProperty.isKeepOsResources()) {
@@ -881,24 +881,5 @@ public class Fafram extends ExternalResource {
 	 */
 	public <T> Response<T> waitFor(Callable<Response<T>> methodBlock, long secondsTimeout) {
 		return rootContainer.getExecutor().waitFor(methodBlock, secondsTimeout);
-	}
-
-	public void log() {
-//		log.error("Logging commands");
-		for (Container c : ContainerManager.getContainerList()) {
-//			log.error(c.getName());
-			if (c.getNode() != null) {
-				if (c.getNode().getExecutor() != null) {
-					CommandHistory.log(c.getNode().getExecutor().getHistory().getLog());
-				}
-			}
-		}
-
-		for (Container c : ContainerManager.getContainerList()) {
-//			log.error(c.getName());
-			if (c.getExecutor() != null) {
-				CommandHistory.log(c.getExecutor().getHistory().getLog());
-			}
-		}
 	}
 }

@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ExecutorCommandHistory {
-	private StringBuilder builder = new StringBuilder();
+	private StringBuilder builder;
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 	private String name;
 
@@ -23,7 +23,8 @@ public class ExecutorCommandHistory {
 	 */
 	public ExecutorCommandHistory(String name) {
 		this.name = name;
-		builder.append("Executor: ").append(name).append("\n");
+		builder = new StringBuilder();
+		builder.append("Executor: ").append(name).append("\n\n");
 	}
 
 	/**
@@ -35,9 +36,9 @@ public class ExecutorCommandHistory {
 	public void log(String cmd, String response) {
 		builder.append(dateFormat.format(new Date()))
 				.append("\n")
-				.append(cmd)
+				.append("Command: ").append(cmd)
 				.append("\n")
-				.append(response)
+				.append("Response: ").append(response)
 				.append("\n")
 				.append("------------------------------------------------------------------")
 				.append("\n");
@@ -52,8 +53,9 @@ public class ExecutorCommandHistory {
 		if (this.name == null) {
 			return "";
 		}
-		if (builder.length() != 0) {
-			builder.append("================================================================================================================").append("\n");
+		if (builder.length() >= 10) {
+			builder.append(builder.length());
+			builder.append("\n================================================================================================\n");
 		}
 
 		return builder.toString();
