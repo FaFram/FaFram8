@@ -7,10 +7,7 @@ import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
-import org.jboss.fuse.qa.fafram8.exception.FaframException;
-import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.property.FaframProvider;
-import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
 import org.jboss.fuse.qa.fafram8.test.base.FaframTestBase;
 
@@ -53,25 +50,20 @@ public class RemoteKillingContainersTest {
 		String response = fafram.executeCommand("exec ps aux | grep " + childName);
 		assertFalse(response.contains("karaf.base"));
 
-		final Executor executor = ssh.getNode().getExecutor();
-
-		executor.executeCommand("pkill -9 -f karaf");
-		response = executor.executeCommand("ps aux | grep " + sshName);
+		ssh.kill();
+		response = ssh.getNode().getExecutor().executeCommand("ps aux | grep " + sshName);
 		assertFalse(response.contains("karaf.base"));
 
 		root.kill();
 
 		assertNull(fafram.executeCommand("list"));
 
-		if(SystemProperty.isWithThreads()){
-			try {
-				fafram.tearDown();
-			} catch (FaframException e) {
-				// cool
-			}
-		} else {
-			fafram.tearDown();
-		}
+//		try {
+//			fafram.tearDown();
+//		} catch (FaframException e) {
+//				// cool
+//		}
+
 
 	}
 }

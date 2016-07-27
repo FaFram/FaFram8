@@ -6,7 +6,6 @@ import org.apache.commons.io.FileUtils;
 
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
 
-import org.junit.After;
 import org.junit.Test;
 
 import java.io.File;
@@ -27,21 +26,19 @@ public class CommandHistoryTest {
 	public void commandHistoryTest() throws Exception {
 		fafram.setup();
 		fafram.executeCommand("echo hello");
+		fafram.executeCommand("echo hi");
+
+		// Now it is required to destroy fafram to wrote command history to file
+		fafram.tearDown();
+
 		File path = new File(Paths.get("target", "archived").toAbsolutePath().toString());
 		final String[] files = path.list();
 		Arrays.sort(files);
-		final String fileName = files[files.length - 1];
+		String fileName = files[0];
 		String content = FileUtils.readFileToString(new File(Paths.get("target", "archived", fileName).toAbsolutePath().toString()));
 		assertTrue(content.contains("echo hello"));
-		fafram.executeCommand("echo hi");
+
 		content = FileUtils.readFileToString(new File(Paths.get("target", "archived", fileName).toAbsolutePath().toString()));
 		assertTrue(content.contains("echo hi"));
-	}
-
-	@After
-	public void after() {
-		if (fafram != null) {
-			fafram.tearDown();
-		}
 	}
 }
