@@ -649,6 +649,7 @@ public class Fafram extends ExternalResource {
 			try {
 				configurationParser.parseConfigurationFile(SystemProperty.getFabricConfigPath());
 			} catch (Exception e) {
+				e.printStackTrace();
 				throw new FaframException("XML configuration parsing error.", e);
 			}
 

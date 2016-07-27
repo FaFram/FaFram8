@@ -1,27 +1,154 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fafram xmlns="org.jboss.fuse.qa"
+<fafram xmlns="urn:org.jboss.fuse.qa"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="org.jboss.fuse.qa  config.scheme.xsd">
+		xsi:schemaLocation="urn:org.jboss.fuse.qa config.scheme.xsd">
 
-	<framework></framework>
+	<configuration>
+		<provider>OpenStack</provider>
+		<hostUser>user</hostUser>
+		<hostPassword>pw</hostPassword>
+		<hostPort>22</hostPort>
+		<fuseUser>user</fuseUser>
+		<fusePassword>user</fusePassword>
+		<fuseZip>http://fusezip</fuseZip>
+		<startWaitTime>120</startWaitTime>
+		<stopWaitTime>30</stopWaitTime>
+		<provisionWaitTime>300</provisionWaitTime>
+		<skipBrokerWait/>
+		<offline/>
+		<iptables path="path"/>
+		<withoutDefaultUser/>
+		<jdk path="path"/>
+	</configuration>
+	<users>
+		<user name="user1" password="pw" roles="Administrator"/>
+		<user name="user2" password="pw" roles="Administrator"/>
+	</users>
+	<commands>
+		<command>profile-edit</command>
+		<command>profile-delete</command>
+	</commands>
+	<bundles>
+		<bundle>bundle</bundle>
+	</bundles>
+	<ensemble>root,c1,c2</ensemble>
 
-	<container type="root" instances="1">
-		<username>admin</username>
-		<password>admin</password>
-		<name>root1</name>
-		<node host="openstack" username="fuse" password="fuse"/>
-	</container>
+	<containers>
+		<!--<ssh type="template" id="temp">-->
+			<!--<commands>-->
+				<!--<command>profile-edit</command>-->
+			<!--</commands>-->
+		<!--</ssh>-->
 
-	<container instances="1" type="ssh">
-		<name>fafram8-ssh-container-a</name>
-		<parent>root1</parent>
-		<node host="openstack" username="fuse" password="fuse"/>
-	</container>
+		<!--<ssh type="ssh" ref="temp">-->
+			<!--<commands>-->
+				<!--<command>profile-edit2</command>-->
+			<!--</commands>-->
+		<!--</ssh>-->
+		<root template="true" id="root1">
+			<name>temp1</name>
+			<commands>
+				<command>temp1</command>
+			</commands>
+		</root>
+		<root template="true" id="root2" ref="root1">
+			<name>root2</name>
+			<jvmOpts>someopts</jvmOpts>
+		</root>
+		<root fabric="true" instances="1" ref="root2">
+			<name>ecervena-root123</name>
+			<jvmMemoryOpts xms="512M" xmx="1024M" permMem="512M" maxPermMem="1024M"/>
+			<jvmOpts>-Dproperty=Value</jvmOpts>
+			<workingDir>fafram</workingDir>
+			<node host="" port="22" user="fuse" password="fuse"/>
+			<users>
+				<user name="user" password="pw" roles="Administrator"/>
+			</users>
+			<commands>
+				<command>profile-edit root</command>
+			</commands>
+			<bundles>
+				<bundle>bundle</bundle>
+			</bundles>
+			<profiles>
+				<profile>p</profile>
+			</profiles>
+		</root>
+		<!--<root fabric="true" instances="1" ref="root2">-->
+			<!--<name>ecervena-root123</name>-->
+			<!--<jvmMemoryOpts xms="512M" xmx="1024M" permMem="512M" maxPermMem="1024M"/>-->
+			<!--<jvmOpts>-Dproperty=Value</jvmOpts>-->
+			<!--<workingDir>fafram</workingDir>-->
+			<!--<node host="" port="22" user="fuse" password="fuse"/>-->
+			<!--<users>-->
+				<!--<user name="user" password="pw" roles="Administrator"/>-->
+			<!--</users>-->
+			<!--<commands>-->
+				<!--<command>profile-edit root</command>-->
+			<!--</commands>-->
+			<!--<bundles>-->
+				<!--<bundle>bundle</bundle>-->
+			<!--</bundles>-->
+			<!--<profiles>-->
+				<!--<profile>p</profile>-->
+			<!--</profiles>-->
+		<!--</root>-->
 
-	<container instances="1" type="ssh">
-		<parent>root1</parent>
-		<name>fafram8-ssh-container-b</name>
-		<node host="openstack" username="fuse" password="fuse"/>
-	</container>
+		<!--<child instances="1">-->
+			<!--<name>ecervena-node1123</name>-->
+			<!--<parentName>ecervena-root123</parentName>-->
+			<!--<version>1.0</version>-->
+			<!--<jvmOpts>-Dproperty=Value</jvmOpts>-->
+			<!--<jmxUser>admin</jmxUser>-->
+			<!--<jmxPassword>pw</jmxPassword>-->
+			<!--<resolver>localip</resolver>-->
+			<!--<manualIp>127.0.0.1</manualIp>-->
+			<!--<commands>-->
+				<!--<command>profile-edit</command>-->
+			<!--</commands>-->
+			<!--<profiles>-->
+				<!--<profile>p</profile>-->
+			<!--</profiles>-->
+		<!--</child>-->
 
+		<!--<ssh instances="1">-->
+			<!--<name>ecervena-node1123</name>-->
+			<!--<node host="" user="user" password="pw"/>-->
+			<!--<version>1.0</version>-->
+			<!--<env>-Dproperty=value</env>-->
+			<!--<jvmOpts>-Dproperty=Value</jvmOpts>-->
+			<!--<workingDir>containers</workingDir>-->
+			<!--<zookeeperPassword>pw</zookeeperPassword>-->
+			<!--<resolver>localip</resolver>-->
+			<!--<manualIp>127.0.0.1</manualIp>-->
+			<!--<privateKey>id_rsa</privateKey>-->
+			<!--<passPhrase>phrase</passPhrase>-->
+			<!--<proxyUri>http://localhost:9999</proxyUri>-->
+			<!--<minPort>9999</minPort>-->
+			<!--<maxPort>11000</maxPort>-->
+			<!--<commands>-->
+				<!--<command>profile-edit</command>-->
+			<!--</commands>-->
+			<!--<profiles>-->
+				<!--<profile>p</profile>-->
+			<!--</profiles>-->
+		<!--</ssh>-->
+	</containers>
+
+	<brokers>
+		<broker>
+			<name>name</name>
+			<ssl>true</ssl>
+			<kind>MasterSlave</kind>
+			<group>myGroup</group>
+			<data>/data</data>
+			<parentProfile>default</parentProfile>
+			<networks>
+				<network url="tcp://localhost:61616" username="user" password="password"/>
+			</networks>
+			<pids>
+				<pid pid="mypid" value="myvalue"/>
+			</pids>
+		</broker>
+	</brokers>
 </fafram>

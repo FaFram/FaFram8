@@ -1,15 +1,6 @@
 package org.jboss.fuse.qa.fafram8.configuration;
 
-import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
-import org.jboss.fuse.qa.fafram8.cluster.container.Container;
-import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
-import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
-import org.jboss.fuse.qa.fafram8.cluster.node.Node;
-import org.jboss.fuse.qa.fafram8.cluster.xml.ClusterModel;
-import org.jboss.fuse.qa.fafram8.cluster.xml.ContainerModel;
-import org.jboss.fuse.qa.fafram8.cluster.xml.FrameworkConfigurationModel;
-import org.jboss.fuse.qa.fafram8.exception.FaframException;
-import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
+import org.jboss.fuse.qa.fafram8.cluster.xml.toplevel.FaframModel;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -28,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConfigurationParser {
 	//Parsed object cluster representation.
-	private ClusterModel clusterModel;
+	private FaframModel faframModel;
 
 	//Unique name incrementer.
 	private int uniqueNameIncrement = 0;
@@ -52,16 +43,15 @@ public class ConfigurationParser {
 		log.info("Configuration parser started.");
 
 		log.trace("Creating unmarshaller.");
-		final JAXBContext jaxbContext = JAXBContext.newInstance(ClusterModel.class);
+		final JAXBContext jaxbContext = JAXBContext.newInstance(FaframModel.class);
 		final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
 		log.trace("Unmarshalling cluster model from " + path);
-		clusterModel = (ClusterModel) jaxbUnmarshaller.unmarshal(new File(path));
-
+		faframModel = (FaframModel) jaxbUnmarshaller.unmarshal(new File(path));
+		faframModel.getContainersModel().buildContainers();
 		//TODO(ecervena): provisional debug logging
-		for (ContainerModel containerModel : clusterModel.getContainerModelList()) {
-			log.debug(containerModel.toString());
-		}
+//		for (ContainerModel containerModel : faframModel.getContainerModelList()) {
+//			log.debug(containerModel.toString());
+//		}
 	}
 
 	/**
@@ -70,101 +60,70 @@ public class ConfigurationParser {
 	 */
 	public void buildContainers() {
 		log.debug("Building containers.");
-		setFrameworkConfiguration(clusterModel.getFrameworkConfigurationModel());
 
-		for (ContainerModel containerModel : clusterModel.getContainerModelList()) {
-			for (int i = 1; i <= containerModel.getInstances(); i++) {
+//		for (ContainerModel containerModel : faframModel.getContainerModelList()) {
+//			log.info(containerModel.toString());
+//			for (int i = 1; i <= containerModel.getInstances(); i++) {
+//
+//				Container container = null;
+//
+//				switch (containerModel.getContainerType()) {
+//					case "root": {
+//						final RootContainer.RootBuilder builder = RootContainer.builder().name(returnUniqueName(containerModel));
+//						if (containerModel.getUsername() != null) {
+//							builder.user(containerModel.getUsername());
+//						}
+//						if (containerModel.getPassword() != null) {
+//							builder.password(containerModel.getPassword());
+//						}
+//						if (containerModel.isFabric()) {
+//							builder.withFabric();
+//						}
+//
+//						final Node node = Node.builder().host(containerModel.getNode().getHost())
+//								.username(containerModel.getNode().getUsername())
+//								.password(containerModel.getNode().getPassword())
+//								.build();
+//						builder.node(node);
+//						container = builder.build();
+//						break;
+//					}
+//					case "ssh": {
+//						final SshContainer.SshBuilder builder = SshContainer.builder().name(returnUniqueName(containerModel));
+//						final Node node = Node.builder().host(containerModel.getNode().getHost())
+//								.username(containerModel.getNode().getUsername())
+//								.password(containerModel.getNode().getPassword())
+//								.build();
+//						builder.node(node);
+//						final Container parentContainer = ContainerManager.getContainer(containerModel.getParentContainer());
+//						if (parentContainer == null) {
+//							throw new FaframException("Parent container does not exists.");
+//						}
+//						builder.parent(parentContainer);
+//						container = builder.build();
+//						break;
+//					}
+//					case "child": {
+//						final ChildContainer.ChildBuilder builder = ChildContainer.builder().name(returnUniqueName(containerModel));
+//						final Container parentContainer = ContainerManager.getContainer(containerModel.getParentContainer());
+//						if (parentContainer == null) {
+//							throw new FaframException("Parent container does not exists.");
+//						}
+//						builder.parent(parentContainer);
+//						container = builder.build();
+//						break;
+//					}
+//					default:
+//						break;
+//				}
+//
+//				if (container != null) {
+//					ContainerManager.getContainerList().add(container);
+//				}
+//			}
+//			resetUniqueNameIncrement();
 
-				Container container = null;
-
-				switch (containerModel.getContainerType()) {
-					case "root": {
-						final RootContainer.RootBuilder builder = RootContainer.builder().name(returnUniqueName(containerModel));
-						if (containerModel.getUsername() != null) {
-							builder.user(containerModel.getUsername());
-						}
-						if (containerModel.getPassword() != null) {
-							builder.password(containerModel.getPassword());
-						}
-						if (containerModel.isFabric()) {
-							builder.withFabric();
-						}
-
-						final Node node = Node.builder().host(containerModel.getNode().getHost())
-								.username(containerModel.getNode().getUsername())
-								.password(containerModel.getNode().getPassword())
-								.build();
-						builder.node(node);
-						container = builder.build();
-						break;
-					}
-					case "ssh": {
-						final SshContainer.SshBuilder builder = SshContainer.builder().name(returnUniqueName(containerModel));
-						final Node node = Node.builder().host(containerModel.getNode().getHost())
-								.username(containerModel.getNode().getUsername())
-								.password(containerModel.getNode().getPassword())
-								.build();
-						builder.node(node);
-						final Container parentContainer = ContainerManager.getContainer(containerModel.getParentContainer());
-						if (parentContainer == null) {
-							throw new FaframException("Parent container does not exists.");
-						}
-						builder.parent(parentContainer);
-						container = builder.build();
-						break;
-					}
-					case "child": {
-						final ChildContainer.ChildBuilder builder = ChildContainer.builder().name(returnUniqueName(containerModel));
-						final Container parentContainer = ContainerManager.getContainer(containerModel.getParentContainer());
-						if (parentContainer == null) {
-							throw new FaframException("Parent container does not exists.");
-						}
-						builder.parent(parentContainer);
-						container = builder.build();
-						break;
-					}
-					default:
-						break;
-				}
-
-				if (container != null) {
-					ContainerManager.getContainerList().add(container);
-				}
-			}
-			resetUniqueNameIncrement();
-		}
-	}
-
-	/**
-	 * Set unmarshaled framework properties.
-	 *
-	 * @param frameworkConfigurationModel XML configuration mapping object
-	 */
-	public void setFrameworkConfiguration(FrameworkConfigurationModel frameworkConfigurationModel) {
-		//do the magic
-	}
-
-	/**
-	 * Return unique container name for container mapped by containerModel. This method enables multiple instances
-	 * specification in XML configuration. E.g. &lt;container instances=5&gt;&lt;name&gt;xxx&lt;/name&gt;&lt;/container&gt;
-	 * will results into 5 containers named xxx-1,xxx-2,xxx-3,xxx-4,xxx-5.
-	 *
-	 * @param containerModel XML container mapping object
-	 * @return unique name
-	 */
-	private String returnUniqueName(ContainerModel containerModel) {
-		if (containerModel.getInstances() <= 1) {
-			return containerModel.getName();
-		}
-		uniqueNameIncrement++;
-		return containerModel.getName() + "-" + uniqueNameIncrement;
-	}
-
-	/**
-	 * Private method reseting uniqueNameIncrement field.
-	 */
-	private void resetUniqueNameIncrement() {
-		uniqueNameIncrement = 0;
+//		}
 	}
 }
 

@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Class represents broker in fafram. Main purpose is to provide all necessary commands for creating borker in Fabric.
+ * Class represents broker in fafram. Main purpose is to provide all necessary commands for creating broker in Fabric.
  * Created by mmelko on 09/10/15.
  */
 public class Broker {

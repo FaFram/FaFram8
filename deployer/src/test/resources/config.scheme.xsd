@@ -1,52 +1,221 @@
 <?xml version="1.0"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-		   targetNamespace="org.jboss.fuse.qa"
-		   xmlns="org.jboss.fuse.qa"
-		   elementFormDefault="qualified">
-
-
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:org.jboss.fuse.qa" elementFormDefault="qualified">
 	<xs:element name="fafram">
 		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="framework" minOccurs="1" maxOccurs="1">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="patchVersion" type="xs:string" minOccurs="0" maxOccurs="1"/>
-						</xs:sequence>
-					</xs:complexType>
-				</xs:element>
-				<xs:element name="container" minOccurs="1" maxOccurs="unbounded">
-					<xs:complexType>
-						<xs:all>
-							<xs:element name="name" type="xs:string"/>
-							<xs:element name="parent" type="xs:string" minOccurs="0" maxOccurs="1"/>
-							<xs:element name="username" type="xs:string" minOccurs="0" maxOccurs="1"/>
-							<xs:element name="password" type="xs:string" minOccurs="0" maxOccurs="1"/>
-							<xs:element name="node" minOccurs="1" maxOccurs="1">
-								<xs:complexType>
-									<xs:attribute name="host" type="xs:string" use="required"/>
-									<xs:attribute name="username" type="xs:string" use="required"/>
-									<xs:attribute name="password" type="xs:string" use="required"/>
-								</xs:complexType>
-							</xs:element>
-						</xs:all>
-						<xs:attribute name="fabric" type="xs:boolean"/>
-						<xs:attribute name="instances" type="xs:int"/>
-						<xs:attribute name="type" type="containerType"/>
-					</xs:complexType>
-				</xs:element>
-			</xs:sequence>
+			<xs:all>
+				<xs:element name="configuration" type="configurationType"/>
+				<xs:element name="users" type="usersType"/>
+				<xs:element name="commands" type="commandsType"/>
+				<xs:element name="bundles" type="bundlesType"/>
+				<xs:element name="ensemble" type="xs:string"/>
+				<xs:element name="containers" type="containersType"/>
+				<xs:element name="brokers" type="brokersType"/>
+			</xs:all>
 		</xs:complexType>
 	</xs:element>
 
+	<xs:complexType name="configurationType">
+		<xs:all>
+			<xs:element name="provider" type="xs:string"/>
+			<xs:element name="hostUser" type="xs:string"/>
+			<xs:element name="hostPassword" type="xs:string"/>
+			<xs:element name="hostPort" type="xs:string"/>
+			<xs:element name="fuseUser" type="xs:string"/>
+			<xs:element name="fusePassword" type="xs:string"/>
+			<xs:element name="fuseZip" type="xs:string"/>
+			<xs:element name="startWaitTime" type="xs:string"/>
+			<xs:element name="stopWaitTime" type="xs:string"/>
+			<xs:element name="provisionWaitTime" type="xs:string"/>
+			<xs:element name="skipBrokerWait"/>
+			<xs:element name="offline"/>
+			<xs:element name="withoutDefaultUser"/>
+			<xs:element name="iptables" type="noValuePathAttr"/>
+			<xs:element name="jdk" type="noValuePathAttr"/>
+		</xs:all>
+	</xs:complexType>
 
-	<xs:simpleType name="containerType">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="root"/>
-			<xs:enumeration value="child"/>
-			<xs:enumeration value="ssh"/>
+	<xs:complexType name="noValuePathAttr">
+		<xs:attribute name="path" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="usersType">
+		<xs:sequence minOccurs="0">
+			<xs:element name="user">
+				<xs:complexType>
+					<xs:attribute name="name" type="xs:string"/>
+					<xs:attribute name="password" type="xs:string"/>
+					<xs:attribute name="roles" type="xs:string"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="commandsType">
+		<xs:sequence minOccurs="0">
+			<xs:element name="command" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="bundlesType">
+		<xs:sequence minOccurs="0">
+			<xs:element name="bundle" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="containersType">
+		<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:element name="root" type="rootType"/>
+			<xs:element name="child" type="childType"/>
+			<xs:element name="ssh" type="sshType"/>
+		</xs:sequence>
+		<xs:attribute name="count" type="xs:integer"/>
+	</xs:complexType>
+
+	<xs:complexType name="containerType">
+		<xs:all>
+			<xs:element name="name" type="xs:string"/>
+			<xs:element name="jvmOpts" type="xs:string"/>
+			<xs:element name="commands" type="commandsType"/>
+			<xs:element name="profiles" type="profilesType"/>
+		</xs:all>
+		<xs:attribute name="id" type="xs:string"/>
+		<xs:attribute name="ref" type="xs:string"/>
+		<xs:attribute name="instances" type="xs:integer"/>
+		<xs:attribute name="template" type="xs:boolean"/>
+	</xs:complexType>
+
+	<xs:complexType name="profilesType">
+		<xs:sequence minOccurs="0">
+			<xs:element name="profile" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="rootType">
+		<xs:complexContent>
+			<xs:extension base="containerType">
+				<xs:all>
+					<xs:element name="jvmMemoryOpts">
+						<xs:complexType>
+							<xs:attribute name="xms" type="xs:string"/>
+							<xs:attribute name="xmx" type="xs:string"/>
+							<xs:attribute name="permMem" type="xs:string"/>
+							<xs:attribute name="maxPermMem" type="xs:string"/>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="workingDir" type="xs:string"/>
+					<xs:element name="users" type="usersType"/>
+					<xs:element name="node" type="nodeType"/>
+					<xs:element name="bundles" type="bundlesType"/>
+				</xs:all>
+				<xs:attribute name="fabric" type="xs:boolean"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="nodeType">
+		<xs:attribute name="host" type="xs:string"/>
+		<xs:attribute name="port" type="xs:integer"/>
+		<xs:attribute name="user" type="xs:string"/>
+		<xs:attribute name="password" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="childType">
+		<xs:complexContent>
+			<xs:extension base="containerType">
+				<xs:all>
+					<xs:element name="parentName" type="xs:string"/>
+					<xs:element name="version" type="xs:string"/>
+					<xs:element name="jvmOpts" type="xs:string"/>
+					<xs:element name="jmxUser" type="xs:string"/>
+					<xs:element name="jmxPassword" type="xs:string"/>
+					<xs:element name="resolver" type="resolverType"/>
+					<xs:element name="manualIp" type="xs:string"/>
+				</xs:all>
+				<xs:attribute name="fabric" type="xs:boolean"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:simpleType name="resolverType">
+		<xs:restriction>
+			<xs:enumeration value="localip"/>
+			<xs:enumeration value="manualip"/>
+			<xs:enumeration value="localhostname"/>
+			<xs:enumeration value="publicip"/>
+			<xs:enumeration value="publichostname"/>
 		</xs:restriction>
 	</xs:simpleType>
 
+	<xs:complexType name="sshType">
+		<xs:complexContent>
+			<xs:extension base="containerType">
+				<xs:all>
+					<xs:element name="node" type="nodeType"/>
+					<xs:element name="version" type="xs:string"/>
+					<xs:element name="env" type="xs:string"/>
+					<xs:element name="jvmOpts" type="xs:string"/>
+					<xs:element name="resolver" type="resolverType"/>
+					<xs:element name="manualIp" type="xs:string"/>
+					<xs:element name="workingDir" type="xs:string"/>
+					<xs:element name="zookeeperPassword" type="xs:string"/>
+					<xs:element name="privateKey" type="xs:string"/>
+					<xs:element name="passPhrase" type="xs:string"/>
+					<xs:element name="proxyUri" type="xs:string"/>
+					<xs:element name="minPort" type="xs:positiveInteger"/>
+					<xs:element name="maxPort" type="xs:positiveInteger"/>
+				</xs:all>
+				<xs:attribute name="fabric" type="xs:boolean"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
 
+	<xs:complexType name="brokersType">
+		<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:element name="broker" type="brokerType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="brokerType">
+		<xs:all>
+			<xs:element name="name" type="xs:string"/>
+			<xs:element name="ssl" type="xs:boolean"/>
+			<xs:element name="kind">
+				<xs:simpleType>
+					<xs:restriction>
+						<xs:enumeration value="MasterSlave"/>
+						<xs:enumeration value="StandAlone"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="parentProfile" type="xs:string"/>
+			<xs:element name="group" type="xs:string"/>
+			<xs:element name="data" type="xs:string"/>
+			<xs:element name="networks" type="networksType"/>
+			<xs:element name="pids" type="pidsType"/>
+			<xs:element name="containerFilter" type="xs:string"/>
+		</xs:all>
+	</xs:complexType>
+
+	<xs:complexType name="networksType">
+		<xs:sequence>
+			<xs:element name="network">
+				<xs:complexType>
+					<xs:attribute name="url" type="xs:string"/>
+					<xs:attribute name="username" type="xs:string"/>
+					<xs:attribute name="password" type="xs:string"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="pidsType">
+		<xs:sequence>
+			<xs:element name="pid">
+				<xs:complexType>
+					<xs:attribute name="pid" type="xs:string"/>
+					<xs:attribute name="value" type="xs:string"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
 </xs:schema>
