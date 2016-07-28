@@ -461,8 +461,12 @@ public class SystemProperty {
 	 *
 	 * @return provider property
 	 */
-	public static String getProvider() {
-		return System.getProperty(FaframConstant.PROVIDER, "StaticProvider");
+	public static FaframProvider getProvider() {
+		if (System.getProperty(FaframConstant.PROVIDER) == null) {
+			return FaframProvider.STATIC;
+		} else {
+			return FaframProvider.valueOf(System.getProperty(FaframConstant.PROVIDER));
+		}
 	}
 
 	/**
@@ -546,7 +550,6 @@ public class SystemProperty {
 	 * @return no.threads property
 	 */
 	public static boolean isWithThreads() {
-//		return true;
 		return System.getProperty(FaframConstant.WITH_THREADS) != null;
 	}
 

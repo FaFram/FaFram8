@@ -10,6 +10,7 @@ import org.jboss.fuse.qa.fafram8.exception.BundleUploadException;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.invoker.MavenPomInvoker;
 import org.jboss.fuse.qa.fafram8.patcher.Patcher;
+import org.jboss.fuse.qa.fafram8.property.FaframProvider;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
@@ -300,7 +301,7 @@ public class ContainerManager {
 				break;
 			}
 		}
-		if (!SystemProperty.getProvider().toLowerCase().contains("static")) {
+		if (!SystemProperty.getProvider().equals(FaframProvider.STATIC)) {
 			return;
 		}
 		for (Container c : containerList) {

@@ -395,16 +395,18 @@ public class Fafram extends ExternalResource {
 		switch (provider) {
 			case STATIC:
 				provisionProvider = new StaticProvider();
+				SystemProperty.set(FaframConstant.PROVIDER, FaframProvider.STATIC.toString());
 				break;
 			case OPENSTACK:
 				provisionProvider = OpenStackProvisionProvider.getInstance();
+				SystemProperty.set(FaframConstant.PROVIDER, FaframProvider.OPENSTACK.toString());
 				break;
 			default:
 				log.warn("Provider not found! Using default static provider!");
 				provisionProvider = new StaticProvider();
+				SystemProperty.set(FaframConstant.PROVIDER, FaframProvider.STATIC.toString());
 				break;
 		}
-		SystemProperty.set(FaframConstant.PROVIDER, provisionProvider.getClass().getName());
 		return this;
 	}
 
