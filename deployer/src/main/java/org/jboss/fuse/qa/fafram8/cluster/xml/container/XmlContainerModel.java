@@ -1,4 +1,4 @@
-package org.jboss.fuse.qa.fafram8.cluster.xml.containers;
+package org.jboss.fuse.qa.fafram8.cluster.xml.container;
 
 import org.jboss.fuse.qa.fafram8.cluster.xml.toplevel.CommandsModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.ProfilesModel;

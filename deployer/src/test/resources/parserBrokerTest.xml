@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fafram xmlns="urn:org.jboss.fuse.qa">
+	<brokers>
+		<broker>
+			<name>name</name>
+			<ssl>true</ssl>
+			<kind>MasterSlave</kind>
+			<group>myGroup</group>
+			<data>/data</data>
+			<parentProfile>default</parentProfile>
+			<networks>
+				<network url="tcp://localhost:61616" username="user" password="password"/>
+			</networks>
+			<pids>
+				<pid pid="mypid" value="myvalue"/>
+			</pids>
+		</broker>
+	</brokers>
+</fafram>

@@ -468,6 +468,24 @@ public class ContainerManager {
 	}
 
 	/**
+	 * Gets the containers by the name substring.
+	 * @param containerFilter container substring to search
+	 * @return array of maching containers
+	 */
+	public static String[] getContainersBySubstring(String containerFilter) {
+		final List<String> list = new ArrayList<>();
+		for (Container container : ContainerManager.getContainerList()) {
+			if (container.getName().contains(containerFilter)) {
+				list.add(container.getName());
+			}
+		}
+		if (list.isEmpty()) {
+			throw new FaframException("No containers matching filter " + containerFilter);
+		}
+		return list.toArray(new String[list.size()]);
+	}
+
+	/**
 	 * Helping method for finding all child containers of given container.
 	 *
 	 * @param container container for finding its children

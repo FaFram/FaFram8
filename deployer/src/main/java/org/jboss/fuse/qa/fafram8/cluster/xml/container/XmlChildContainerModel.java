@@ -1,4 +1,4 @@
-package org.jboss.fuse.qa.fafram8.cluster.xml.containers;
+package org.jboss.fuse.qa.fafram8.cluster.xml.container;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

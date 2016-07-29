@@ -644,7 +644,7 @@ public class Fafram extends ExternalResource {
 	 */
 	public void initConfiguration() {
 		if (SystemProperty.getFabricConfigPath() != null) {
-			this.configurationParser = new ConfigurationParser();
+			this.configurationParser = new ConfigurationParser(this);
 
 			try {
 				configurationParser.parseConfigurationFile(SystemProperty.getFabricConfigPath());
@@ -654,9 +654,10 @@ public class Fafram extends ExternalResource {
 			}
 
 			try {
-				configurationParser.buildContainers();
+				configurationParser.applyConfiguration();
 			} catch (Exception e) {
-				throw new FaframException("Error while building containers from parsed model.", e);
+				e.printStackTrace();
+				throw new FaframException("Error while applying configuration from parsed model.", e);
 			}
 		}
 	}

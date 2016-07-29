@@ -31,7 +31,7 @@ public class FaframModel {
 	private UsersModel usersModel;
 
 	@XmlElement(name = "commands")
-	private CommandsModel commands;
+	private CommandsModel commandsModel;
 
 	@XmlElement(name = "bundles")
 	private BundlesModel bundlesModel;
@@ -41,4 +41,7 @@ public class FaframModel {
 
 	@XmlElement(name = "containers")
 	private ContainersModel containersModel;
+
+	@XmlElement(name = "brokers")
+	private BrokersModel brokersModel;
 }

@@ -58,7 +58,7 @@ public class RemoteNodeManager implements NodeManager {
 	@Override
 	public void prepareZip() {
 		log.info("Preparing zip...");
-		executor.executeCommand("mkdir " + getFolder());
+		executor.executeCommand("mkdir -p " + getFolder());
 		productZipPath = Downloader.getProduct(executor, this);
 		log.trace("Zip path is " + productZipPath);
 	}

@@ -1,6 +1,8 @@
 package org.jboss.fuse.qa.fafram8.configuration;
 
 import org.jboss.fuse.qa.fafram8.cluster.xml.toplevel.FaframModel;
+import org.jboss.fuse.qa.fafram8.cluster.xml.util.UserModel;
+import org.jboss.fuse.qa.fafram8.resource.Fafram;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -18,6 +20,9 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ConfigurationParser {
+	// Fafram instance
+	private Fafram fafram;
+
 	//Parsed object cluster representation.
 	private FaframModel faframModel;
 
@@ -30,7 +35,8 @@ public class ConfigurationParser {
 	/**
 	 * Constructor.
 	 */
-	public ConfigurationParser() {
+	public ConfigurationParser(Fafram fafram) {
+		this.fafram = fafram;
 	}
 
 	/**
@@ -47,83 +53,49 @@ public class ConfigurationParser {
 		final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		log.trace("Unmarshalling cluster model from " + path);
 		faframModel = (FaframModel) jaxbUnmarshaller.unmarshal(new File(path));
-		faframModel.getContainersModel().buildContainers();
-		//TODO(ecervena): provisional debug logging
-//		for (ContainerModel containerModel : faframModel.getContainerModelList()) {
-//			log.debug(containerModel.toString());
-//		}
 	}
 
 	/**
-	 * Call of this method will set parsed framework configuration and build container
-	 * objects parsed from Fafram8 XML configuration.
+	 * Applies the configuration from the XML file.
+	 * Sets system properties,
+	 * build containers,
+	 * build brokers,
+	 * set bundles,
+	 * set commands,
+	 * set users,
+	 * set ensemble.
 	 */
-	public void buildContainers() {
-		log.debug("Building containers.");
-
-//		for (ContainerModel containerModel : faframModel.getContainerModelList()) {
-//			log.info(containerModel.toString());
-//			for (int i = 1; i <= containerModel.getInstances(); i++) {
-//
-//				Container container = null;
-//
-//				switch (containerModel.getContainerType()) {
-//					case "root": {
-//						final RootContainer.RootBuilder builder = RootContainer.builder().name(returnUniqueName(containerModel));
-//						if (containerModel.getUsername() != null) {
-//							builder.user(containerModel.getUsername());
-//						}
-//						if (containerModel.getPassword() != null) {
-//							builder.password(containerModel.getPassword());
-//						}
-//						if (containerModel.isFabric()) {
-//							builder.withFabric();
-//						}
-//
-//						final Node node = Node.builder().host(containerModel.getNode().getHost())
-//								.username(containerModel.getNode().getUsername())
-//								.password(containerModel.getNode().getPassword())
-//								.build();
-//						builder.node(node);
-//						container = builder.build();
-//						break;
-//					}
-//					case "ssh": {
-//						final SshContainer.SshBuilder builder = SshContainer.builder().name(returnUniqueName(containerModel));
-//						final Node node = Node.builder().host(containerModel.getNode().getHost())
-//								.username(containerModel.getNode().getUsername())
-//								.password(containerModel.getNode().getPassword())
-//								.build();
-//						builder.node(node);
-//						final Container parentContainer = ContainerManager.getContainer(containerModel.getParentContainer());
-//						if (parentContainer == null) {
-//							throw new FaframException("Parent container does not exists.");
-//						}
-//						builder.parent(parentContainer);
-//						container = builder.build();
-//						break;
-//					}
-//					case "child": {
-//						final ChildContainer.ChildBuilder builder = ChildContainer.builder().name(returnUniqueName(containerModel));
-//						final Container parentContainer = ContainerManager.getContainer(containerModel.getParentContainer());
-//						if (parentContainer == null) {
-//							throw new FaframException("Parent container does not exists.");
-//						}
-//						builder.parent(parentContainer);
-//						container = builder.build();
-//						break;
-//					}
-//					default:
-//						break;
-//				}
-//
-//				if (container != null) {
-//					ContainerManager.getContainerList().add(container);
-//				}
-//			}
-//			resetUniqueNameIncrement();
-
-//		}
+	public void applyConfiguration() {
+		if (faframModel.getConfigurationModel() != null) {
+			faframModel.getConfigurationModel().applyConfiguration(fafram);
+		}
+		if (faframModel.getContainersModel() != null) {
+			faframModel.getContainersModel().buildContainers();
+		}
+		if (faframModel.getBrokersModel() != null) {
+			faframModel.getBrokersModel().buildBrokers();
+		}
+		if (faframModel.getBundlesModel() != null) {
+			for (String s : faframModel.getBundlesModel().getBundles()) {
+				fafram.bundles(s);
+			}
+		}
+		if (faframModel.getCommandsModel() != null) {
+			for (String s : faframModel.getCommandsModel().getCommands()) {
+				fafram.commands(s);
+			}
+		}
+		if (faframModel.getEnsembleModel() != null) {
+			final String[] containers = faframModel.getEnsembleModel().getEnsemble().split(",");
+			for (String s : containers) {
+				fafram.ensemble(s);
+			}
+		}
+		if (faframModel.getUsersModel() != null) {
+			for (UserModel userModel : faframModel.getUsersModel().getUsers()) {
+				fafram.addUser(userModel.getName(), userModel.getPassword(), userModel.getRoles());
+			}
+		}
 	}
 }
 

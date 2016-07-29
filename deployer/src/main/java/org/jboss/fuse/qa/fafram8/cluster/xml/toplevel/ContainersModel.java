@@ -5,10 +5,10 @@ import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
 import org.jboss.fuse.qa.fafram8.cluster.resolver.Resolver;
-import org.jboss.fuse.qa.fafram8.cluster.xml.containers.XmlChildContainerModel;
-import org.jboss.fuse.qa.fafram8.cluster.xml.containers.XmlContainerModel;
-import org.jboss.fuse.qa.fafram8.cluster.xml.containers.XmlRootContainerModel;
-import org.jboss.fuse.qa.fafram8.cluster.xml.containers.XmlSshContainerModel;
+import org.jboss.fuse.qa.fafram8.cluster.xml.container.XmlChildContainerModel;
+import org.jboss.fuse.qa.fafram8.cluster.xml.container.XmlContainerModel;
+import org.jboss.fuse.qa.fafram8.cluster.xml.container.XmlRootContainerModel;
+import org.jboss.fuse.qa.fafram8.cluster.xml.container.XmlSshContainerModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.UserModel;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
@@ -52,22 +52,28 @@ public class ContainersModel {
 	public void buildContainers() {
 		Container c;
 		for (XmlContainerModel xmlContainerModel : containerModelList) {
-			if (!xmlContainerModel.isTemplate()) {
-				if (xmlContainerModel instanceof XmlRootContainerModel) {
-					c = buildRootContainer((XmlRootContainerModel) xmlContainerModel);
-				} else if (xmlContainerModel instanceof XmlChildContainerModel) {
-					c = buildChildContainer((XmlChildContainerModel) xmlContainerModel);
-				} else {
-					c = buildSshContainer((XmlSshContainerModel) xmlContainerModel);
+			for (int i = 1; i <= xmlContainerModel.getInstances(); i++) {
+				if (!xmlContainerModel.isTemplate()) {
+					if (xmlContainerModel instanceof XmlRootContainerModel) {
+						c = buildRootContainer((XmlRootContainerModel) xmlContainerModel);
+					} else if (xmlContainerModel instanceof XmlChildContainerModel) {
+						c = buildChildContainer((XmlChildContainerModel) xmlContainerModel);
+					} else {
+						c = buildSshContainer((XmlSshContainerModel) xmlContainerModel);
+					}
+					if (xmlContainerModel.getInstances() > 1) {
+						c.setName(c.getName() + i);
+					}
+					log.trace("Parsed container: " + c.toString());
+					ContainerManager.getContainerList().add(c);
 				}
-				log.trace("Parsed container: " + c.toString());
-				ContainerManager.getContainerList().add(c);
 			}
 		}
 	}
 
 	/**
 	 * Buils the root container from the model.
+	 *
 	 * @param root root model.
 	 * @return root container
 	 */
@@ -79,8 +85,6 @@ public class ContainersModel {
 		} else {
 			builder = RootContainer.builder();
 		}
-
-		// TODO(avano): Copy builder here and do for to create multiple instances
 
 		if (root.getName() == null) {
 			throw new FaframException("Root container name is not set!");
@@ -99,8 +103,7 @@ public class ContainersModel {
 			builder.withFabric();
 		}
 		if (root.getJvmMemoryOpts() != null) {
-			builder.jvmMemoryOpts(root.getJvmMemoryOpts().getXms(), root.getJvmMemoryOpts().getXmx(), root.getJvmMemoryOpts().getPermMem(),
-					root.getJvmMemoryOpts().getMaxPermMem());
+			builder.jvmMemoryOpts(root.getJvmMemoryOpts().getXms(), root.getJvmMemoryOpts().getXmx(), root.getJvmMemoryOpts().getPermMem(), root.getJvmMemoryOpts().getMaxPermMem());
 		}
 		if (root.getNode() != null) {
 			builder.node(root.getNode().createNode());
@@ -122,6 +125,7 @@ public class ContainersModel {
 
 	/**
 	 * Buils the child container from the model.
+	 *
 	 * @param child child model
 	 * @return child container
 	 */
@@ -133,8 +137,6 @@ public class ContainersModel {
 		} else {
 			builder = ChildContainer.builder();
 		}
-
-		// TODO(avano): Copy builder here and do for to create multiple instances
 
 		if (child.getName() == null) {
 			throw new FaframException("Child container name is not set!");
@@ -173,6 +175,7 @@ public class ContainersModel {
 
 	/**
 	 * Buils the ssh container from the model.
+	 *
 	 * @param ssh ssh model
 	 * @return ssh container
 	 */
@@ -184,8 +187,6 @@ public class ContainersModel {
 		} else {
 			builder = SshContainer.builder();
 		}
-
-		// TODO(avano): Copy builder here and do for to create multiple instances
 
 		if (ssh.getName() == null) {
 			throw new FaframException("Ssh container name is not set!");
@@ -242,6 +243,7 @@ public class ContainersModel {
 
 	/**
 	 * Gets the model by its id.
+	 *
 	 * @param id XML element id
 	 * @param type type to return
 	 * @param <T> class to return

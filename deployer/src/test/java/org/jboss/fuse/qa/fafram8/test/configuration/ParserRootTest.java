@@ -4,9 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
-import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
-import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
-import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
@@ -58,9 +55,7 @@ public class ParserRootTest {
 
 	@AfterClass
 	public static void tearDown() {
-		SystemProperty.clearAllProperties();
-		ModifierExecutor.clearAllModifiers();
-		ContainerManager.clearAllLists();
+		fafram.tearDown();
 	}
 }
 

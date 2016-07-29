@@ -1,4 +1,4 @@
-package org.jboss.fuse.qa.fafram8.cluster.xml.containers;
+package org.jboss.fuse.qa.fafram8.cluster.xml.container;
 
 import org.jboss.fuse.qa.fafram8.cluster.xml.toplevel.BundlesModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.JvmMemoryOptsModel;
