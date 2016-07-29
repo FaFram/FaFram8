@@ -81,7 +81,6 @@ public final class JvmMemoryModifier extends Modifier {
 	 * Modifies JVM Opts on localhost.
 	 */
 	private void modifyLocalJvmMemOpts(Container container) {
-//		final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 		// Files locations
 		final File setenv = new File(container.getFusePath() + File.separator + "bin" + File.separator + "setenv");
 		final File setenvBat = new File(container.getFusePath() + File.separator + "bin" + File.separator + "setenv.bat");
@@ -112,7 +111,6 @@ public final class JvmMemoryModifier extends Modifier {
 	 * Modifies JVM memory opts on remote.
 	 */
 	private void modifyRemoteJvmMemOpts(Container container) {
-//		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 		final String path = container.getFusePath() + File.separator + "bin" + File.separator + "setenv";
 		final StringBuilder builder = new StringBuilder();
 		for (String line : jvmMemOpts) {

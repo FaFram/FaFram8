@@ -89,12 +89,6 @@ public final class Deployer {
 		// Doing thread cleaning is not the best idea because it is not really stable.
 		// For now just do it in the stable old way
 		destroyWithoutThreads(force);
-
-//		if (SystemProperty.isWithThreads()) {
-//			destroyWithThreads(force);
-//		} else {
-//
-//		}
 	}
 
 	/**
@@ -120,20 +114,20 @@ public final class Deployer {
 		}
 
 		Exception storedException = null;
-		boolean flag = false;
+		boolean failed = false;
 		for (Future future : futureSet) {
 			try {
 				future.get();
 			} catch (Exception e) {
 				log.trace("Exception thrown from the thread ", e);
-				flag = true;
+				failed = true;
 				storedException = e;
 				break;
 			}
 		}
 
-		if (flag || ContainerSummoner.isStopWork()) {
-			log.debug("Shutting down spawning threads because flag " + flag + " or " + ContainerSummoner.isStopWork());
+		if (failed || ContainerSummoner.isStopWork()) {
+			log.debug("Shutting down spawning threads because flag " + failed + " or " + ContainerSummoner.isStopWork());
 			ContainerSummoner.setStopWork(true);
 			for (Future future : futureSet) {
 				future.cancel(true);
@@ -178,7 +172,7 @@ public final class Deployer {
 					// children
 					final Set<ContainerAnnihilator> children = new HashSet<>();
 					// Find threads of child containers
-					for (Container child : getChildContainers(c)) {
+					for (Container child : ContainerManager.getChildContainers(c)) {
 						children.add(annihilatingThreads.get(child));
 					}
 
@@ -240,17 +234,11 @@ public final class Deployer {
 	 * @param force flag if the exceptions should be ignored
 	 */
 	private static void destroyWithoutThreads(boolean force) {
-		// Temp set which holds all root containers after the first cycle, so that we don't need to mess with concurent mods
-		final Set<Container> set = new HashSet<>();
-		set.addAll(ContainerManager.getContainerList());
-
-		for (int i = 0; i < ContainerManager.getContainerList().size(); i++) {
+		for (int i = ContainerManager.getContainerList().size() - 1; i >= 0; i--) {
 			final Container c = ContainerManager.getContainerList().get(i);
+
 			try {
-				if (!(c instanceof RootContainer)) {
-					c.destroy();
-					set.remove(c);
-				}
+				c.destroy();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				if (!force) {
@@ -258,35 +246,5 @@ public final class Deployer {
 				}
 			}
 		}
-
-		for (Container c : set) {
-			try {
-				c.destroy();
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				if (!force) {
-					throw new FaframException("Error while destroying root container! " + ex);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Helping method for finding all child containers of given container.
-	 *
-	 * @param container container for finding its children
-	 * @return set of child containers for given container
-	 */
-	private static Set<Container> getChildContainers(Container container) {
-		final Set<Container> containers = new HashSet<>();
-		for (Container c : ContainerManager.getContainerList()) {
-			if (!(c instanceof RootContainer)) {
-				if (c.getParent().getName().equals(container.getName())) {
-					containers.add(c);
-				}
-			}
-		}
-
-		return containers;
 	}
 }

@@ -54,7 +54,6 @@ public class ExecutorCommandHistory {
 			return "";
 		}
 		if (builder.length() >= 10) {
-			builder.append(builder.length());
 			builder.append("\n================================================================================================\n");
 		}
 

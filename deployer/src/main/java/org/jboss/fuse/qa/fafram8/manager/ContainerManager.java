@@ -17,7 +17,9 @@ import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -463,6 +465,42 @@ public class ContainerManager {
 		// Maybe this will solve the insufficient roles that happen sometimes
 		ensembleRoot.getExecutor().reconnect();
 		ensembleRoot.executeCommand("ensemble-add --force " + ensembleString.toString());
+	}
+
+	/**
+	 * Helping method for finding all child containers of given container.
+	 *
+	 * @param container container for finding its children
+	 * @return set of child containers for given container
+	 */
+	public static Set<Container> getChildContainers(Container container) {
+		final Set<Container> containers = new HashSet<>();
+		for (Container c : ContainerManager.getContainerList()) {
+			if (!(c instanceof RootContainer)) {
+				if (c.getParent().getName().equals(container.getName())) {
+					containers.add(c);
+				}
+			}
+		}
+
+		return containers;
+	}
+
+	/**
+	 * Gets RootContainer with given host (Fafram8 doesn't support 2 root containers on the same node).
+	 *
+	 * @param host host
+	 * @return root container with given host
+	 */
+	public static Container getRootContainerByHost(String host) {
+		for (Container container : ContainerManager.getContainerList()) {
+			if (container instanceof RootContainer) {
+				if (host.equals(container.getNode().getHost())) {
+					return container;
+				}
+			}
+		}
+		throw new FaframException("Container with given host doesn't exist!");
 	}
 }
 

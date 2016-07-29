@@ -68,17 +68,6 @@ public class SshContainer extends Container implements ThreadContainer {
 
 	@Override
 	public void create(Executor executor) {
-		// This should be already done in almost all cases but left here for double checking -> adding containers in tests is probably only exception when parent
-		// will be not set
-		if (super.getParent() == null) {
-			// Search the parent by its name
-			final Container parent = ContainerManager.getContainer(super.getParentName());
-			if (parent == null) {
-				throw new FaframException(String.format("Specified parent (%s) of container %s does not exist in container list!",
-						super.getParentName(), super.getName()));
-			}
-			super.setParent(parent);
-		}
 		if (SystemProperty.suppressStart()) {
 			return;
 		}

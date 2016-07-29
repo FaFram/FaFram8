@@ -29,6 +29,7 @@ public class RemoteWorkingDirectoryTest {
 	private static final String DIR = "/home/fuse/bin";
 
 	static {
+		System.setProperty(FaframConstant.WITH_THREADS, "");
 		System.setProperty(FaframConstant.FUSE_ZIP, FaframTestBase.CURRENT_LOCAL_URL);
 		System.setProperty(FaframConstant.WORKING_DIRECTORY, DIR);
 	}
@@ -56,17 +57,18 @@ public class RemoteWorkingDirectoryTest {
 		assertFalse(root2.getFusePath().contains(DIR));
 	}
 
-//	@Test
-//	public void testWorkDirOnSSH() throws Exception {
-//		final String sshDir = "/home/fuse/ssh/test/folder";
-//		final Container ssh2 = SshContainer.builder().name("working-dir-ssh2").parent(root).node(ssh.getNode()).directory(sshDir).build();
-//		ssh2.create();
-//		assertTrue(ssh2.executeNodeCommand("ps aux | grep karaf.base").contains(sshDir));
-//	}
+	@Test
+	public void testWorkDirOnSSH() throws Exception {
+		final String sshDir = "/home/fuse/ssh/test/folder";
+		final Container ssh2 = SshContainer.builder().name("working-dir-ssh2").parent(root).node(ssh.getNode()).directory(sshDir).build();
+		ssh2.create();
+		assertTrue(ssh2.executeNodeCommand("ps aux | grep karaf.base").contains(sshDir));
+	}
 
 	@AfterClass
 	public static void tearDown() throws Exception {
 		System.clearProperty(FaframConstant.WORKING_DIRECTORY);
 		System.clearProperty(FaframConstant.FUSE_ZIP);
+		System.clearProperty(FaframConstant.WITH_THREADS);
 	}
 }

@@ -134,7 +134,6 @@ public class RootContainer extends Container {
 				nodeManager.prepareZip();
 				nodeManager.unzipArtifact(this);
 				super.setCreated(true);
-//				nodeManager.prepareFuse(super.getNode().getHost());
 				nodeManager.prepareFuse(this);
 				if (!SystemProperty.suppressStart()) {
 					nodeManager.startFuse();

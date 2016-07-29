@@ -6,7 +6,6 @@ import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
-import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.property.FaframConstant;
 import org.jboss.fuse.qa.fafram8.property.FaframProvider;
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
@@ -40,11 +39,13 @@ public class RemoteSettingJvmOptsTest {
 
 	@BeforeClass
 	public static void before() {
+		System.setProperty(FaframConstant.WITH_THREADS, "");
 		System.setProperty(FaframConstant.FUSE_ZIP, FaframTestBase.CURRENT_LOCAL_URL);
 	}
 
 	@After
 	public void tearDown() {
+		System.clearProperty(FaframConstant.WITH_THREADS);
 		System.clearProperty(FaframConstant.FUSE_ZIP);
 	}
 

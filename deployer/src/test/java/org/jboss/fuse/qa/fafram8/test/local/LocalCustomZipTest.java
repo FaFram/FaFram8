@@ -19,7 +19,7 @@ public class LocalCustomZipTest {
 
 	@Before
 	public void init() {
-		System.setProperty(FaframConstant.FUSE_ZIP, "file:/mnt/fuseqe-shared/fuse/jboss-fuse-full-6.1.0.redhat-379.zip");
+		System.setProperty(FaframConstant.FUSE_ZIP, "file:/qa/fuseqe-shared/fuse/jboss-fuse-full-6.1.0.redhat-379.zip");
 	}
 
 	@Test

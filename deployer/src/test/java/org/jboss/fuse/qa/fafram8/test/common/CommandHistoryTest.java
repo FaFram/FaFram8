@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,13 +32,11 @@ public class CommandHistoryTest {
 		fafram.tearDown();
 
 		File path = new File(Paths.get("target", "archived").toAbsolutePath().toString());
-		final String[] files = path.list();
-		Arrays.sort(files);
-		String fileName = files[0];
-		String content = FileUtils.readFileToString(new File(Paths.get("target", "archived", fileName).toAbsolutePath().toString()));
-		assertTrue(content.contains("echo hello"));
+		String[] extensions = new String[] { "txt" };
+		List<File> files = (List<File>) FileUtils.listFiles(path, extensions, true);
 
-		content = FileUtils.readFileToString(new File(Paths.get("target", "archived", fileName).toAbsolutePath().toString()));
+		String content = FileUtils.readFileToString(files.get(0));
+		assertTrue(content.contains("echo hello"));
 		assertTrue(content.contains("echo hi"));
 	}
 }

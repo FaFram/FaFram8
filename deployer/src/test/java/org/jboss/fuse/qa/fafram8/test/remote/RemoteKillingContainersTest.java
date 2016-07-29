@@ -7,6 +7,7 @@ import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
+import org.jboss.fuse.qa.fafram8.property.FaframConstant;
 import org.jboss.fuse.qa.fafram8.property.FaframProvider;
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
 import org.jboss.fuse.qa.fafram8.test.base.FaframTestBase;
@@ -36,11 +37,13 @@ public class RemoteKillingContainersTest {
 
 	@Before
 	public void setUp() throws Exception {
+		System.setProperty(FaframConstant.WITH_THREADS, "");
 		fafram.setup();
 	}
 
 	@After
 	public void tearDown() throws Exception {
+		System.clearProperty(FaframConstant.WITH_THREADS);
 		fafram.tearDown(true);
 	}
 
@@ -57,13 +60,5 @@ public class RemoteKillingContainersTest {
 		root.kill();
 
 		assertNull(fafram.executeCommand("list"));
-
-//		try {
-//			fafram.tearDown();
-//		} catch (FaframException e) {
-//				// cool
-//		}
-
-
 	}
 }

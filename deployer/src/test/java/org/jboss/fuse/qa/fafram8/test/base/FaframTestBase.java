@@ -8,7 +8,7 @@ public final class FaframTestBase {
 	public static final String CURRENT_HTTP_URL = "http://download.eng.rdu2.redhat.com/brewroot/repos/jb-fuse-6.2-build/"
 			+ "latest/maven/org/jboss/fuse/jboss-fuse-full/" + System.getProperty("fuse.version") + "/jboss-fuse-full-"
 			+ System.getProperty("fuse.version") + ".zip";
-	public static final String CURRENT_LOCAL_URL = "file:/mnt/fuseqe-shared/fuse/jboss-fuse-full-6.2.1.redhat-084.zip";
+	public static final String CURRENT_LOCAL_URL = "file:/qa/fuseqe-shared/fuse/jboss-fuse-full-6.2.1.redhat-084.zip";
 
 	/**
 	 * Constructor.

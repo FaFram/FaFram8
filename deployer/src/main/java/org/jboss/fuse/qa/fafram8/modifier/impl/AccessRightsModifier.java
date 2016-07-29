@@ -51,7 +51,6 @@ public final class AccessRightsModifier extends Modifier {
 	 */
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private void localExecute(Container container) {
-//		final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 		for (String path : paths) {
 			new File(container.getFusePath() + File.separator + path).setExecutable(true);
 		}
@@ -61,7 +60,6 @@ public final class AccessRightsModifier extends Modifier {
 	 * Executes the modifier on remote.
 	 */
 	private void remoteExecute(Container container) {
-//		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 		for (String path : paths) {
 			super.getExecutor().executeCommandSilently("chmod +x " + container.getFusePath() + path);
 		}

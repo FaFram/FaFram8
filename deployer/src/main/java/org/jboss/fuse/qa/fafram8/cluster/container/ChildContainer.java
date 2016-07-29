@@ -61,15 +61,6 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 	@Override
 	public void create() {
-		if (super.getParent() == null) {
-			// Search the parent by its name
-			final Container parent = ContainerManager.getContainer(super.getParentName());
-			if (parent == null) {
-				throw new FaframException(String.format("Specified parent (%s) of container %s does not exist in container list!",
-						super.getParentName(), super.getName()));
-			}
-			super.setParent(parent);
-		}
 		create(super.getParent().getExecutor());
 	}
 

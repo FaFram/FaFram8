@@ -38,11 +38,13 @@ public class RemoteOpenstackSetJdkTest {
 
 	@BeforeClass
 	public static void before() {
+		System.setProperty(FaframConstant.WITH_THREADS, "");
 		System.setProperty(FaframConstant.FUSE_ZIP, FaframTestBase.CURRENT_LOCAL_URL);
 	}
 
 	@After
 	public void tearDown() {
+		System.clearProperty(FaframConstant.WITH_THREADS);
 		System.clearProperty(FaframConstant.FUSE_ZIP);
 	}
 

@@ -75,7 +75,6 @@ public final class JvmOptsModifier extends Modifier {
 	 */
 	public void localExecute(Container container) {
 		try {
-//			final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 			final String filePath = container.getFusePath() + File.separator + "bin" + File.separator + "setenv";
 			final FileInputStream fis = new FileInputStream(filePath);
 			String content = IOUtils.toString(fis);
@@ -97,7 +96,6 @@ public final class JvmOptsModifier extends Modifier {
 	 * Adds random modifier to bin/setenv on remote host.
 	 */
 	public void remoteExecute(Container container) {
-//		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 		final String filePath = container.getFusePath() + File.separator + "bin" + File.separator + "setenv";
 
 		final String response = super.getExecutor().executeCommandSilently("printf \" \nexport JAVA_OPTS=\\\"-Xms\\$JAVA_MIN_MEM -Xmx\\$JAVA_MAX_MEM "

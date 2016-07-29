@@ -62,7 +62,6 @@ public final class JavaHomeModifier extends Modifier {
 	 * Modifies JAVA_HOME on local.
 	 */
 	private void modifyLocalJavaHome(Container container) {
-//		final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 		// Files locations
 		final File setenv = new File(container.getFusePath() + File.separator + "bin" + File.separator + "setenv");
 		final File setenvBat = new File(container.getFusePath() + File.separator + "bin" + File.separator + "setenv.bat");
@@ -91,7 +90,6 @@ public final class JavaHomeModifier extends Modifier {
 	 *Modifies JAVA_HOME on remote.
 	 */
 	private void modifyRemoteJavaHome(Container container) {
-//		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 		final String path = container.getFusePath() + File.separator + "bin" + File.separator + "setenv";
 		String content = String.format("export JAVA_HOME=%s%n", javaHomePath);
 		// Remove original files

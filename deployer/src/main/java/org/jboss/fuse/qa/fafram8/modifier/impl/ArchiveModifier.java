@@ -7,8 +7,8 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exceptions.CopyFileException;
+import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
-import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
 
@@ -54,7 +54,6 @@ public class ArchiveModifier extends Modifier {
 	 */
 	private void archiveLocalFiles(Container container) {
 		log.info("Archiving files with patterns: {}", archiveFiles);
-//		final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 
 		try {
 			// setup Ant Directory Scanner
@@ -93,7 +92,6 @@ public class ArchiveModifier extends Modifier {
 		final int endIndex = 6;
 		final String randomFolder = super.getExecutor().getClient().getHost() + "-" + UUID.randomUUID().toString().substring(0, endIndex);
 		final NodeSSHClient sshClient = (NodeSSHClient) super.getExecutor().getClient();
-//		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 
 		for (String s : archiveFiles) {
 			final String response = super.getExecutor().executeCommand(
@@ -130,7 +128,7 @@ public class ArchiveModifier extends Modifier {
 	 * @return absolute target path
 	 */
 	private Path getTargetPath(String fileName) {
-		final Container container = ModifierExecutor.getRootContainerByHost("localhost");
+		final Container container = ContainerManager.getRootContainerByHost("localhost");
 		if (System.getenv("WORKSPACE") == null) {
 			return Paths.get(archiveTargetPath.toString(), StringUtils.substringBetween(
 					Paths.get(container.getFusePath(), fileName).toAbsolutePath().toString(),

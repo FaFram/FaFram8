@@ -15,7 +15,7 @@ public class DefaultValuesTest {
 	private OpenStackClient osm;
 	private String namePrefix = "openstack-client-test";
 	private String serverName = "hello-kitty";
-	private String imageId = "58487173-9c24-4644-97e7-f5f3e8d5e34e";
+	private String imageId = "7120330f-63d8-4384-b154-2bf01b890255";
 
 	@Test
 	public void testOverridingValues() throws Exception {

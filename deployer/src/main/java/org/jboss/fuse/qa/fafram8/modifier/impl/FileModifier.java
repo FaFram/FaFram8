@@ -67,7 +67,6 @@ public final class FileModifier extends Modifier {
 	 * Moves files on localhost.
 	 */
 	private void moveLocalFile(Container container) {
-//		final Container container = ModifierExecutor.getRootContainerByHost("localhost");
 		final String oldFilePath = container.getFusePath() + File.separator + fileToReplace;
 		try {
 			FileUtils.forceDelete(new File(oldFilePath));
@@ -93,7 +92,6 @@ public final class FileModifier extends Modifier {
 	 * Moves files on remote.
 	 */
 	private void moveRemoteFile(Container container) {
-//		final Container container = ModifierExecutor.getRootContainerByHost(super.getExecutor().getClient().getHost());
 		final String path = container.getFusePath() + File.separator + fileToReplace;
 
 		try {

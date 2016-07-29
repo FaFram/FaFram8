@@ -239,7 +239,7 @@ The workflow or properties can be modified using system properties. Full list of
 * additional.commands - Semicolon separated list of commands that should be executed (useful for small hotfixy specific for builds with problems etc.)
 * use.default.repositores - Flag if the default fabric repositories should be used
 * command.retry.timeout - Retry timeout in seconds when the command response contains "not found"
-* no.threads -
+* with.threads - Run Fafram in thread mode (spawning containers in threads)
 
 ### Patches
 
