@@ -26,11 +26,12 @@ public class ParserBrokerTest {
 		assertEquals("List size", 1, fafram.getBrokerList().size());
 		Broker b = fafram.getBrokerList().get(0);
 		assertEquals("Name", "name", b.getName());
-		assertEquals("Ssl", true, b.isSsl());
-		assertEquals("Group", "myGroup", b.getGroup());
+		assertEquals("Ssl", false, b.isSsl());
+		assertEquals("Group", "myGroup2", b.getGroup());
 		assertEquals("Data", "/data", b.getData());
 		assertEquals("ParentProfile", "default", b.getParentProfile());
 		assertEquals("Pid", "myvalue", b.getPids().get("mypid"));
+		assertEquals("Pid2", "myvalue2", b.getPids().get("mypid2"));
 		assertEquals("Network", "tcp://localhost:61616", b.getNetworks().get(0));
 	}
 

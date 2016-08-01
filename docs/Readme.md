@@ -171,10 +171,10 @@ Using Fafram8 you are able to connect to running Fuse instance and work with it.
 
 ```
 @Rule
-Fafram fafram = new Fafram().containers(RootContainer.builder().name("dummy-container").node("1.1.1.1").onlyConnect().build())
+public Fafram fafram = new Fafram().containers(RootContainer.builder().name("dummy-container").node("1.1.1.1").onlyConnect().build())
 
 @Rule
-Fafram fafram = new Fafram().containers(RootContainer.builder().name("dummy-container").node("1.1.1.1").onlyConnect(8103).build())
+public Fafram fafram = new Fafram().containers(RootContainer.builder().name("dummy-container").node("1.1.1.1").onlyConnect(8103).build())
 ```
 
 ### Loading iptables and offline mode
@@ -187,6 +187,16 @@ If Static provider is used then old _iptables_ configuration is saved to temp fi
 FaFram also provide special option _offline()_ that works only if iptables configuration file with name **iptables-no-internet** is present on all nodes in user home directory. If you are using the Openstack provider then this file is present in all ecervena snapshosts by default. Using offline flag with dynamic provisioning with Fuse-QA Openstack is the most stable and the most supported use case for this feature.
 
 For basic examples and usage check [OfflineTest](../deployer/src/test/java/org/jboss/fuse/qa/fafram8/test/remote/RemoteTurnOffInternetTest.java) and [CustomIPTablesTest](../deployer/src/test/java/org/jboss/fuse/qa/fafram8/test/remote/RemoteSettingIPtablesTest.java).
+
+### Defining configuration in XML file
+
+You can use an XML file to define almost all configuration of FaFram. You can pass the XML file as an argument to the Fafram class:
+```
+@Rule
+public Fafram fafram = new Fafram().config("path/to/file");
+```
+
+For the XML configuration, please check the [XSD Schema](../deployer/src/main/resources/parser/configuration.scheme.xsd) and [Example XML file](../deployer/src/main/resources/parser/configuration_example.xml)
 
 ### System properties
 The workflow or properties can be modified using system properties. Full list of system properties is

@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @ToString
 @Slf4j
 public class ContainersModel {
+	@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 	@XmlElements({
 			@XmlElement(name = "root", type = XmlRootContainerModel.class),
 			@XmlElement(name = "child", type = XmlChildContainerModel.class),

@@ -194,6 +194,9 @@
 			<xs:element name="pids" type="pidsType" minOccurs="0"/>
 			<xs:element name="containerFilter" type="xs:string" minOccurs="0"/>
 		</xs:all>
+		<xs:attribute name="id" type="xs:string"/>
+		<xs:attribute name="ref" type="xs:string"/>
+		<xs:attribute name="template" type="xs:boolean"/>
 	</xs:complexType>
 
 	<xs:complexType name="networksType">

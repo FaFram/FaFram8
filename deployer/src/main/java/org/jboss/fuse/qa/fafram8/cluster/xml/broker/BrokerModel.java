@@ -2,6 +2,7 @@ package org.jboss.fuse.qa.fafram8.cluster.xml.broker;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
 import lombok.Getter;
@@ -15,11 +16,20 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BrokerModel {
+	@XmlAttribute
+	private String id;
+
+	@XmlAttribute
+	private String ref;
+
+	@XmlAttribute
+	private boolean template;
+
 	@XmlElement
 	private String name;
 
 	@XmlElement
-	private boolean ssl;
+	private boolean ssl = false;
 
 	@XmlElement
 	private String kind;

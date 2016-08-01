@@ -116,6 +116,7 @@
 	</containers>
 
 	<brokers>
+		<!-- You can use the template, id, ref here aswell -->
 		<broker>
 			<name>name</name>
 			<ssl>true</ssl>

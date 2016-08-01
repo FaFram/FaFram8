@@ -4,6 +4,7 @@ import org.jboss.fuse.qa.fafram8.cluster.broker.Broker;
 import org.jboss.fuse.qa.fafram8.cluster.xml.broker.BrokerModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.broker.NetworkModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.broker.PidModel;
+import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @Slf4j
 public class BrokersModel {
+	@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 	@XmlElement(name = "broker")
 	private List<BrokerModel> brokers;
 
@@ -34,9 +36,11 @@ public class BrokersModel {
 	public void buildBrokers() {
 		Broker b;
 		for (BrokerModel broker : brokers) {
-			b = buildBroker(broker);
-			log.trace("Parsed broker: " + b.toString());
-			ContainerManager.getBrokers().add(b);
+			if (!broker.isTemplate()) {
+				b = buildBroker(broker);
+				log.trace("Parsed broker: " + b.toString());
+				ContainerManager.getBrokers().add(b);
+			}
 		}
 	}
 
@@ -46,14 +50,18 @@ public class BrokersModel {
 	 * @return broker object
 	 */
 	private Broker buildBroker(BrokerModel broker) {
-		final Broker.BrokerBuilder builder = Broker.builder();
+		final Broker.BrokerBuilder builder;
+
+		if (broker.getRef() != null) {
+			builder = Broker.builder(buildBroker(getModel(broker.getRef())));
+		} else {
+			builder = Broker.builder();
+		}
 
 		if (broker.getName() != null) {
 			builder.name(broker.getName());
 		}
-		if (broker.isSsl()) {
-			builder.ssl(broker.isSsl());
-		}
+		builder.ssl(broker.isSsl());
 		if (broker.getKind() != null) {
 			builder.kind(broker.getKind());
 		}
@@ -81,5 +89,19 @@ public class BrokersModel {
 		}
 
 		return builder.build();
+	}
+
+	/**
+	 * Gets the brokerModel by its id.
+	 * @param id id to search
+	 * @return broker model
+	 */
+	private BrokerModel getModel(String id) {
+		for (BrokerModel brokerModel : brokers) {
+			if (id.equals(brokerModel.getId())) {
+				return brokerModel;
+			}
+		}
+		throw new FaframException("Ref " + id + " not found");
 	}
 }
