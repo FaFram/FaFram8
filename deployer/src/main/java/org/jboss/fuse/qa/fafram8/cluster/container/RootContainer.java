@@ -130,6 +130,9 @@ public class RootContainer extends Container {
 		if (!super.isOnlyConnect()) {
 			nodeManager.clean();
 			nodeManager.checkRunningContainer();
+			super.getNode().getExecutor().executeCommands(OptionUtils.get(this.getOptions(), Option.STARTUP_NODE_COMMANDS)
+					.toArray(new String[OptionUtils.get(this.getOptions(), Option.STARTUP_NODE_COMMANDS).size()]));
+
 			try {
 				nodeManager.prepareZip();
 				nodeManager.unzipArtifact(this);
@@ -565,6 +568,17 @@ public class RootContainer extends Container {
 		 */
 		public RootBuilder profiles(String... profiles) {
 			OptionUtils.set(container.getOptions(), Option.PROFILE, profiles);
+			return this;
+		}
+
+		/**
+		 * Setter.
+		 *
+		 * @param commands startup node commands
+		 * @return this
+		 */
+		public RootBuilder startupNodeCommands(String... commands) {
+			OptionUtils.set(container.getOptions(), Option.STARTUP_NODE_COMMANDS, commands);
 			return this;
 		}
 

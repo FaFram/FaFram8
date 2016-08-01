@@ -188,6 +188,12 @@ public enum Option {
 			return "working-dir";
 		}
 	},
+	STARTUP_NODE_COMMANDS(false) {
+		@Override
+		public String toString() {
+			return "startup-node-commands";
+		}
+	},
 	// For backwards compatibility to use with Builder.opts
 	OTHER(false) {
 		@Override
