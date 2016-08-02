@@ -152,13 +152,13 @@ public class Broker {
 			cmd.append(" --data ").append(data);
 		}
 		for (String network : networks) {
-			cmd.append(" --network ").append(network);
+			cmd.append(" --networks ").append(network);
 		}
 		if (!"".equals(networksUsername)) {
-			cmd.append(" --network-username ").append(networksUsername);
+			cmd.append(" --networks-username ").append(networksUsername);
 		}
 		if (!"".equals(networksPassword)) {
-			cmd.append(" --network-password ").append(networksPassword);
+			cmd.append(" --networks-password ").append(networksPassword);
 		}
 		cmd.append(" ").append(name);
 		return cmd.toString();
