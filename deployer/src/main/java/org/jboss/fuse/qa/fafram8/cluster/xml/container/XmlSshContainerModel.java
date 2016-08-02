@@ -52,4 +52,7 @@ public class XmlSshContainerModel extends XmlContainerModel {
 
 	@XmlElement
 	private int maxPort;
+
+	@XmlElement
+	private String parentName;
 }

@@ -19,7 +19,6 @@ import org.junit.Test;
  */
 public class OpenstackXmlProvisionTest {
 	@Rule
-	//TODO(ecervena): implement enhancement to add timestamp to container name
 	public Fafram fafram = new Fafram().provider(FaframProvider.OPENSTACK)
 			.withFabric().config("src/test/resources/OpenStackProvisionTestConfig.xml");
 
@@ -39,7 +38,7 @@ public class OpenstackXmlProvisionTest {
 
 	@Test
 	public void fabricTest() {
-		assertTrue(fafram.executeCommand("container-list | grep ecervena-root123").contains("success"));
-		assertTrue(fafram.executeCommand("container-list | grep ecervena-node1123").contains("success"));
+		assertTrue(fafram.executeCommand("container-list | grep xmltest").contains("success"));
+		assertTrue(fafram.executeCommand("container-list | grep ssh").contains("success"));
 	}
 }

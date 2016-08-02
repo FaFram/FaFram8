@@ -193,10 +193,16 @@ public class ContainersModel {
 			throw new FaframException("Ssh container name is not set!");
 		}
 		builder.name(ssh.getName());
-		if (ssh.getNode() == null) {
-			throw new FaframException("Ssh node is not set!");
+
+		if (ssh.getParentName() == null) {
+			throw new FaframException("Ssh container parent name is not set!");
 		}
-		builder.node(ssh.getNode().createNode());
+		builder.parentName(ssh.getParentName());
+
+		if (ssh.getNode() != null) {
+			builder.node(ssh.getNode().createNode());
+		}
+
 		if (ssh.getVersion() != null) {
 			builder.version(ssh.getVersion());
 		}

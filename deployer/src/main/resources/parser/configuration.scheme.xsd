@@ -150,7 +150,8 @@
 		<xs:complexContent>
 			<xs:extension base="containerType">
 				<xs:all>
-					<xs:element name="node" type="nodeType" minOccurs="1"/>
+					<xs:element name="parentName" type="xs:string" minOccurs="0"/>
+					<xs:element name="node" type="nodeType" minOccurs="0"/>
 					<xs:element name="version" type="xs:string" minOccurs="0"/>
 					<xs:element name="env" type="xs:string" minOccurs="0"/>
 					<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>

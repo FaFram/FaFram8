@@ -1,23 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fafram xmlns="org.jboss.fuse.qa"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="org.jboss.fuse.qa  config.scheme.xsd">
-
-	<framework></framework>
-
-	<container type="root" fabric="true" instances="1">
-		<!-- Note the root container name is always "root" -->
-		<name>ecervena-root123</name>
-		<username>fafram</username>
-		<password>fafram</password>
-		<node host="" username="fuse" password="fuse"/>
-	</container>
-
-	<container instances="1" type="ssh">
-		<name>ecervena-node1123</name>
-		<username>fafram</username>
-		<password>fafram</password>
-		<parent>ecervena-root123</parent>
-		<node host="" username="fuse" password="fuse"/>
-	</container>
+<fafram xmlns="urn:org.jboss.fuse.qa">
+	<configuration>
+		<provider>Openstack</provider>
+	</configuration>
+	<containers>
+		<root fabric="true">
+			<name>xmltest</name>
+		</root>
+		<ssh>
+			<name>ssh</name>
+			<parentName>xmltest</parentName>
+		</ssh>
+	</containers>
 </fafram>
