@@ -38,7 +38,7 @@ public class XmlContainerModel {
 	private String ref;
 
 	@XmlAttribute
-	private int instances;
+	private int instances = 1;
 
 	@XmlAttribute
 	private boolean template = false;
