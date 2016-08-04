@@ -139,14 +139,20 @@ public class ContainersModel {
 			builder = ChildContainer.builder();
 		}
 
-		if (child.getName() == null) {
+		if (child.getName() == null && !child.isTemplate() && builder.getContainer().getName() == null) {
 			throw new FaframException("Child container name is not set!");
 		}
-		builder.name(child.getName());
-		if (child.getParentName() == null) {
+		// If we are overriding template in the container
+		if (child.getName() != null) {
+			builder.name(child.getName());
+		}
+		if (child.getParentName() == null && !child.isTemplate() && builder.getContainer().getParentName() == null) {
 			throw new FaframException("Child container parent name is not set!");
 		}
-		builder.parentName(child.getParentName());
+		// If we are overriding template in the container
+		if (child.getParentName() != null) {
+			builder.parentName(child.getParentName());
+		}
 		if (child.getVersion() != null) {
 			builder.version(child.getVersion());
 		}
@@ -189,17 +195,23 @@ public class ContainersModel {
 			builder = SshContainer.builder();
 		}
 
-		if (ssh.getName() == null) {
+		if (ssh.getName() == null && !ssh.isTemplate() && builder.getContainer().getName() == null) {
 			throw new FaframException("Ssh container name is not set!");
 		}
-		builder.name(ssh.getName());
+		// If we are overriding template in the container
+		if (ssh.getName() != null) {
+			builder.name(ssh.getName());
+		}
 
-		if (ssh.getParentName() == null) {
+		if (ssh.getParentName() == null && !ssh.isTemplate() && builder.getContainer().getParentName() == null) {
 			throw new FaframException("Ssh container parent name is not set!");
 		}
-		builder.parentName(ssh.getParentName());
+		// If we are overriding template in the container
+		if (ssh.getParentName() != null) {
+			builder.parentName(ssh.getParentName());
+		}
 
-		if (ssh.getNode() != null) {
+		if (ssh.getNode() != null && !ssh.isTemplate()) {
 			builder.node(ssh.getNode().createNode());
 		}
 

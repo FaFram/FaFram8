@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -225,6 +226,7 @@ public class SshContainer extends Container implements ThreadContainer {
 	 */
 	public static class SshBuilder {
 		// Container instance
+		@Getter
 		private Container container;
 
 		/**

@@ -72,6 +72,10 @@ public class Broker {
 	@Getter
 	private Map<String, String> pids = new HashMap<>();
 
+	@Setter
+	@Getter
+	private Map<String, String> ports = new HashMap<>();
+
 	/**
 	 * Constructor.
 	 *
@@ -159,6 +163,11 @@ public class Broker {
 		}
 		if (!"".equals(networksPassword)) {
 			cmd.append(" --networks-password ").append(networksPassword);
+		}
+		if (!ports.isEmpty()) {
+			for (Map.Entry<String, String> entry : ports.entrySet()) {
+				cmd.append(" --port ").append(entry.getKey()).append("=").append(entry.getValue());
+			}
 		}
 		cmd.append(" ").append(name);
 		return cmd.toString();
@@ -359,6 +368,17 @@ public class Broker {
 		 */
 		public BrokerBuilder addPid(String pid, String value) {
 			this.tempBroker.getPids().put(pid, value);
+			return this;
+		}
+
+		/**
+		 * Adds protocol/port.
+		 * @param protocol protocol
+		 * @param value port
+		 * @return this
+		 */
+		public BrokerBuilder port(String protocol, String value) {
+			this.tempBroker.getPorts().put(protocol, value);
 			return this;
 		}
 

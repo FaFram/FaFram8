@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
+import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
+import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
+import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
@@ -26,8 +29,8 @@ public class ParserSshTest {
 
 	@Test
 	public void parseSshContainerTest() {
-		assertEquals("List size", 1, fafram.getContainerList().size());
-		Container c = fafram.getContainerList().get(0);
+		assertEquals("List size", 2, fafram.getContainerList().size());
+		Container c = fafram.getContainerList().get(1);
 		assertEquals("3", c.getName());
 		// Three added + one urandom
 		assertEquals("Jvm opts list size", 4, OptionUtils.get(c.getOptions(), Option.JVM_OPTS).size());
@@ -57,11 +60,13 @@ public class ParserSshTest {
 		assertEquals("Zookeeper pw", "2", OptionUtils.getString(c.getOptions(), Option.ZOOKEEPER_PASSWORD));
 		assertEquals("Workdir", "2", OptionUtils.getString(c.getOptions(), Option.WORKING_DIRECTORY));
 		assertEquals("Private key", "1", OptionUtils.getString(c.getOptions(), Option.PRIVATE_KEY));
-
+		assertEquals("Parent name", "root", c.getParentName());
 	}
 
 	@AfterClass
 	public static void tearDown() {
-		fafram.tearDown();
+		SystemProperty.clearAllProperties();
+		ModifierExecutor.clearAllModifiers();
+		ContainerManager.clearAllLists();
 	}
 }

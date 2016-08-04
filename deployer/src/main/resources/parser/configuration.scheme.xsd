@@ -154,6 +154,7 @@
 					<xs:element name="node" type="nodeType" minOccurs="0"/>
 					<xs:element name="version" type="xs:string" minOccurs="0"/>
 					<xs:element name="env" type="xs:string" minOccurs="0"/>
+					<xs:element name="path" type="xs:simpleType" minOccurs="0"/>
 					<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>
 					<xs:element name="resolver" type="resolverType" minOccurs="0"/>
 					<xs:element name="manualIp" type="xs:string" minOccurs="0"/>
@@ -194,6 +195,7 @@
 			<xs:element name="networks" type="networksType" minOccurs="0"/>
 			<xs:element name="pids" type="pidsType" minOccurs="0"/>
 			<xs:element name="containerFilter" type="xs:string" minOccurs="0"/>
+			<xs:element name="ports" type="portsType" minOccurs="0"/>
 		</xs:all>
 		<xs:attribute name="id" type="xs:string"/>
 		<xs:attribute name="ref" type="xs:string"/>
@@ -218,6 +220,17 @@
 				<xs:complexType>
 					<xs:attribute name="pid" type="xs:string"/>
 					<xs:attribute name="value" type="xs:string"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="portsType">
+		<xs:sequence>
+			<xs:element name="port">
+				<xs:complexType>
+					<xs:attribute name="protocol" type="xs:string"/>
+					<xs:attribute name="port" type="xs:string"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>

@@ -130,6 +130,9 @@
 			<pids>
 				<pid pid="mypid" value="myvalue"/>
 			</pids>
+			<ports>
+				<port protocol="openwire" port="11111"/>
+			</ports>
 		</broker>
 	</brokers>
 </fafram>

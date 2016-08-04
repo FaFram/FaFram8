@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fafram xmlns="urn:org.jboss.fuse.qa">
 	<containers>
+		<root>
+			<name>root</name>
+		</root>
 		<ssh instances="1" id="t1" template="true">
 			<name>1</name>
 			<node host="1" user="1" password="1"/>
@@ -22,6 +25,7 @@
 			<node host="2" user="2" password="2"/>
 			<version>2</version>
 			<env>2</env>
+			<parentName>root</parentName>
 			<jvmOpts>2</jvmOpts>
 			<workingDir>2</workingDir>
 			<zookeeperPassword>2</zookeeperPassword>
