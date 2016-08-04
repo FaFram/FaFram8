@@ -25,6 +25,8 @@ public class ParserBrokerTest {
 	public void parseBrokerTest() {
 		assertEquals("List size", 1, fafram.getBrokerList().size());
 		Broker b = fafram.getBrokerList().get(0);
+		assertEquals("Network password", "password", b.getNetworksPassword());
+		assertEquals("Network user", "user", b.getNetworksUsername());
 		assertEquals("Name", "name", b.getName());
 		assertEquals("Ssl", false, b.isSsl());
 		assertEquals("Group", "myGroup2", b.getGroup());

@@ -9,11 +9,13 @@ import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Class represents broker in fafram. Main purpose is to provide all necessary commands for creating broker in Fabric.
  * Created by mmelko on 09/10/15.
  */
+@ToString
 public class Broker {
 
 	public static final String STANDALONE = "StandAlone";
@@ -97,6 +99,8 @@ public class Broker {
 		this.group = broker.getGroup();
 		this.data = broker.getData();
 		this.networks = new ArrayList<>(broker.getNetworks());
+		this.networksUsername = broker.getNetworksUsername();
+		this.networksPassword = broker.getNetworksPassword();
 		this.parentProfile = broker.getParentProfile();
 		this.containers = new ArrayList<>(broker.getContainers());
 		this.pids = new HashMap<>(broker.getPids());
