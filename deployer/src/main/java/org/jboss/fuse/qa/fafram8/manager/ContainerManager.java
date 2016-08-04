@@ -465,6 +465,25 @@ public class ContainerManager {
 		// Maybe this will solve the insufficient roles that happen sometimes
 		ensembleRoot.getExecutor().reconnect();
 		ensembleRoot.executeCommand("ensemble-add --force " + ensembleString.toString());
+
+		// Wait for all containers to be ready
+		for (String cName : ensembleList) {
+			getContainer(cName).waitForProvisioning();
+		}
+	}
+
+	public static boolean isEnsembleReady() {
+		if (ensembleList.isEmpty()) {
+			return false;
+		}
+
+		for (String cName : ensembleList) {
+			if (!getContainer(cName).isOnline()) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

@@ -67,10 +67,16 @@ public final class Deployer {
 		if (SystemProperty.isWithThreads()) {
 			log.info("Deploying with threads!");
 			deployWithThreads();
+			ContainerManager.createEnsemble();
 		} else {
+			boolean ensembleCreated = false;
 			for (Container c : ContainerManager.getContainerList()) {
 				if (!c.isCreated()) {
 					c.create();
+				}
+				if (ContainerManager.isEnsembleReady() && !ensembleCreated) {
+					ContainerManager.createEnsemble();
+					ensembleCreated = true;
 				}
 			}
 		}

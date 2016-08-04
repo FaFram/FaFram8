@@ -108,7 +108,6 @@ public class Fafram extends ExternalResource {
 			setDefaultModifiers();
 			buildBundles();
 			Deployer.deploy();
-			ContainerManager.createEnsemble();
 		} catch (Exception ex) {
 			tearDown(true);
 			// Rethrow the exception so that we will know what happened
