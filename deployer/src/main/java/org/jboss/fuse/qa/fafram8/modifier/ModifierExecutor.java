@@ -1,6 +1,6 @@
 package org.jboss.fuse.qa.fafram8.modifier;
 
-import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 
@@ -9,8 +9,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,10 +21,6 @@ public class ModifierExecutor {
 	private static Set<Modifier> modifiers = new LinkedHashSet<>();
 	private static Set<Modifier> postModifiers = new LinkedHashSet<>();
 	private static Set<Modifier> customModifiers = new LinkedHashSet<>();
-
-	@Setter
-	@Getter
-	private static RootContainer container = null;
 
 	/**
 	 * Constructor.
@@ -52,7 +46,9 @@ public class ModifierExecutor {
 		// Force the initialization
 		ModifierExecutor.getInstance();
 
-		addModifiersToCollection(modifiers, modifier);
+		synchronized (modifiers) {
+			addModifiersToCollection(modifiers, modifier);
+		}
 	}
 
 	/**
@@ -91,28 +87,28 @@ public class ModifierExecutor {
 	/**
 	 * Executes the modifiers before the fuse starts.
 	 *
-	 * @param host host to execute on
+	 * @param container host to execute on
 	 */
-	public static void executeModifiers(String host) {
-		executeModifiers(host, null);
+	public static void executeModifiers(Container container) {
+		executeModifiers(container, null);
 	}
 
 	/**
 	 * Executes the modifiers before the fuse starts.
 	 *
 	 * @param executor executor
-	 * @param host host to execute on
+	 * @param container host to execute on
 	 */
-	public static void executeModifiers(String host, Executor executor) {
-		executeModifiersFromCollection(host, executor, modifiers);
+	public static void executeModifiers(Container container, Executor executor) {
+		executeModifiersFromCollection(container, executor, modifiers);
 	}
 
 	/**
 	 * Executes the post modifiers.
 	 */
-	public static void executePostModifiers() {
+	public static void executePostModifiers(Container container) {
 		ModifierExecutor.getInstance();
-		executePostModifiers(null);
+		executePostModifiers(container, null);
 	}
 
 	/**
@@ -120,15 +116,15 @@ public class ModifierExecutor {
 	 *
 	 * @param executor executor
 	 */
-	public static void executePostModifiers(Executor executor) {
-		executeModifiersFromCollection(null, executor, postModifiers);
+	public static void executePostModifiers(Container container, Executor executor) {
+		executeModifiersFromCollection(container, executor, postModifiers);
 	}
 
 	/**
 	 * Executes the custom modifiers.
 	 */
-	public static void executeCustomModifiers() {
-		executeCustomModifiers(null);
+	public static void executeCustomModifiers(Container container) {
+		executeCustomModifiers(container, null);
 	}
 
 	/**
@@ -136,8 +132,8 @@ public class ModifierExecutor {
 	 *
 	 * @param executor executor
 	 */
-	public static void executeCustomModifiers(Executor executor) {
-		executeModifiersFromCollection(null, executor, customModifiers);
+	public static void executeCustomModifiers(Container container, Executor executor) {
+		executeModifiersFromCollection(container, executor, customModifiers);
 	}
 
 	/**
@@ -146,27 +142,29 @@ public class ModifierExecutor {
 	 * @param executor executor
 	 * @param col collection
 	 */
-	private static void executeModifiersFromCollection(String host, Executor executor, Collection<Modifier> col) {
-		for (Modifier c : col) {
-			try {
-				// If the host in the modifier is null, it is applicable for all containers
-				// If c.getHost() != host, then this modifier does not belong to that container, so skip it
-				if ((c.getHost() == null) || c.getHost().equals(host)) {
-					// If executor is not null, then set the executor to the modifier so that it will know it should do it on remote
-					if (executor != null) {
-						c.setExecutor(executor);
-					}
-					log.debug("Executing modifier {}.", c);
-					c.execute();
+	private static void executeModifiersFromCollection(Container container, Executor executor, Collection<Modifier> col) {
+		synchronized (col) {
+			for (Modifier c : col) {
+				try {
+					// If the host in the modifier is null, it is applicable for all containers
+					// If c.getHost() != host, then this modifier does not belong to that container, so skip it
+					if ((c.getHost() == null) || c.getHost().equals(container.getNode().getHost())) {
+						// If executor is not null, then set the executor to the modifier so that it will know it should do it on remote
+						if (executor != null) {
+							c.setExecutor(executor);
+						}
+						log.debug("Executing modifier {}.", c);
+						c.execute(container);
 
-					// Unset the executor so that we will not have multiple instances of one modifier in the collection
-					if (executor != null) {
-						c.setExecutor(null);
+						// Unset the executor so that we will not have multiple instances of one modifier in the collection
+						if (executor != null) {
+							c.setExecutor(null);
+						}
 					}
+				} catch (Exception e) {
+					log.error("Failed to execute modifiers.", e);
+					throw new FaframException(e);
 				}
-			} catch (Exception e) {
-				log.error("Failed to execute modifiers.", e);
-				throw new FaframException(e);
 			}
 		}
 	}

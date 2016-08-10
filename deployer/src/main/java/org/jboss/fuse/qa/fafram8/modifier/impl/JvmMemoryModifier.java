@@ -2,9 +2,9 @@ package org.jboss.fuse.qa.fafram8.modifier.impl;
 
 import org.apache.commons.io.FileUtils;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
-import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,11 +50,11 @@ public final class JvmMemoryModifier extends Modifier {
 	}
 
 	@Override
-	public void execute() {
+	public void execute(Container container) {
 		if (super.getExecutor() != null) {
-			modifyRemoteJvmMemOpts();
+			modifyRemoteJvmMemOpts(container);
 		} else {
-			modifyLocalJvmMemOpts();
+			modifyLocalJvmMemOpts(container);
 		}
 	}
 
@@ -80,10 +80,10 @@ public final class JvmMemoryModifier extends Modifier {
 	/**
 	 * Modifies JVM Opts on localhost.
 	 */
-	private void modifyLocalJvmMemOpts() {
+	private void modifyLocalJvmMemOpts(Container container) {
 		// Files locations
-		final File setenv = new File(ModifierExecutor.getContainer().getFusePath() + File.separator + "bin" + File.separator + "setenv");
-		final File setenvBat = new File(ModifierExecutor.getContainer().getFusePath() + File.separator + "bin" + File.separator + "setenv.bat");
+		final File setenv = new File(container.getFusePath() + File.separator + "bin" + File.separator + "setenv");
+		final File setenvBat = new File(container.getFusePath() + File.separator + "bin" + File.separator + "setenv.bat");
 
 		try {
 			if (!setenvBat.exists()) {
@@ -110,8 +110,8 @@ public final class JvmMemoryModifier extends Modifier {
 	/**
 	 * Modifies JVM memory opts on remote.
 	 */
-	private void modifyRemoteJvmMemOpts() {
-		final String path = ModifierExecutor.getContainer().getFusePath() + File.separator + "bin" + File.separator + "setenv";
+	private void modifyRemoteJvmMemOpts(Container container) {
+		final String path = container.getFusePath() + File.separator + "bin" + File.separator + "setenv";
 		final StringBuilder builder = new StringBuilder();
 		for (String line : jvmMemOpts) {
 			builder.append("export " + line + "\n");

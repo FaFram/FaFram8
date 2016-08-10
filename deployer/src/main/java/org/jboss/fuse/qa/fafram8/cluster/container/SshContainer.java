@@ -2,9 +2,11 @@ package org.jboss.fuse.qa.fafram8.cluster.container;
 
 import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.cluster.resolver.Resolver;
+import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
+import org.jboss.fuse.qa.fafram8.property.FaframProvider;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
@@ -22,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  * Created by avano on 1.2.16.
  */
 @Slf4j
-public class SshContainer extends Container {
+public class SshContainer extends Container implements ThreadContainer {
 	/**
 	 * Constructor.
 	 */
@@ -61,21 +63,17 @@ public class SshContainer extends Container {
 
 	@Override
 	public void create() {
-		if (super.getParent() == null) {
-			// Search the parent by its name
-			final Container parent = ContainerManager.getContainer(super.getParentName());
-			if (parent == null) {
-				throw new FaframException(String.format("Specified parent (%s) of container %s does not exist in container list!",
-						super.getParentName(), super.getName()));
-			}
-			super.setParent(parent);
-		}
+		create(super.getParent().getExecutor());
+	}
+
+	@Override
+	public void create(Executor executor) {
 		if (SystemProperty.suppressStart()) {
 			return;
 		}
 
 		// If using static provider then clean
-		if ("StaticProvider".equals(SystemProperty.getProvider())) {
+		if (FaframProvider.STATIC.equals(SystemProperty.getProvider())) {
 			clean();
 		}
 
@@ -93,14 +91,20 @@ public class SshContainer extends Container {
 		}
 
 		log.info("Creating container " + this);
-
+		executor.connect();
 		// Recreate the executor because the values could be changed in the process
 		super.getNode().setExecutor(super.getNode().createExecutor());
 
-		getExecutor().executeCommand(String.format("container-create-ssh --user %s --password %s --host %s %s %s",
+		executor.executeCommand(String.format("container-create-ssh --user %s --password %s --host %s %s %s",
 				super.getNode().getUsername(), super.getNode().getPassword(), super.getNode().getHost(), OptionUtils.getCommand(super.getOptions()), super.getName()));
 		super.setCreated(true);
-		getExecutor().waitForProvisioning(this);
+		try {
+			executor.waitForProvisioning(this);
+		} catch (FaframException e) {
+			ContainerSummoner.setStopWork(true);
+			throw e;
+		}
+
 		super.setExecutor(super.createExecutor());
 		super.getExecutor().connect();
 		super.getNode().getExecutor().connect();
@@ -116,13 +120,20 @@ public class SshContainer extends Container {
 
 	@Override
 	public void destroy() {
+		destroy(getExecutor());
+	}
+
+	@Override
+	public void destroy(Executor executor) {
 		if (SystemProperty.suppressStart() || !super.isCreated()) {
 			return;
 		}
 
 		log.info("Destroying container " + super.getName());
-		getExecutor().executeCommand("container-delete --force " + super.getName());
+		executor.connect();
+		super.getParent().getExecutor().executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
+		ContainerManager.getContainerList().remove(this);
 	}
 
 	@Override
@@ -133,21 +144,22 @@ public class SshContainer extends Container {
 
 	@Override
 	public void start(boolean force) {
-		getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
-		getExecutor().waitForProvisioning(this);
+		super.getParent().getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
+		super.getParent().getExecutor().waitForProvisioning(this);
 		super.setOnline(true);
 	}
 
 	@Override
 	public void stop(boolean force) {
-		getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
-		getExecutor().waitForContainerStop(this);
+		super.getParent().getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
+		super.getParent().getExecutor().waitForContainerStop(this);
 		super.setOnline(false);
 	}
 
 	@Override
 	public void kill() {
 		super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());
+		super.setOnline(false);
 	}
 
 	@Override
@@ -178,11 +190,6 @@ public class SshContainer extends Container {
 	@Override
 	public void waitForProvisionStatus(String status, int time) {
 		getExecutor().waitForProvisionStatus(this, status, time);
-	}
-
-	@Override
-	public Executor getExecutor() {
-		return super.getParent().getExecutor();
 	}
 
 	/**
@@ -447,6 +454,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param zkPass zookeeper password
 		 * @return this
 		 */
@@ -457,6 +465,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param manualIp manual ip
 		 * @return this
 		 */
@@ -467,6 +476,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param addr bind address
 		 * @return this
 		 */
@@ -477,6 +487,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param datastore datastore options
 		 * @return this
 		 */
@@ -487,6 +498,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param passPhrase pass phrase
 		 * @return this
 		 */
@@ -497,6 +509,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param port ssh port
 		 * @return this
 		 */
@@ -507,6 +520,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param privateKey private key path
 		 * @return this
 		 */
@@ -517,6 +531,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param minPort min port
 		 * @return this
 		 */
@@ -527,6 +542,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param repos fallback repos
 		 * @return this
 		 */
@@ -537,6 +553,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param uri proxy uri
 		 * @return this
 		 */
@@ -547,6 +564,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param port max port
 		 * @return this
 		 */
@@ -557,6 +575,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param retries ssh retries
 		 * @return this
 		 */
@@ -567,6 +586,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Sets the "--with-admin-access" flag.
+		 *
 		 * @return this
 		 */
 		public SshBuilder withAdminAccess() {
@@ -576,6 +596,7 @@ public class SshContainer extends Container {
 
 		/**
 		 * Sets the "--disable-distribution-upload" flag.
+		 *
 		 * @return this
 		 */
 		public SshBuilder disableDistributionUpload() {
@@ -586,9 +607,9 @@ public class SshContainer extends Container {
 		/**
 		 * Setter for additional create options that does not have special method.
 		 *
-		 * @deprecated Use other setters, they should be complete.
 		 * @param options options string
 		 * @return this
+		 * @deprecated Use other setters, they should be complete.
 		 */
 		@Deprecated
 		public SshBuilder options(String options) {

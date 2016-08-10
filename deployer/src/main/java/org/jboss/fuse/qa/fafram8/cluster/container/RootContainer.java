@@ -7,6 +7,7 @@ import static org.jboss.fuse.qa.fafram8.modifier.impl.PropertyModifier.putProper
 import static org.jboss.fuse.qa.fafram8.modifier.impl.RootNameModifier.setRootName;
 
 import org.jboss.fuse.qa.fafram8.cluster.node.Node;
+import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.manager.LocalNodeManager;
@@ -103,7 +104,6 @@ public class RootContainer extends Container {
 			}
 		}
 
-		ModifierExecutor.setContainer(this);
 		// If we shouldn't skip default user and the usersMod is null == we dont add specific user to the container, so add fafram/fafram
 		if (usersMod == null && !SystemProperty.skipDefaultUser()) {
 			// Add default user which is now fafram/fafram with only role Administrator for more transparent tests
@@ -134,7 +134,7 @@ public class RootContainer extends Container {
 				nodeManager.prepareZip();
 				nodeManager.unzipArtifact(this);
 				super.setCreated(true);
-				nodeManager.prepareFuse(super.getNode().getHost());
+				nodeManager.prepareFuse(this);
 				if (!SystemProperty.suppressStart()) {
 					nodeManager.startFuse();
 					ContainerManager.patchStandaloneBeforeFabric(this);
@@ -146,6 +146,7 @@ public class RootContainer extends Container {
 				}
 			} catch (FaframException ex) {
 				ex.printStackTrace();
+				ContainerSummoner.setStopWork(true);
 				nodeManager.stopAndClean(true);
 				throw new FaframException(ex);
 			}
@@ -158,9 +159,9 @@ public class RootContainer extends Container {
 	@Override
 	public void destroy() {
 		if ("localhost".equals(super.getNode().getHost())) {
-			ModifierExecutor.executePostModifiers();
+			ModifierExecutor.executePostModifiers(this);
 		} else {
-			ModifierExecutor.executePostModifiers(super.getNode().getExecutor());
+			ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
 		}
 
 		if (!super.isCreated()) {
@@ -211,6 +212,7 @@ public class RootContainer extends Container {
 	@Override
 	public void kill() {
 		nodeManager.kill();
+		super.setOnline(false);
 	}
 
 	@Override

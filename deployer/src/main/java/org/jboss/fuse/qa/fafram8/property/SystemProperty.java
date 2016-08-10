@@ -461,8 +461,12 @@ public class SystemProperty {
 	 *
 	 * @return provider property
 	 */
-	public static String getProvider() {
-		return System.getProperty(FaframConstant.PROVIDER, "StaticProvider");
+	public static FaframProvider getProvider() {
+		if (System.getProperty(FaframConstant.PROVIDER) == null) {
+			return FaframProvider.STATIC;
+		} else {
+			return FaframProvider.valueOf(System.getProperty(FaframConstant.PROVIDER));
+		}
 	}
 
 	/**
@@ -504,7 +508,7 @@ public class SystemProperty {
 	/**
 	 * Getter.
 	 *
-	 * @return keepContainers propery
+	 * @return keepContainers property
 	 */
 	public static boolean isKeepContainers() {
 		return System.getProperty(FaframConstant.KEEP_CONTAINERS) != null
@@ -538,6 +542,15 @@ public class SystemProperty {
 			forceSet(FaframConstant.KEEP_CONTAINERS, "true");
 			forceSet(FaframConstant.KEEP_OS_RESOURCES, "true");
 		}
+	}
+
+	/**
+	 * Getter.
+	 *
+	 * @return no.threads property
+	 */
+	public static boolean isWithThreads() {
+		return System.getProperty(FaframConstant.WITH_THREADS) != null;
 	}
 
 	/**

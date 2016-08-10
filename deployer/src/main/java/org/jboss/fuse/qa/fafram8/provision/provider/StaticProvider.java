@@ -52,7 +52,7 @@ public class StaticProvider implements ProvisionProvider {
 
 				final SSHClient sshClient = new NodeSSHClient().defaultSSHPort().host(c.getNode().getHost())
 						.username(c.getNode().getUsername()).password(c.getNode().getPassword());
-				executor = new Executor(sshClient);
+				executor = new Executor(sshClient, c.getNode().getHost());
 				log.debug("Killing Fuse process on node: ", executor);
 				try {
 					executor.connect();
@@ -111,7 +111,7 @@ public class StaticProvider implements ProvisionProvider {
 
 			sshClient = new NodeSSHClient().defaultSSHPort().host(c.getNode().getHost())
 					.username(c.getNode().getUsername()).password(c.getNode().getPassword());
-			executor = new Executor(sshClient);
+			executor = new Executor(sshClient, c.getNode().getHost());
 			log.debug("Loading iptables on node {}.", executor);
 			try {
 				executor.connect();
@@ -180,7 +180,7 @@ public class StaticProvider implements ProvisionProvider {
 
 			sshClient = new NodeSSHClient().defaultSSHPort().host(c.getNode().getHost())
 					.username(c.getNode().getUsername()).password(c.getNode().getPassword());
-			executor = new Executor(sshClient);
+			executor = new Executor(sshClient, c.getNode().getHost());
 			log.debug("Restoring iptables on node {} back to default.", executor);
 			try {
 				executor.connect();

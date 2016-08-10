@@ -4,10 +4,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exceptions.CopyFileException;
+import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
-import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
 
@@ -18,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -36,23 +36,23 @@ public class ArchiveModifier extends Modifier {
 	private String[] archiveFiles = SystemProperty.getArchivePattern().split(" *, " + "*"); //ignore spaces around comma
 
 	@Override
-	public void execute() {
+	public void execute(Container container) {
 		if (archiveFiles.length == 0) {
 			log.info("Nothing to archive.");
 			return;
 		}
 
 		if (super.getExecutor() != null) {
-			archiveRemoteFiles();
+			archiveRemoteFiles(container);
 		} else {
-			archiveLocalFiles();
+			archiveLocalFiles(container);
 		}
 	}
 
 	/**
 	 * Archives files on localhost.
 	 */
-	private void archiveLocalFiles() {
+	private void archiveLocalFiles(Container container) {
 		log.info("Archiving files with patterns: {}", archiveFiles);
 
 		try {
@@ -60,7 +60,7 @@ public class ArchiveModifier extends Modifier {
 			final DirectoryScanner scanner = new DirectoryScanner();
 			scanner.setIncludes(archiveFiles);
 			// set base dir to target/
-			scanner.setBasedir(ModifierExecutor.getContainer().getFusePath());
+			scanner.setBasedir(container.getFusePath());
 			scanner.setCaseSensitive(false);
 			// perform scan
 			scanner.scan();
@@ -69,7 +69,7 @@ public class ArchiveModifier extends Modifier {
 			log.info("Archiving {} file" + (foundFiles.length > 1 ? "s" : "") + " to {}", foundFiles.length, archiveTargetPath);
 			for (String fileName : foundFiles) {
 				//scanner returns paths relative to fuseDir
-				final Path p = Paths.get(ModifierExecutor.getContainer().getFusePath(), fileName);
+				final Path p = Paths.get(container.getFusePath(), fileName);
 				log.debug("Archiving file {}", fileName);
 				//create target directory structure
 				final Path target = getTargetPath(fileName);
@@ -88,15 +88,15 @@ public class ArchiveModifier extends Modifier {
 	/**
 	 * Archives files on remote.
 	 */
-	private void archiveRemoteFiles() {
+	private void archiveRemoteFiles(Container container) {
 		final int endIndex = 6;
 		final String randomFolder = super.getExecutor().getClient().getHost() + "-" + UUID.randomUUID().toString().substring(0, endIndex);
 		final NodeSSHClient sshClient = (NodeSSHClient) super.getExecutor().getClient();
 
 		for (String s : archiveFiles) {
 			final String response = super.getExecutor().executeCommand(
-					"find " + ModifierExecutor.getContainer().getFusePath() + " -type f -wholename \""
-							+ ModifierExecutor.getContainer().getFusePath() + s + "\"");
+					"find " + container.getFusePath() + " -type f -wholename \""
+							+ container.getFusePath() + s + "\"");
 			if (!(response == null || response.isEmpty())) {
 				for (String filePath : response.split("\n")) {
 					try {
@@ -128,18 +128,16 @@ public class ArchiveModifier extends Modifier {
 	 * @return absolute target path
 	 */
 	private Path getTargetPath(String fileName) {
+		final Container container = ContainerManager.getRootContainerByHost("localhost");
 		if (System.getenv("WORKSPACE") == null) {
 			return Paths.get(archiveTargetPath.toString(), StringUtils.substringBetween(
-					Paths.get(ModifierExecutor.getContainer().getFusePath(), fileName).toAbsolutePath().toString(),
+					Paths.get(container.getFusePath(), fileName).toAbsolutePath().toString(),
 					Paths.get(SystemProperty.getBaseDir(), "target").toAbsolutePath().toString(),
 					fileName),
 					fileName).toAbsolutePath();
 		} else {
 			// Jenkins env
-			final String[] path = Paths.get(ModifierExecutor.getContainer().getFusePath())
-					.toAbsolutePath()
-					.toString()
-					.split(Pattern.quote(File.separator));
+			final String[] path = Paths.get(container.getFusePath()).toAbsolutePath().toString().split(File.separator);
 			final String folder = path[path.length - 2] + File.separator + path[path.length - 1];
 			return Paths.get(archiveTargetPath.toString(), folder, fileName).toAbsolutePath();
 		}

@@ -2,8 +2,10 @@ package org.jboss.fuse.qa.fafram8.manager;
 
 import org.apache.commons.io.FileUtils;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.downloader.Downloader;
+import org.jboss.fuse.qa.fafram8.exception.ContainerException;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
@@ -85,7 +87,7 @@ public class LocalNodeManager implements NodeManager {
 		if (jenkins) {
 			targetPath = new File(System.getenv("WORKSPACE") + SEP + new Date().getTime()).getAbsolutePath();
 		} else {
-			targetPath = new File("target" + SEP + "container" + SEP + new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss")
+			targetPath = new File("target" + SEP + "container" + SEP + new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SS")
 					.format(new Date())).getAbsolutePath();
 		}
 
@@ -110,9 +112,9 @@ public class LocalNodeManager implements NodeManager {
 	}
 
 	@Override
-	public void prepareFuse(String host) {
-		ModifierExecutor.executeModifiers(host);
-		ModifierExecutor.executeCustomModifiers();
+	public void prepareFuse(Container container) {
+		ModifierExecutor.executeModifiers(container);
+		ModifierExecutor.executeCustomModifiers(container);
 	}
 
 	@Override
@@ -142,7 +144,7 @@ public class LocalNodeManager implements NodeManager {
 				executor.waitForBroker();
 			}
 		} catch (Exception e) {
-			throw new FaframException("Could not start container: " + e);
+			throw new ContainerException("Could not start root container: " + e);
 		}
 	}
 

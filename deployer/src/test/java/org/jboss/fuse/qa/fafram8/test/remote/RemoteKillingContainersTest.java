@@ -7,12 +7,13 @@ import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
-import org.jboss.fuse.qa.fafram8.executor.Executor;
+import org.jboss.fuse.qa.fafram8.property.FaframConstant;
 import org.jboss.fuse.qa.fafram8.property.FaframProvider;
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
 import org.jboss.fuse.qa.fafram8.test.base.FaframTestBase;
 
-import org.junit.Rule;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,20 @@ public class RemoteKillingContainersTest {
 	private Container child = ChildContainer.builder().name(childName).parent(root).build();
 	private Container ssh = SshContainer.builder().name(sshName).parent(root).build();
 
-	@Rule
-	public Fafram fafram = new Fafram().fuseZip(FaframTestBase.CURRENT_HTTP_URL).provider(FaframProvider.OPENSTACK).containers(root, child, ssh);
+
+	public Fafram fafram = new Fafram().fuseZip(FaframTestBase.CURRENT_LOCAL_URL).provider(FaframProvider.OPENSTACK).containers(root, child, ssh);
+
+	@Before
+	public void setUp() throws Exception {
+		System.setProperty(FaframConstant.WITH_THREADS, "");
+		fafram.setup();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		System.clearProperty(FaframConstant.WITH_THREADS);
+		fafram.tearDown(true);
+	}
 
 	@Test
 	public void killTest() throws Exception {
@@ -40,10 +53,8 @@ public class RemoteKillingContainersTest {
 		String response = fafram.executeCommand("exec ps aux | grep " + childName);
 		assertFalse(response.contains("karaf.base"));
 
-		final Executor executor = ssh.getNode().getExecutor();
-
-		executor.executeCommand("pkill -9 -f karaf");
-		response = executor.executeCommand("ps aux | grep " + sshName);
+		ssh.kill();
+		response = ssh.getNode().getExecutor().executeCommand("ps aux | grep " + sshName);
 		assertFalse(response.contains("karaf.base"));
 
 		root.kill();

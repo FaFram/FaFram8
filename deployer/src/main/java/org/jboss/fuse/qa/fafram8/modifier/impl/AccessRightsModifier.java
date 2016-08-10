@@ -1,7 +1,7 @@
 package org.jboss.fuse.qa.fafram8.modifier.impl;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
-import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 
 import java.io.File;
 
@@ -38,11 +38,11 @@ public final class AccessRightsModifier extends Modifier {
 	}
 
 	@Override
-	public void execute() {
+	public void execute(Container container) {
 		if (super.getExecutor() == null) {
-			localExecute();
+			localExecute(container);
 		} else {
-			remoteExecute();
+			remoteExecute(container);
 		}
 	}
 
@@ -50,18 +50,18 @@ public final class AccessRightsModifier extends Modifier {
 	 * Executes the modifier on localhost.
 	 */
 	@SuppressWarnings("ResultOfMethodCallIgnored")
-	private void localExecute() {
+	private void localExecute(Container container) {
 		for (String path : paths) {
-			new File(ModifierExecutor.getContainer().getFusePath() + File.separator + path).setExecutable(true);
+			new File(container.getFusePath() + File.separator + path).setExecutable(true);
 		}
 	}
 
 	/**
 	 * Executes the modifier on remote.
 	 */
-	private void remoteExecute() {
+	private void remoteExecute(Container container) {
 		for (String path : paths) {
-			super.getExecutor().executeCommandSilently("chmod +x " + ModifierExecutor.getContainer().getFusePath() + path);
+			super.getExecutor().executeCommandSilently("chmod +x " + container.getFusePath() + path);
 		}
 	}
 }

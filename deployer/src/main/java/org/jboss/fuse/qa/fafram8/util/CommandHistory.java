@@ -2,7 +2,10 @@ package org.jboss.fuse.qa.fafram8.util;
 
 import org.apache.commons.io.FileUtils;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
+import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 
 import java.io.File;
@@ -45,28 +48,44 @@ public class CommandHistory {
 	}
 
 	/**
-	 * Logs the command and it's response into a file.
+	 * Logs the command history of one Executor to file.
 	 *
-	 * @param cmd command
-	 * @param response response
+	 * @param history whole history of commands and responses from ExecutorCommandHistory
 	 */
-	public static void log(String cmd, String response) {
+	public static void writeLogToFile(String history) {
+		if (history == null) {
+			return;
+		}
 		// Force initialization
 		CommandHistory.getInstance();
-
-		final StringBuilder builder = new StringBuilder();
-		builder.append(dateFormat.format(new Date()))
-				.append("\n")
-				.append(cmd)
-				.append("\n")
-				.append(response)
-				.append("\n")
-				.append("------------------------------------------------------------------")
-				.append("\n");
 		try {
-			FileUtils.write(file, builder.toString(), true);
+			FileUtils.write(file, history, true);
 		} catch (IOException e) {
 			throw new FaframException(e);
 		}
+	}
+
+	/**
+	 * Writes all logs from all Executors to a file.
+	 */
+	public static void writeLogs() {
+		for (Container c : ContainerManager.getContainerList()) {
+			if (c.getNode() != null && !(c instanceof ChildContainer)) {
+				if (c.getNode().getExecutor() != null) {
+					writeLogToFile(c.getNode().getExecutor().getHistory().getLog());
+				}
+			}
+		}
+
+		for (Container c : ContainerManager.getContainerList()) {
+			if (c.getExecutor() != null) {
+				writeLogToFile(c.getExecutor().getHistory().getLog());
+			}
+		}
+
+		// This delimeter is added after one test case
+		writeLogToFile("\n////////////////////////////////////////////////////////////////////////////////////////////////////////////////\n");
+		writeLogToFile("****************************************************************************************************************");
+		writeLogToFile("\n////////////////////////////////////////////////////////////////////////////////////////////////////////////////\n\n");
 	}
 }

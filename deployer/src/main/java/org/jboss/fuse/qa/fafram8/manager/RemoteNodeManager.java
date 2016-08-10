@@ -1,7 +1,9 @@
 package org.jboss.fuse.qa.fafram8.manager;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.downloader.Downloader;
+import org.jboss.fuse.qa.fafram8.exception.ContainerException;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
@@ -82,8 +84,9 @@ public class RemoteNodeManager implements NodeManager {
 	}
 
 	@Override
-	public void prepareFuse(String host) {
+	public void prepareFuse(Container host) {
 		ModifierExecutor.executeModifiers(host, executor);
+		ModifierExecutor.executeCustomModifiers(host, executor);
 	}
 
 	@Override
@@ -97,7 +100,7 @@ public class RemoteNodeManager implements NodeManager {
 				fuseExecutor.waitForBroker();
 			}
 		} catch (Exception e) {
-			throw new FaframException("Could not start container: " + e);
+			throw new ContainerException("Could not start root container: ", e);
 		}
 	}
 

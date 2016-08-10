@@ -12,7 +12,9 @@ import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.jboss.fuse.qa.fafram8.cluster.broker.Broker;
 import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
+import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.configuration.ConfigurationParser;
+import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.deployer.Deployer;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exception.ValidatorException;
@@ -28,6 +30,7 @@ import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.StaticProvider;
+import org.jboss.fuse.qa.fafram8.util.CommandHistory;
 import org.jboss.fuse.qa.fafram8.util.callables.Response;
 import org.jboss.fuse.qa.fafram8.validator.Validator;
 
@@ -107,15 +110,7 @@ public class Fafram extends ExternalResource {
 			Deployer.deploy();
 			ContainerManager.createEnsemble();
 		} catch (Exception ex) {
-			if (!SystemProperty.isKeepOsResources()) {
-				provisionProvider.cleanIpTables(ContainerManager.getContainerList());
-				provisionProvider.releaseResources();
-			}
-			Deployer.destroy(true);
-			ContainerManager.clearAllLists();
-			SystemProperty.clearAllProperties();
-			ModifierExecutor.clearAllModifiers();
-
+			tearDown(true);
 			// Rethrow the exception so that we will know what happened
 			if (ex instanceof ValidatorException) {
 				throw ex;
@@ -137,10 +132,19 @@ public class Fafram extends ExternalResource {
 	 * Stop method.
 	 */
 	public void tearDown() {
+		tearDown(false);
+	}
+
+	/**
+	 * Stop method.
+	 */
+	public void tearDown(boolean force) {
 		try {
+			CommandHistory.writeLogs();
 			// There can be a problem with stopping containers
-			Deployer.destroy(false);
+			Deployer.destroy(force);
 		} catch (Exception ex) {
+			CommandHistory.writeLogs();
 			ex.printStackTrace();
 
 			if (!SystemProperty.isKeepOsResources()) {
@@ -158,6 +162,12 @@ public class Fafram extends ExternalResource {
 			provisionProvider.cleanIpTables(ContainerManager.getContainerList());
 			provisionProvider.releaseResources();
 		}
+
+		// Thread related cleaning
+		ContainerSummoner.setStopWork(false);
+		Deployer.setFail(false);
+		Deployer.getAnnihilatingThreads().clear();
+		Deployer.getSummoningThreads().clear();
 
 		SystemProperty.clearAllProperties();
 		ModifierExecutor.clearAllModifiers();
@@ -214,7 +224,11 @@ public class Fafram extends ExternalResource {
 		if (running) {
 			// If we are running modifiers in the test, execute them directly
 			for (Modifier mod : modifiers) {
-				mod.execute();
+				for (Container c : ContainerManager.getContainerList()) {
+					if (c instanceof RootContainer) {
+						mod.execute(c);
+					}
+				}
 			}
 		}
 		return this;
@@ -381,16 +395,18 @@ public class Fafram extends ExternalResource {
 		switch (provider) {
 			case STATIC:
 				provisionProvider = new StaticProvider();
+				SystemProperty.set(FaframConstant.PROVIDER, FaframProvider.STATIC.toString());
 				break;
 			case OPENSTACK:
 				provisionProvider = OpenStackProvisionProvider.getInstance();
+				SystemProperty.set(FaframConstant.PROVIDER, FaframProvider.OPENSTACK.toString());
 				break;
 			default:
 				log.warn("Provider not found! Using default static provider!");
 				provisionProvider = new StaticProvider();
+				SystemProperty.set(FaframConstant.PROVIDER, FaframProvider.STATIC.toString());
 				break;
 		}
-		SystemProperty.set(FaframConstant.PROVIDER, provisionProvider.getClass().getName());
 		return this;
 	}
 
@@ -717,6 +733,7 @@ public class Fafram extends ExternalResource {
 
 	/**
 	 * Get product version (from {@link Fafram#getProductPath()}).
+	 *
 	 * @return product version, eg {@code 6.2.1.redhat-084} or empty string if regex doesn't match.
 	 */
 	public String getProductVersion() {

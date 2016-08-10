@@ -1,6 +1,7 @@
 package org.jboss.fuse.qa.fafram8.cluster.container;
 
 import org.jboss.fuse.qa.fafram8.cluster.resolver.Resolver;
+import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * Created by avano on 1.2.16.
  */
 @Slf4j
-public class ChildContainer extends Container {
+public class ChildContainer extends Container implements ThreadContainer {
 	/**
 	 * Constructor.
 	 */
@@ -60,22 +61,17 @@ public class ChildContainer extends Container {
 
 	@Override
 	public void create() {
-		if (super.getParent() == null) {
-			// Search the parent by its name
-			final Container parent = ContainerManager.getContainer(super.getParentName());
-			if (parent == null) {
-				throw new FaframException(String.format("Specified parent (%s) of container %s does not exist in container list!",
-						super.getParentName(), super.getName()));
-			}
-			super.setParent(parent);
-		}
+		create(super.getParent().getExecutor());
+	}
 
+	@Override
+	public void create(Executor executor) {
 		if (SystemProperty.suppressStart()) {
 			return;
 		}
 
 		log.info("Creating container " + this);
-
+		executor.connect();
 		String jmxUser = super.getUser();
 		String jmxPass = super.getPassword();
 		if (super.getOptions().containsKey(Option.JMX_USER)) {
@@ -84,21 +80,28 @@ public class ChildContainer extends Container {
 		if (super.getOptions().containsKey(Option.JMX_PASSWORD)) {
 			jmxPass = super.getOptions().get(Option.JMX_PASSWORD).get(0);
 		}
-		super.getParent().getExecutor().executeCommand(String.format("container-create-child %s --jmx-user %s --jmx-password %s %s %s",
+
+		executor.executeCommand(String.format("container-create-child %s --jmx-user %s --jmx-password %s %s %s",
 				OptionUtils.getCommand(super.getOptions()), jmxUser, jmxPass, super.getParent().getName(), super.getName()));
 		super.setCreated(true);
-		super.getParent().getExecutor().waitForProvisioning(this);
+		try {
+			executor.waitForProvisioning(this);
+		} catch (FaframException e) {
+			ContainerSummoner.setStopWork(true);
+			throw e;
+		}
+
 		super.setOnline(true);
 		// Set node object
 		super.setNode(super.getParent().getNode());
 		// Create a new executor
 		try {
-			final Executor executor = super.createExecutor();
+			final Executor childExecutor = super.createExecutor();
 			final String port = super.getParent().getExecutor().executeCommandSilently("zk:get /fabric/registry/ports/containers/"
 					+ super.getName() + "/org.apache.karaf.shell/sshPort").trim();
-			executor.getClient().setPort(Integer.parseInt(port));
-			executor.connect();
-			super.setExecutor(executor);
+			childExecutor.getClient().setPort(Integer.parseInt(port));
+			childExecutor.connect();
+			super.setExecutor(childExecutor);
 		} catch (Exception ex) {
 			log.warn("Couldn't create executor / couldn't parse ssh port, child.executeCommand() won't work!");
 		}
@@ -112,13 +115,20 @@ public class ChildContainer extends Container {
 
 	@Override
 	public void destroy() {
+		destroy(super.getParent().getExecutor());
+	}
+
+	@Override
+	public void destroy(Executor executor) {
 		if (SystemProperty.suppressStart() || !super.isCreated()) {
 			return;
 		}
 
 		log.info("Destroying container " + super.getName());
-		super.getParent().getExecutor().executeCommand("container-delete --force " + super.getName());
+		executor.connect();
+		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
+		ContainerManager.getContainerList().remove(this);
 	}
 
 	@Override
@@ -143,6 +153,7 @@ public class ChildContainer extends Container {
 	@Override
 	public void kill() {
 		super.getExecutor().executeCommand("exec pkill -9 -f " + super.getName());
+		super.setOnline(false);
 	}
 
 	@Override
@@ -299,6 +310,7 @@ public class ChildContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param jmxUser jmx user
 		 * @return this
 		 */
@@ -309,6 +321,7 @@ public class ChildContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param jmxPassword jmx password
 		 * @return this
 		 */
@@ -319,6 +332,7 @@ public class ChildContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param zkPass zookeeper password
 		 * @return this
 		 */
@@ -329,6 +343,7 @@ public class ChildContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param manualIp manual ip
 		 * @return this
 		 */
@@ -339,6 +354,7 @@ public class ChildContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param addr bind address
 		 * @return this
 		 */
@@ -349,6 +365,7 @@ public class ChildContainer extends Container {
 
 		/**
 		 * Setter.
+		 *
 		 * @param datastore datastore option
 		 * @return this
 		 */
@@ -360,9 +377,9 @@ public class ChildContainer extends Container {
 		/**
 		 * Setter for additional create options that does not have special method.
 		 *
-		 * @deprecated Use other setters, they should be complete.
 		 * @param options options string
 		 * @return this
+		 * @deprecated Use other setters, they should be complete.
 		 */
 		@Deprecated
 		public ChildBuilder options(String options) {

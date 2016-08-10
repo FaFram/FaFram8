@@ -3,6 +3,7 @@ package org.jboss.fuse.qa.fafram8.test.remote;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
@@ -28,6 +29,7 @@ public class RemoteWorkingDirectoryTest {
 	private static final String DIR = "/home/fuse/bin";
 
 	static {
+		System.setProperty(FaframConstant.WITH_THREADS, "");
 		System.setProperty(FaframConstant.FUSE_ZIP, FaframTestBase.CURRENT_LOCAL_URL);
 		System.setProperty(FaframConstant.WORKING_DIRECTORY, DIR);
 	}
@@ -35,12 +37,16 @@ public class RemoteWorkingDirectoryTest {
 	private static Container root = RootContainer.builder().name("working-dir-root").node(
 			Node.builder().build()).withFabric().build();
 	private static Container root2 = RootContainer.builder().name("working-dir-root2").node(
-			Node.builder().build()).directory("/home/fuse").build();
+			Node.builder().build()).directory("/home/fuse").withFabric().build();
 	private static Container ssh = SshContainer.builder().name("working-dir-ssh").parent(root).node(
 			Node.builder().build()).build();
 
+	private static Container sshChild = ChildContainer.builder().name("test-jvm-opts-ssh-child").parent(ssh).build();
+	private static Container childRoot = ChildContainer.builder().name("child-root").parent(root).build();
+	private static Container child2Root = ChildContainer.builder().name("child2-root").parent(root).build();
+	private static Container childRoot2 = ChildContainer.builder().name("child-root2").parent(root2).build();
 	@ClassRule
-	public static Fafram fafram = new Fafram().provider(FaframProvider.OPENSTACK).containers(root, root2, ssh);
+	public static Fafram fafram = new Fafram().provider(FaframProvider.OPENSTACK).containers(root, root2, ssh, sshChild, childRoot, childRoot2, child2Root);
 
 	@Test
 	public void testWorkingDirectory() throws Exception {
@@ -63,5 +69,6 @@ public class RemoteWorkingDirectoryTest {
 	public static void tearDown() throws Exception {
 		System.clearProperty(FaframConstant.WORKING_DIRECTORY);
 		System.clearProperty(FaframConstant.FUSE_ZIP);
+		System.clearProperty(FaframConstant.WITH_THREADS);
 	}
 }

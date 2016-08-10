@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by mmelko on 18/03/16.
@@ -46,14 +47,13 @@ public class BrokerTest {
 
 	@After
 	public void killContainers() {
-		final ArrayList<Container> containers = new ArrayList<Container>();
-		for (Container c : fafram.getContainerList()) {
+		final List<Container> containers = new ArrayList<>(fafram.getContainerList());
+
+		for (Container c : containers) {
 			if (!c.isRoot()) {
 				c.destroy();
-				containers.add(c);
 			}
 		}
-		fafram.getContainerList().removeAll(containers);
 	}
 
 	@Test

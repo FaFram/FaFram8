@@ -23,7 +23,7 @@ public class RemoteExecuteNodeCommandTest {
 	private Container ssh = SshContainer.builder().name("build-excommand-container").parent(root).build();
 
 	@Rule
-	public Fafram fafram = new Fafram().fuseZip(FaframTestBase.CURRENT_HTTP_URL).provider(FaframProvider.OPENSTACK).containers(root, ssh);
+	public Fafram fafram = new Fafram().fuseZip(FaframTestBase.CURRENT_LOCAL_URL).provider(FaframProvider.OPENSTACK).containers(root, ssh);
 
 	@Test
 	public void executeNodeCommandTest() throws Exception {
