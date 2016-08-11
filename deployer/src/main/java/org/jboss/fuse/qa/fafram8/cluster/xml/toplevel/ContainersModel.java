@@ -177,6 +177,9 @@ public class ContainersModel {
 		if (child.getProfilesModel() != null) {
 			builder.profiles(child.getProfilesModel().getProfiles().toArray(new String[child.getProfilesModel().getProfiles().size()]));
 		}
+		if (child.getSameNodeAs() != null) {
+			builder.sameNodeAs(child.getSameNodeAs());
+		}
 		return builder.build();
 	}
 
@@ -256,6 +259,9 @@ public class ContainersModel {
 		}
 		if (ssh.getMaxPort() > 0) {
 			builder.maxPort(ssh.getMaxPort());
+		}
+		if (ssh.getSameNodeAs() != null) {
+			builder.sameNodeAs(ssh.getSameNodeAs());
 		}
 		return builder.build();
 	}

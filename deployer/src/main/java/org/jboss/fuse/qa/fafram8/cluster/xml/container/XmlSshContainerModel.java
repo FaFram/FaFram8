@@ -4,6 +4,7 @@ import org.jboss.fuse.qa.fafram8.cluster.xml.util.NodeModel;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
 import lombok.Getter;
@@ -55,4 +56,7 @@ public class XmlSshContainerModel extends XmlContainerModel {
 
 	@XmlElement
 	private String parentName;
+
+	@XmlAttribute
+	private String sameNodeAs;
 }

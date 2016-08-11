@@ -131,7 +131,7 @@
 					<xs:element name="resolver" type="resolverType" minOccurs="0"/>
 					<xs:element name="manualIp" type="xs:string" minOccurs="0"/>
 				</xs:all>
-				<xs:attribute name="fabric" type="xs:boolean"/>
+				<xs:attribute name="sameNodeAs" type="xs:string"/>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -166,7 +166,7 @@
 					<xs:element name="minPort" type="xs:positiveInteger" minOccurs="0"/>
 					<xs:element name="maxPort" type="xs:positiveInteger" minOccurs="0"/>
 				</xs:all>
-				<xs:attribute name="fabric" type="xs:boolean"/>
+				<xs:attribute name="sameNodeAs" type="xs:string"/>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>

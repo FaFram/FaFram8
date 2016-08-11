@@ -8,6 +8,8 @@ import org.jboss.fuse.qa.fafram8.exception.FaframThreadException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.openstack.exception.InvokerPoolInterruptedException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
+import org.jboss.fuse.qa.fafram8.util.Option;
+import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -72,6 +74,7 @@ public final class Deployer {
 			boolean ensembleCreated = false;
 			for (Container c : ContainerManager.getContainerList()) {
 				if (!c.isCreated()) {
+					setNodeIfNecessary(c);
 					c.create();
 				}
 				if (ContainerManager.isEnsembleReady() && !ensembleCreated) {
@@ -79,6 +82,16 @@ public final class Deployer {
 					ensembleCreated = true;
 				}
 			}
+		}
+	}
+
+	/**
+	 * Sets the node to the container if the container has "setNodeAs" set.
+	 * @param c container
+	 */
+	private static void setNodeIfNecessary(Container c) {
+		if (!OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
+			c.setNode(ContainerManager.getContainer(OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS)).getNode());
 		}
 	}
 
@@ -107,6 +120,7 @@ public final class Deployer {
 		for (Container c : ContainerManager.getContainerList()) {
 			final ContainerSummoner containerSummoner;
 			if (!c.isCreated()) {
+				setNodeIfNecessary(c);
 				if (c instanceof RootContainer) {
 					containerSummoner = new ContainerSummoner(c, null);
 				} else {

@@ -472,6 +472,10 @@ public class ContainerManager {
 		}
 	}
 
+	/**
+	 * Checks if all ensemble members are already created.
+	 * @return true if all ensemble members are already created, false otherwise.
+	 */
 	public static boolean isEnsembleReady() {
 		if (ensembleList.isEmpty()) {
 			return false;

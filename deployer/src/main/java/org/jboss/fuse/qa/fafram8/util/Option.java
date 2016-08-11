@@ -194,6 +194,12 @@ public enum Option {
 			return "startup-node-commands";
 		}
 	},
+	SAME_NODE_AS(true) {
+		@Override
+		public String toString() {
+			return "same-node-as";
+		}
+	},
 	// For backwards compatibility to use with Builder.opts
 	OTHER(false) {
 		@Override

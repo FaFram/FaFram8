@@ -34,6 +34,8 @@ public class ConfigurationParser {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param fafram fafram instance
 	 */
 	public ConfigurationParser(Fafram fafram) {
 		this.fafram = fafram;

@@ -31,6 +31,8 @@ import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.StaticProvider;
 import org.jboss.fuse.qa.fafram8.util.CommandHistory;
+import org.jboss.fuse.qa.fafram8.util.Option;
+import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 import org.jboss.fuse.qa.fafram8.util.callables.Response;
 import org.jboss.fuse.qa.fafram8.validator.Validator;
 
@@ -791,7 +793,8 @@ public class Fafram extends ExternalResource {
 		// Create a temp list without child containers
 		final List<Container> temp = new ArrayList<>();
 		for (Container c : containerList) {
-			if (!(c instanceof ChildContainer) && (c.getNode() == null || c.getNode().getHost() == null || "".equals(c.getNode().getHost()))) {
+			if (!(c instanceof ChildContainer) && (c.getNode() == null || c.getNode().getHost() == null || "".equals(c.getNode().getHost()))
+					&& OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
 				temp.add(c);
 			}
 		}

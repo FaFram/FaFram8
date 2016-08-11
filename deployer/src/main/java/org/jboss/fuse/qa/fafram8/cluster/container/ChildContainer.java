@@ -377,6 +377,25 @@ public class ChildContainer extends Container implements ThreadContainer {
 		}
 
 		/**
+		 * Setter.
+		 * @param containerName container name
+		 * @return this
+		 */
+		public ChildBuilder sameNodeAs(String containerName) {
+			OptionUtils.set(container.getOptions(), Option.SAME_NODE_AS, containerName);
+			return this;
+		}
+
+		/**
+		 * Setter.
+		 * @param otherContainer other container
+		 * @return this
+		 */
+		public ChildBuilder sameNodeAs(Container otherContainer) {
+			return sameNodeAs(otherContainer.getName());
+		}
+
+		/**
 		 * Setter for additional create options that does not have special method.
 		 *
 		 * @param options options string
