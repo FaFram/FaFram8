@@ -192,4 +192,7 @@ public final class FaframConstant {
 
 	// Property used when you don't want to use threads for creating/destroying containers
 	public static final String WITH_THREADS = "with.threads";
+
+	// Property for setting if fafram should try to restart container if it ended in failed stated
+	public static final String RETRY_PROVISIONING = "retry.provisioning";
 }
