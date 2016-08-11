@@ -430,7 +430,7 @@ public class Executor {
 				}
 			}
 			if (("requires full restart".equals(provisionStatus) || provisionStatus.contains("NoNodeException") || provisionStatus.contains(
-					"Client is not started")) && c != null) {
+					"Client is not started") || (SystemProperty.isRetryProvisioning() && "failed".equals(provisionStatus))) && c != null) {
 				handleProvisionRetries(waitFor, status);
 				restarted = true;
 				log.warn("Container requires restart (provision status: " + provisionStatus + ")! Restarting...");

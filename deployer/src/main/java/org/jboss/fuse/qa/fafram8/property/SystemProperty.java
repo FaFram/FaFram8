@@ -554,6 +554,15 @@ public class SystemProperty {
 	}
 
 	/**
+	 * Getter.
+	 *
+	 * @return retry.provisioning propertyF
+	 */
+	public static boolean isRetryProvisioning() {
+		return System.getProperty(FaframConstant.RETRY_PROVISIONING) != null;
+	}
+
+	/**
 	 * Gets the external property from the property file.
 	 *
 	 * @param property property key
