@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
+import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
+import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
+import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
@@ -13,6 +16,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
+ * Verifies parsing the child containers from XML file.
+ *
  * Created by avano on 27.7.16.
  */
 public class ParserChildTest {
@@ -48,6 +53,8 @@ public class ParserChildTest {
 
 	@AfterClass
 	public static void tearDown() {
-		fafram.tearDown();
+		SystemProperty.clearAllProperties();
+		ModifierExecutor.clearAllModifiers();
+		ContainerManager.clearAllLists();
 	}
 }

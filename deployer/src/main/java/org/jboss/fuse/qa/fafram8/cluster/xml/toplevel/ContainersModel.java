@@ -6,7 +6,6 @@ import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
 import org.jboss.fuse.qa.fafram8.cluster.resolver.Resolver;
 import org.jboss.fuse.qa.fafram8.cluster.xml.container.XmlChildContainerModel;
-import org.jboss.fuse.qa.fafram8.cluster.xml.container.XmlContainerModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.container.XmlRootContainerModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.container.XmlSshContainerModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.UserModel;
@@ -19,6 +18,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import lombok.Getter;
@@ -38,32 +38,41 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @ToString
 @Slf4j
+@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 public class ContainersModel {
-	@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 	@XmlElements({
 			@XmlElement(name = "root", type = XmlRootContainerModel.class),
 			@XmlElement(name = "child", type = XmlChildContainerModel.class),
 			@XmlElement(name = "ssh", type = XmlSshContainerModel.class)
 	})
-	private List<XmlContainerModel> containerModelList;
+	private List<Object> containerModelList;
 
 	/**
 	 * Builds all containers and adds them into the container list.
 	 */
 	public void buildContainers() {
 		Container c;
-		for (XmlContainerModel xmlContainerModel : containerModelList) {
-			for (int i = 1; i <= xmlContainerModel.getInstances(); i++) {
-				if (!xmlContainerModel.isTemplate()) {
-					if (xmlContainerModel instanceof XmlRootContainerModel) {
-						c = buildRootContainer((XmlRootContainerModel) xmlContainerModel);
-					} else if (xmlContainerModel instanceof XmlChildContainerModel) {
-						c = buildChildContainer((XmlChildContainerModel) xmlContainerModel);
+		for (Object obj : containerModelList) {
+			for (int i = 1; i <= getObjFieldValue("instances", obj, Integer.class); i++) {
+				if (!getObjFieldValue("template", obj, Boolean.class)) {
+					if (obj instanceof XmlRootContainerModel) {
+						final XmlRootContainerModel root = (XmlRootContainerModel) obj;
+						c = buildRootContainer(root);
+						if (root.getInstances() > 1) {
+							c.setName(c.getName() + i);
+						}
+					} else if (obj instanceof XmlChildContainerModel) {
+						final XmlChildContainerModel child = (XmlChildContainerModel) obj;
+						c = buildChildContainer(child);
+						if (child.getInstances() > 1) {
+							c.setName(c.getName() + i);
+						}
 					} else {
-						c = buildSshContainer((XmlSshContainerModel) xmlContainerModel);
-					}
-					if (xmlContainerModel.getInstances() > 1) {
-						c.setName(c.getName() + i);
+						final XmlSshContainerModel ssh = (XmlSshContainerModel) obj;
+						c = buildSshContainer(ssh);
+						if (ssh.getInstances() > 1) {
+							c.setName(c.getName() + i);
+						}
 					}
 					log.trace("Parsed container: " + c.toString());
 					ContainerManager.getContainerList().add(c);
@@ -73,7 +82,7 @@ public class ContainersModel {
 	}
 
 	/**
-	 * Buils the root container from the model.
+	 * Builds the root container from the model.
 	 *
 	 * @param root root model.
 	 * @return root container
@@ -125,7 +134,7 @@ public class ContainersModel {
 	}
 
 	/**
-	 * Buils the child container from the model.
+	 * Builds the child container from the model.
 	 *
 	 * @param child child model
 	 * @return child container
@@ -184,7 +193,7 @@ public class ContainersModel {
 	}
 
 	/**
-	 * Buils the ssh container from the model.
+	 * Builds the ssh container from the model.
 	 *
 	 * @param ssh ssh model
 	 * @return ssh container
@@ -275,12 +284,31 @@ public class ContainersModel {
 	 * @return container model representation of the container with specified id
 	 */
 	public <T> T getModel(String id, Class<T> type) {
-		for (XmlContainerModel xmlContainerModel : containerModelList) {
-			if (id.equals(xmlContainerModel.getId())) {
-				return type.cast(xmlContainerModel);
+		for (Object obj : containerModelList) {
+			if (id.equals(getObjFieldValue("id", obj, String.class))) {
+				return type.cast(obj);
 			}
 		}
 		throw new FaframException("Ref " + id + " not found");
+	}
+
+	/**
+	 * Gets the value of the field from the object and returns the type based on the parameter.
+	 * @param field field
+	 * @param obj object instance
+	 * @param type type to return
+	 * @param <T> type to return
+	 * @return value of the field
+	 */
+	public <T> T getObjFieldValue(String field, Object obj, Class<T> type) {
+		try {
+			final Field f = obj.getClass().getDeclaredField(field);
+			f.setAccessible(true);
+			return type.cast(f.get(obj));
+		} catch (IllegalAccessException | NoSuchFieldException e) {
+			e.printStackTrace();
+			throw new FaframException("Get object field value failed with: " + e);
+		}
 	}
 }
 

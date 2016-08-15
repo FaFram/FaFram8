@@ -10,6 +10,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
+ * Verifies parsing the brokers from XML file.
+ *
  * Created by avano on 28.7.16.
  */
 public class ParserBrokerTest {

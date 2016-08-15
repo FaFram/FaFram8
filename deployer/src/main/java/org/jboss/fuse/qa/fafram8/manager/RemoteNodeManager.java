@@ -103,7 +103,7 @@ public class RemoteNodeManager implements NodeManager {
 		try {
 			log.info("Starting container");
 			// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
-			if(isCygwin()) {
+			if (isCygwin()) {
 				executor.reconnect();
 			}
 

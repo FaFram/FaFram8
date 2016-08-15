@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ * Class representing the <ports> element.
  * Created by avano on 4.8.16.
  */
 @XmlAccessorType(XmlAccessType.FIELD)

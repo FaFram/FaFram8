@@ -1,6 +1,8 @@
 package org.jboss.fuse.qa.fafram8.cluster.xml.container;
 
+import org.jboss.fuse.qa.fafram8.cluster.xml.toplevel.CommandsModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.NodeModel;
+import org.jboss.fuse.qa.fafram8.cluster.xml.util.ProfilesModel;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -17,7 +19,31 @@ import lombok.Setter;
 @XmlAccessorType(XmlAccessType.FIELD)
 @Getter
 @Setter
-public class XmlSshContainerModel extends XmlContainerModel {
+public class XmlSshContainerModel {
+	@XmlElement
+	private String name;
+
+	@XmlElement
+	private String jvmOpts;
+
+	@XmlElement(name = "commands")
+	private CommandsModel commandsModel;
+
+	@XmlElement(name = "profiles")
+	private ProfilesModel profilesModel;
+
+	@XmlAttribute
+	private String id;
+
+	@XmlAttribute
+	private String ref;
+
+	@XmlAttribute
+	private int instances = 1;
+
+	@XmlAttribute
+	private boolean template = false;
+
 	@XmlElement
 	private NodeModel node;
 

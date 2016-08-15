@@ -4,11 +4,17 @@ import org.jboss.fuse.qa.fafram8.cluster.xml.toplevel.FaframModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.UserModel;
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
 
+import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 
 import java.io.File;
+import java.io.IOException;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -48,12 +54,20 @@ public class ConfigurationParser {
 	 * @throws JAXBException if an error was encountered while creating the Unmarshaller object.
 	 * @throws SAXException if an error with parsing occures
 	 */
-	public void parseConfigurationFile(String path) throws JAXBException {
+	public void parseConfigurationFile(String path) throws JAXBException, SAXException {
 		log.info("Configuration parser started.");
 
 		log.trace("Creating unmarshaller.");
 		final JAXBContext jaxbContext = JAXBContext.newInstance(FaframModel.class);
 		final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+		final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		Schema schema = null;
+		try {
+			schema = sf.newSchema(ConfigurationParser.class.getClassLoader().getResources("parser/configuration.scheme.xsd").nextElement());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		jaxbUnmarshaller.setSchema(schema);
 		log.trace("Unmarshalling cluster model from " + path);
 		faframModel = (FaframModel) jaxbUnmarshaller.unmarshal(new File(path));
 	}

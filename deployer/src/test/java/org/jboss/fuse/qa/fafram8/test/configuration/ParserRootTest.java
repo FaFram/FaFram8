@@ -13,6 +13,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
+ * Verifies parsing the root containers from XML file.
+ *
  * Created by ecervena on 1/11/16.
  */
 public class ParserRootTest {
@@ -43,7 +45,7 @@ public class ParserRootTest {
 		assertTrue(OptionUtils.get(c.getOptions(), Option.JVM_MEM_OPTS).contains("JAVA_MAX_MEM=10"));
 		assertTrue(OptionUtils.get(c.getOptions(), Option.JVM_MEM_OPTS).contains("JAVA_PERM_MEM=11"));
 		assertTrue(OptionUtils.get(c.getOptions(), Option.JVM_MEM_OPTS).contains("JAVA_MAX_PERM_MEM=12"));
-		assertEquals("Cmds list size", 4, OptionUtils.get(c.getOptions(), Option.COMMANDS).size());
+		assertEquals("Cmds list size", 3, OptionUtils.get(c.getOptions(), Option.COMMANDS).size());
 		assertTrue(OptionUtils.get(c.getOptions(), Option.COMMANDS).contains("profile-edit root"));
 		assertTrue(OptionUtils.get(c.getOptions(), Option.COMMANDS).contains("temp1"));
 		assertEquals("Bundles list size", 2, OptionUtils.get(c.getOptions(), Option.BUNDLES).size());

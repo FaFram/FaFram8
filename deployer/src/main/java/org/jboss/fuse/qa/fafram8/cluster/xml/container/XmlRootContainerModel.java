@@ -1,8 +1,10 @@
 package org.jboss.fuse.qa.fafram8.cluster.xml.container;
 
 import org.jboss.fuse.qa.fafram8.cluster.xml.toplevel.BundlesModel;
+import org.jboss.fuse.qa.fafram8.cluster.xml.toplevel.CommandsModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.JvmMemoryOptsModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.NodeModel;
+import org.jboss.fuse.qa.fafram8.cluster.xml.util.ProfilesModel;
 import org.jboss.fuse.qa.fafram8.cluster.xml.util.UsersModel;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -20,7 +22,31 @@ import lombok.Setter;
 @XmlAccessorType(XmlAccessType.FIELD)
 @Getter
 @Setter
-public class XmlRootContainerModel extends XmlContainerModel {
+public class XmlRootContainerModel {
+	@XmlElement
+	private String name;
+
+	@XmlElement
+	private String jvmOpts;
+
+	@XmlElement(name = "commands")
+	private CommandsModel commandsModel;
+
+	@XmlElement(name = "profiles")
+	private ProfilesModel profilesModel;
+
+	@XmlAttribute
+	private String id;
+
+	@XmlAttribute
+	private String ref;
+
+	@XmlAttribute
+	private int instances = 1;
+
+	@XmlAttribute
+	private boolean template = false;
+
 	@XmlAttribute
 	private boolean fabric;
 

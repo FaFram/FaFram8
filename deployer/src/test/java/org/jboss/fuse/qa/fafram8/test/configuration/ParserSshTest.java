@@ -16,6 +16,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
+ * Verifies parsing the ssh containers from XML file.
+ *
  * Created by avano on 27.7.16.
  */
 public class ParserSshTest {

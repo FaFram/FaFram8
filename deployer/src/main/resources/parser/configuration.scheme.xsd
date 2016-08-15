@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:org.jboss.fuse.qa" elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:org.jboss.fuse.qa" elementFormDefault="qualified" xmlns:tns="urn:org.jboss.fuse.qa">
 	<xs:element name="fafram">
 		<xs:complexType>
 			<xs:all>
-				<xs:element name="configuration" type="configurationType" minOccurs="0"/>
-				<xs:element name="users" type="usersType" minOccurs="0"/>
-				<xs:element name="commands" type="commandsType" minOccurs="0"/>
-				<xs:element name="bundles" type="bundlesType" minOccurs="0"/>
+				<xs:element name="configuration" type="tns:configurationType" minOccurs="0"/>
+				<xs:element name="users" type="tns:usersType" minOccurs="0"/>
+				<xs:element name="commands" type="tns:commandsType" minOccurs="0"/>
+				<xs:element name="bundles" type="tns:bundlesType" minOccurs="0"/>
 				<xs:element name="ensemble" type="xs:string" minOccurs="0"/>
-				<xs:element name="containers" type="containersType" minOccurs="0"/>
-				<xs:element name="brokers" type="brokersType" minOccurs="0"/>
+				<xs:element name="containers" type="tns:containersType" minOccurs="0"/>
+				<xs:element name="brokers" type="tns:brokersType" minOccurs="0"/>
 			</xs:all>
 		</xs:complexType>
 	</xs:element>
@@ -29,8 +29,8 @@
 			<xs:element name="skipBrokerWait" minOccurs="0"/>
 			<xs:element name="offline" minOccurs="0"/>
 			<xs:element name="withoutDefaultUser" minOccurs="0"/>
-			<xs:element name="iptables" type="noValuePathAttr" minOccurs="0"/>
-			<xs:element name="jdk" type="noValuePathAttr" minOccurs="0"/>
+			<xs:element name="iptables" type="tns:noValuePathAttr" minOccurs="0"/>
+			<xs:element name="jdk" type="tns:noValuePathAttr" minOccurs="0"/>
 		</xs:all>
 	</xs:complexType>
 
@@ -39,7 +39,7 @@
 	</xs:complexType>
 
 	<xs:complexType name="usersType">
-		<xs:sequence minOccurs="0">
+		<xs:sequence>
 			<xs:element name="user">
 				<xs:complexType>
 					<xs:attribute name="name" type="xs:string"/>
@@ -51,65 +51,56 @@
 	</xs:complexType>
 
 	<xs:complexType name="commandsType">
-		<xs:sequence minOccurs="0">
-			<xs:element name="command" type="xs:string"/>
+		<xs:sequence>
+			<xs:element name="command" type="xs:string" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
 
 	<xs:complexType name="bundlesType">
-		<xs:sequence minOccurs="0">
-			<xs:element name="bundle" type="xs:string"/>
+		<xs:sequence>
+			<xs:element name="bundle" type="xs:string" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
 
 	<xs:complexType name="containersType">
-		<xs:sequence maxOccurs="unbounded" minOccurs="0">
-			<xs:element name="root" type="rootType"/>
-			<xs:element name="child" type="childType"/>
-			<xs:element name="ssh" type="sshType"/>
-		</xs:sequence>
+		<xs:choice maxOccurs="unbounded">
+			<xs:element name="root" type="tns:rootType" minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="child" type="tns:childType" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="ssh" type="tns:sshType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:choice>
 		<xs:attribute name="count" type="xs:integer"/>
 	</xs:complexType>
 
-	<xs:complexType name="containerType">
-		<xs:all>
-			<xs:element name="name" type="xs:string" minOccurs="1"/>
-			<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>
-			<xs:element name="commands" type="commandsType" minOccurs="0"/>
-			<xs:element name="profiles" type="profilesType" minOccurs="0"/>
-		</xs:all>
-		<xs:attribute name="id" type="xs:string"/>
-		<xs:attribute name="ref" type="xs:string"/>
-		<xs:attribute name="instances" type="xs:integer"/>
-		<xs:attribute name="template" type="xs:boolean"/>
-	</xs:complexType>
-
 	<xs:complexType name="profilesType">
-		<xs:sequence minOccurs="0">
-			<xs:element name="profile" type="xs:string"/>
+		<xs:sequence>
+			<xs:element name="profile" type="xs:string" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
 
 	<xs:complexType name="rootType">
-		<xs:complexContent>
-			<xs:extension base="containerType">
-				<xs:all>
-					<xs:element name="jvmMemoryOpts" minOccurs="0">
-						<xs:complexType>
-							<xs:attribute name="xms" type="xs:string"/>
-							<xs:attribute name="xmx" type="xs:string"/>
-							<xs:attribute name="permMem" type="xs:string"/>
-							<xs:attribute name="maxPermMem" type="xs:string"/>
-						</xs:complexType>
-					</xs:element>
-					<xs:element name="workingDir" type="xs:string" minOccurs="0"/>
-					<xs:element name="users" type="usersType" minOccurs="0"/>
-					<xs:element name="node" type="nodeType" minOccurs="0"/>
-					<xs:element name="bundles" type="bundlesType" minOccurs="0"/>
-				</xs:all>
-				<xs:attribute name="fabric" type="xs:boolean"/>
-			</xs:extension>
-		</xs:complexContent>
+		<xs:all>
+			<xs:element name="name" type="xs:string" minOccurs="0"/>
+			<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>
+			<xs:element name="commands" type="tns:commandsType" minOccurs="0"/>
+			<xs:element name="profiles" type="tns:profilesType" minOccurs="0"/>
+			<xs:element name="jvmMemoryOpts" minOccurs="0">
+				<xs:complexType>
+					<xs:attribute name="xms" type="xs:string"/>
+					<xs:attribute name="xmx" type="xs:string"/>
+					<xs:attribute name="permMem" type="xs:string"/>
+					<xs:attribute name="maxPermMem" type="xs:string"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="workingDir" type="xs:string" minOccurs="0"/>
+			<xs:element name="users" type="tns:usersType" minOccurs="0"/>
+			<xs:element name="node" type="tns:nodeType" minOccurs="0"/>
+			<xs:element name="bundles" type="tns:bundlesType" minOccurs="0"/>
+		</xs:all>
+		<xs:attribute name="fabric" type="xs:boolean"/>
+		<xs:attribute name="id" type="xs:string"/>
+		<xs:attribute name="ref" type="xs:string"/>
+		<xs:attribute name="instances" type="xs:integer"/>
+		<xs:attribute name="template" type="xs:boolean"/>
 	</xs:complexType>
 
 	<xs:complexType name="nodeType">
@@ -120,24 +111,27 @@
 	</xs:complexType>
 
 	<xs:complexType name="childType">
-		<xs:complexContent>
-			<xs:extension base="containerType">
-				<xs:all>
-					<xs:element name="parentName" type="xs:string" minOccurs="1"/>
-					<xs:element name="version" type="xs:string" minOccurs="0"/>
-					<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>
-					<xs:element name="jmxUser" type="xs:string" minOccurs="0"/>
-					<xs:element name="jmxPassword" type="xs:string" minOccurs="0"/>
-					<xs:element name="resolver" type="resolverType" minOccurs="0"/>
-					<xs:element name="manualIp" type="xs:string" minOccurs="0"/>
-				</xs:all>
-				<xs:attribute name="sameNodeAs" type="xs:string"/>
-			</xs:extension>
-		</xs:complexContent>
+		<xs:all>
+			<xs:element name="name" type="xs:string" minOccurs="0"/>
+			<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>
+			<xs:element name="commands" type="tns:commandsType" minOccurs="0"/>
+			<xs:element name="profiles" type="tns:profilesType" minOccurs="0"/>
+			<xs:element name="parentName" type="xs:string" minOccurs="0"/>
+			<xs:element name="version" type="xs:string" minOccurs="0"/>
+			<xs:element name="jmxUser" type="xs:string" minOccurs="0"/>
+			<xs:element name="jmxPassword" type="xs:string" minOccurs="0"/>
+			<xs:element name="resolver" type="tns:resolverType" minOccurs="0"/>
+			<xs:element name="manualIp" type="xs:string" minOccurs="0"/>
+		</xs:all>
+		<xs:attribute name="sameNodeAs" type="xs:string"/>
+		<xs:attribute name="id" type="xs:string"/>
+		<xs:attribute name="ref" type="xs:string"/>
+		<xs:attribute name="instances" type="xs:integer"/>
+		<xs:attribute name="template" type="xs:boolean"/>
 	</xs:complexType>
 
 	<xs:simpleType name="resolverType">
-		<xs:restriction>
+		<xs:restriction base="xs:string">
 			<xs:enumeration value="localip"/>
 			<xs:enumeration value="manualip"/>
 			<xs:enumeration value="localhostname"/>
@@ -147,33 +141,36 @@
 	</xs:simpleType>
 
 	<xs:complexType name="sshType">
-		<xs:complexContent>
-			<xs:extension base="containerType">
-				<xs:all>
-					<xs:element name="parentName" type="xs:string" minOccurs="0"/>
-					<xs:element name="node" type="nodeType" minOccurs="0"/>
-					<xs:element name="version" type="xs:string" minOccurs="0"/>
-					<xs:element name="env" type="xs:string" minOccurs="0"/>
-					<xs:element name="path" type="xs:simpleType" minOccurs="0"/>
-					<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>
-					<xs:element name="resolver" type="resolverType" minOccurs="0"/>
-					<xs:element name="manualIp" type="xs:string" minOccurs="0"/>
-					<xs:element name="workingDir" type="xs:string" minOccurs="0"/>
-					<xs:element name="zookeeperPassword" type="xs:string" minOccurs="0"/>
-					<xs:element name="privateKey" type="xs:string" minOccurs="0"/>
-					<xs:element name="passPhrase" type="xs:string" minOccurs="0"/>
-					<xs:element name="proxyUri" type="xs:string" minOccurs="0"/>
-					<xs:element name="minPort" type="xs:positiveInteger" minOccurs="0"/>
-					<xs:element name="maxPort" type="xs:positiveInteger" minOccurs="0"/>
-				</xs:all>
-				<xs:attribute name="sameNodeAs" type="xs:string"/>
-			</xs:extension>
-		</xs:complexContent>
+		<xs:all>
+			<xs:element name="name" type="xs:string" minOccurs="0"/>
+			<xs:element name="jvmOpts" type="xs:string" minOccurs="0"/>
+			<xs:element name="commands" type="tns:commandsType" minOccurs="0"/>
+			<xs:element name="profiles" type="tns:profilesType" minOccurs="0"/>
+			<xs:element name="parentName" type="xs:string" minOccurs="0"/>
+			<xs:element name="node" type="tns:nodeType" minOccurs="0"/>
+			<xs:element name="version" type="xs:string" minOccurs="0"/>
+			<xs:element name="env" type="xs:string" minOccurs="0"/>
+			<xs:element name="path" type="xs:string" minOccurs="0"/>
+			<xs:element name="resolver" type="tns:resolverType" minOccurs="0"/>
+			<xs:element name="manualIp" type="xs:string" minOccurs="0"/>
+			<xs:element name="workingDir" type="xs:string" minOccurs="0"/>
+			<xs:element name="zookeeperPassword" type="xs:string" minOccurs="0"/>
+			<xs:element name="privateKey" type="xs:string" minOccurs="0"/>
+			<xs:element name="passPhrase" type="xs:string" minOccurs="0"/>
+			<xs:element name="proxyUri" type="xs:string" minOccurs="0"/>
+			<xs:element name="minPort" type="xs:positiveInteger" minOccurs="0"/>
+			<xs:element name="maxPort" type="xs:positiveInteger" minOccurs="0"/>
+		</xs:all>
+		<xs:attribute name="sameNodeAs" type="xs:string"/>
+		<xs:attribute name="id" type="xs:string"/>
+		<xs:attribute name="ref" type="xs:string"/>
+		<xs:attribute name="instances" type="xs:integer"/>
+		<xs:attribute name="template" type="xs:boolean"/>
 	</xs:complexType>
 
 	<xs:complexType name="brokersType">
-		<xs:sequence maxOccurs="unbounded" minOccurs="0">
-			<xs:element name="broker" type="brokerType"/>
+		<xs:sequence maxOccurs="unbounded">
+			<xs:element name="broker" type="tns:brokerType"/>
 		</xs:sequence>
 	</xs:complexType>
 
@@ -183,7 +180,7 @@
 			<xs:element name="ssl" type="xs:boolean" minOccurs="0"/>
 			<xs:element name="kind" minOccurs="0">
 				<xs:simpleType>
-					<xs:restriction>
+					<xs:restriction base="xs:string">
 						<xs:enumeration value="MasterSlave"/>
 						<xs:enumeration value="StandAlone"/>
 					</xs:restriction>
@@ -192,10 +189,10 @@
 			<xs:element name="parentProfile" type="xs:string" minOccurs="0"/>
 			<xs:element name="group" type="xs:string" minOccurs="0"/>
 			<xs:element name="data" type="xs:string" minOccurs="0"/>
-			<xs:element name="networks" type="networksType" minOccurs="0"/>
-			<xs:element name="pids" type="pidsType" minOccurs="0"/>
+			<xs:element name="networks" type="tns:networksType" minOccurs="0"/>
+			<xs:element name="pids" type="tns:pidsType" minOccurs="0"/>
 			<xs:element name="containerFilter" type="xs:string" minOccurs="0"/>
-			<xs:element name="ports" type="portsType" minOccurs="0"/>
+			<xs:element name="ports" type="tns:portsType" minOccurs="0"/>
 		</xs:all>
 		<xs:attribute name="id" type="xs:string"/>
 		<xs:attribute name="ref" type="xs:string"/>
@@ -216,7 +213,7 @@
 
 	<xs:complexType name="pidsType">
 		<xs:sequence>
-			<xs:element name="pid">
+			<xs:element name="pid" maxOccurs="unbounded">
 				<xs:complexType>
 					<xs:attribute name="pid" type="xs:string"/>
 					<xs:attribute name="value" type="xs:string"/>
@@ -227,7 +224,7 @@
 
 	<xs:complexType name="portsType">
 		<xs:sequence>
-			<xs:element name="port">
+			<xs:element name="port" maxOccurs="unbounded">
 				<xs:complexType>
 					<xs:attribute name="protocol" type="xs:string"/>
 					<xs:attribute name="port" type="xs:string"/>
