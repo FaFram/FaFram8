@@ -529,8 +529,8 @@ public class SystemProperty {
 	 *
 	 * @return flag if default repositories should be used
 	 */
-	public static boolean useDefaultRepositories() {
-		return System.getProperty(FaframConstant.USE_DEFAULT_REPOSITORIES) != null;
+	public static boolean clearDefaultRepositories() {
+		return System.getProperty(FaframConstant.CLEAR_DEFAULT_REPOSITORIES) != null;
 	}
 
 	/**
