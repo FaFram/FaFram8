@@ -22,6 +22,8 @@ public abstract class Modifier {
 
 	/**
 	 * This method will be called before fuse is started.
+	 *
+	 * @param container container
 	 */
 	public abstract void execute(Container container);
 }

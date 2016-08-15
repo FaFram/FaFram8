@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class Deployer {
+	private static final int TIMEOUT = 3;
 
 	@Getter
 	@Setter
@@ -160,7 +161,7 @@ public final class Deployer {
 		executorService.shutdown();
 		log.trace("Waiting for ContainerSummoner threads to finish a job.");
 		try {
-			while (!executorService.awaitTermination(3, TimeUnit.SECONDS)) {
+			while (!executorService.awaitTermination(TIMEOUT, TimeUnit.SECONDS)) {
 				log.trace("Waiting for ContainerSummoner threads to finish a job.");
 			}
 		} catch (InterruptedException ie) {
@@ -237,7 +238,7 @@ public final class Deployer {
 		executorService.shutdown();
 		log.trace("Waiting for ContainerAnnihilator threads to finish a job.");
 		try {
-			while (!executorService.awaitTermination(3, TimeUnit.SECONDS)) {
+			while (!executorService.awaitTermination(TIMEOUT, TimeUnit.SECONDS)) {
 				log.trace("Waiting for ContainerAnnihilator threads to finish a job.");
 			}
 		} catch (InterruptedException ie) {

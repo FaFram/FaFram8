@@ -138,6 +138,8 @@ public class Fafram extends ExternalResource {
 
 	/**
 	 * Stop method.
+	 *
+	 * @param force force flag
 	 */
 	public void tearDown(boolean force) {
 		try {

@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ExecutorCommandHistory {
+	private static final int MAX_BUILDER_LENGTH = 10;
 	private StringBuilder builder;
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 	private String name;
@@ -53,7 +54,7 @@ public class ExecutorCommandHistory {
 		if (this.name == null) {
 			return "";
 		}
-		if (builder.length() >= 10) {
+		if (builder.length() >= MAX_BUILDER_LENGTH) {
 			builder.append("\n================================================================================================\n");
 		}
 

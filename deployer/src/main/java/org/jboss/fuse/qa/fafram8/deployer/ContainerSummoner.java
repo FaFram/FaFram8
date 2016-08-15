@@ -33,12 +33,23 @@ public class ContainerSummoner implements Callable {
 	@Getter
 	private String name;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param container container
+	 * @param containerSummoner container summoner
+	 */
 	public ContainerSummoner(Container container, ContainerSummoner containerSummoner) {
 		this.container = container;
 		this.containerSummoner = containerSummoner;
 		this.name = container.getName();
 	}
 
+	/**
+	 * Sets the stop work flag.
+	 *
+	 * @param stopWork flag
+	 */
 	public static void setStopWork(boolean stopWork) {
 		ContainerSummoner.stopWork = stopWork;
 	}

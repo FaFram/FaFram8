@@ -46,6 +46,7 @@ public class ConfigurationParser {
 	 *
 	 * @param path path to Fafram8 XML configuration
 	 * @throws JAXBException if an error was encountered while creating the Unmarshaller object.
+	 * @throws SAXException if an error with parsing occures
 	 */
 	public void parseConfigurationFile(String path) throws JAXBException {
 		log.info("Configuration parser started.");

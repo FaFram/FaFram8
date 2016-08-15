@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @ToString
-@EqualsAndHashCode(callSuper = true, of = {"host"})
+@EqualsAndHashCode(callSuper = true)
 public final class JvmOptsModifier extends Modifier {
 	private String additionalJvmOpts = "";
 
@@ -47,7 +47,7 @@ public final class JvmOptsModifier extends Modifier {
 	public static JvmOptsModifier addJvmOpts(List<String> jvmOptsForRoot) {
 		final StringBuilder builder = new StringBuilder("");
 		for (String opt : jvmOptsForRoot) {
-			builder.append(" " + opt);
+			builder.append(" ").append(opt);
 		}
 		return new JvmOptsModifier(builder.toString());
 	}
@@ -72,6 +72,8 @@ public final class JvmOptsModifier extends Modifier {
 
 	/**
 	 * Adds random modifier to bin/setenv on localhost.
+	 *
+	 * @param container container
 	 */
 	public void localExecute(Container container) {
 		try {
@@ -94,6 +96,8 @@ public final class JvmOptsModifier extends Modifier {
 
 	/**
 	 * Adds random modifier to bin/setenv on remote host.
+	 *
+	 * @param container container
 	 */
 	public void remoteExecute(Container container) {
 		final String filePath = container.getFusePath() + File.separator + "bin" + File.separator + "setenv";
