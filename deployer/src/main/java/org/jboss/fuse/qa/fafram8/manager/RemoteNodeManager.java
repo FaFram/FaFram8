@@ -1,5 +1,7 @@
 package org.jboss.fuse.qa.fafram8.manager;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.downloader.Downloader;
@@ -65,6 +67,13 @@ public class RemoteNodeManager implements NodeManager {
 	public void unzipArtifact(RootContainer container) {
 		log.info("Unzipping fuse from " + productZipPath);
 
+		// Check if remote machine is windows and convert zip path to windows path using cygwin
+		if (isCygwin()) {
+			productZipPath = "$(cygpath -w " + productZipPath + ")";
+			// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
+			executor.reconnect();
+		}
+
 		// Jar can't unzip to specified directory, so we need to change the dir first
 		if (productZipPath.contains(getFolder())) {
 			executor.executeCommand("cd " + getFolder() + "; jar xf $(basename " + productZipPath + ")");
@@ -75,8 +84,8 @@ public class RemoteNodeManager implements NodeManager {
 		// Problem if WORKING_DIRECTORY is set because then the first command doesn't work
 
 		productPath = "".equals(SystemProperty.getWorkingDirectory())
-				? executor.executeCommandSilently("ls -d $PWD" + SEP + getFolder() + SEP + "*" + SEP).trim()
-				: executor.executeCommandSilently("ls -d " + getFolder() + SEP + "*" + SEP).trim();
+				? executor.executeCommand("ls -d $PWD" + SEP + getFolder() + SEP + "*" + SEP).trim()
+				: executor.executeCommand("ls -d " + getFolder() + SEP + "*" + SEP).trim();
 
 		log.trace("Product path is " + productPath);
 
@@ -93,6 +102,11 @@ public class RemoteNodeManager implements NodeManager {
 	public void startFuse() {
 		try {
 			log.info("Starting container");
+			// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
+			if(isCygwin()) {
+				executor.reconnect();
+			}
+
 			executor.executeCommand(productPath + "bin" + SEP + "start");
 			fuseExecutor.waitForBoot();
 			// TODO(avano): special usecase for remote standalone starting? maybe not necessary
@@ -169,5 +183,14 @@ public class RemoteNodeManager implements NodeManager {
 	@Override
 	public void kill() {
 		executor.executeCommand("pkill -9 -f karaf.base");
+	}
+
+	/**
+	 * Checks if remote node is a windows server.
+	 *
+	 * @return true if remote node is a windows server
+	 */
+	public boolean isCygwin() {
+		return StringUtils.containsIgnoreCase(executor.executeCommandSilently("uname"), "cyg");
 	}
 }
