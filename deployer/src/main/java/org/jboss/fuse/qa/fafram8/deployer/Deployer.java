@@ -42,6 +42,8 @@ public final class Deployer {
 	@Getter
 	private static ConcurrentHashMap<Container, ContainerAnnihilator> annihilatingThreads = new ConcurrentHashMap<>();
 
+	private static boolean ensembleCreated = false;
+
 	/**
 	 * Private constructor.
 	 */
@@ -72,7 +74,6 @@ public final class Deployer {
 			deployWithThreads();
 			ContainerManager.createEnsemble();
 		} else {
-			boolean ensembleCreated = false;
 			for (Container c : ContainerManager.getContainerList()) {
 				if (!c.isCreated()) {
 					setNodeIfNecessary(c);
