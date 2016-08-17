@@ -465,6 +465,47 @@ public class ContainerManager {
 		// Maybe this will solve the insufficient roles that happen sometimes
 		ensembleRoot.getExecutor().reconnect();
 		ensembleRoot.executeCommand("ensemble-add --force " + ensembleString.toString());
+
+		// Wait for all containers to be ready
+		for (String cName : ensembleList) {
+			getContainer(cName).waitForProvisioning();
+		}
+	}
+
+	/**
+	 * Checks if all ensemble members are already created.
+	 * @return true if all ensemble members are already created, false otherwise.
+	 */
+	public static boolean isEnsembleReady() {
+		if (ensembleList.isEmpty()) {
+			return false;
+		}
+
+		for (String cName : ensembleList) {
+			if (!getContainer(cName).isOnline()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Gets the containers by the name substring.
+	 * @param containerFilter container substring to search
+	 * @return array of maching containers
+	 */
+	public static String[] getContainersBySubstring(String containerFilter) {
+		final List<String> list = new ArrayList<>();
+		for (Container container : ContainerManager.getContainerList()) {
+			if (container.getName().contains(containerFilter)) {
+				list.add(container.getName());
+			}
+		}
+		if (list.isEmpty()) {
+			throw new FaframException("No containers matching filter " + containerFilter);
+		}
+		return list.toArray(new String[list.size()]);
 	}
 
 	/**

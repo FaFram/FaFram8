@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import org.jboss.fuse.qa.fafram8.property.FaframConstant;
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,5 +36,10 @@ public class AdditionalCommandsTest {
 		assertTrue(fafram.executeCommand("profile-display " + profileName).contains("camel-jms"));
 		assertTrue(fafram.executeCommand("profile-display " + profileName).contains("file:${runtime.home}/${karaf.default.repository}@snapshots@id=karaf-default"));
 		assertTrue(fafram.executeCommand("profile-display " + profileName).contains("file:${runtime.data}/maven/upload@snapshots@id=fabric-upload"));
+	}
+
+	@AfterClass
+	public static void afterClass() {
+		System.clearProperty(FaframConstant.ADDITIONAL_COMMANDS);
 	}
 }

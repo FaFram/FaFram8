@@ -8,6 +8,8 @@ import org.jboss.fuse.qa.fafram8.exception.FaframThreadException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.openstack.exception.InvokerPoolInterruptedException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
+import org.jboss.fuse.qa.fafram8.util.Option;
+import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class Deployer {
+	private static final int TIMEOUT = 3;
 
 	@Getter
 	@Setter
@@ -67,12 +70,29 @@ public final class Deployer {
 		if (SystemProperty.isWithThreads()) {
 			log.info("Deploying with threads!");
 			deployWithThreads();
+			ContainerManager.createEnsemble();
 		} else {
+			boolean ensembleCreated = false;
 			for (Container c : ContainerManager.getContainerList()) {
 				if (!c.isCreated()) {
+					setNodeIfNecessary(c);
 					c.create();
 				}
+				if (ContainerManager.isEnsembleReady() && !ensembleCreated) {
+					ContainerManager.createEnsemble();
+					ensembleCreated = true;
+				}
 			}
+		}
+	}
+
+	/**
+	 * Sets the node to the container if the container has "setNodeAs" set.
+	 * @param c container
+	 */
+	private static void setNodeIfNecessary(Container c) {
+		if (!OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
+			c.setNode(ContainerManager.getContainer(OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS)).getNode());
 		}
 	}
 
@@ -101,6 +121,7 @@ public final class Deployer {
 		for (Container c : ContainerManager.getContainerList()) {
 			final ContainerSummoner containerSummoner;
 			if (!c.isCreated()) {
+				setNodeIfNecessary(c);
 				if (c instanceof RootContainer) {
 					containerSummoner = new ContainerSummoner(c, null);
 				} else {
@@ -140,7 +161,7 @@ public final class Deployer {
 		executorService.shutdown();
 		log.trace("Waiting for ContainerSummoner threads to finish a job.");
 		try {
-			while (!executorService.awaitTermination(3, TimeUnit.SECONDS)) {
+			while (!executorService.awaitTermination(TIMEOUT, TimeUnit.SECONDS)) {
 				log.trace("Waiting for ContainerSummoner threads to finish a job.");
 			}
 		} catch (InterruptedException ie) {
@@ -217,7 +238,7 @@ public final class Deployer {
 		executorService.shutdown();
 		log.trace("Waiting for ContainerAnnihilator threads to finish a job.");
 		try {
-			while (!executorService.awaitTermination(3, TimeUnit.SECONDS)) {
+			while (!executorService.awaitTermination(TIMEOUT, TimeUnit.SECONDS)) {
 				log.trace("Waiting for ContainerAnnihilator threads to finish a job.");
 			}
 		} catch (InterruptedException ie) {

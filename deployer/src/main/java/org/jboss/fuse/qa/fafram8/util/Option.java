@@ -49,7 +49,7 @@ public enum Option {
 			return "--jvm-opts";
 		}
 	},
-	JVM_MEM_OPTS(false) {
+	JVM_MEM_OPTS(true) {
 		@Override
 		public String toString() {
 			return "jvmMemOpts";
@@ -186,6 +186,18 @@ public enum Option {
 		@Override
 		public String toString() {
 			return "working-dir";
+		}
+	},
+	STARTUP_NODE_COMMANDS(false) {
+		@Override
+		public String toString() {
+			return "startup-node-commands";
+		}
+	},
+	SAME_NODE_AS(true) {
+		@Override
+		public String toString() {
+			return "same-node-as";
 		}
 	},
 	// For backwards compatibility to use with Builder.opts

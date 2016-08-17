@@ -54,24 +54,25 @@ public class FuseSSHClient extends SSHClient {
 
 			int retries = 0;
 
+			channel = session.openChannel("exec");
+			((ChannelExec) channel).setCommand(command);
+
+			channel.setInputStream(null);
+			((ChannelExec) channel).setErrStream(System.err);
+
 			String returnString = "";
 			do {
 				if (retries == retriesCount) {
 					// If we retried it 2 times already, break
 					break;
 				}
-				channel = session.openChannel("exec");
-				((ChannelExec) channel).setCommand(command);
-
-				channel.setInputStream(null);
-				((ChannelExec) channel).setErrStream(System.err);
 
 				final InputStream in = channel.getInputStream();
 
 				channel.connect();
 
 				returnString = convertStreamToString(in);
-				if (returnString.contains("not found")) {
+				if (returnString.replaceAll("\u001B\\[[;\\d]*m", "").trim().startsWith("Command not found")) {
 					if (!suppressLog) {
 						log.debug("Retrying command in " + (commandRetryTimeout / 1000) + " seconds");
 					}

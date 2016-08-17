@@ -54,6 +54,7 @@ public class Executor {
 	 * Constructor.
 	 *
 	 * @param client ssh client instance
+	 * @param name executor name
 	 */
 	public Executor(SSHClient client, String name) {
 		this.client = client;

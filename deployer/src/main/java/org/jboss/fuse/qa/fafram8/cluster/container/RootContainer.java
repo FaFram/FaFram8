@@ -130,6 +130,9 @@ public class RootContainer extends Container {
 		if (!super.isOnlyConnect()) {
 			nodeManager.clean();
 			nodeManager.checkRunningContainer();
+			super.getNode().getExecutor().executeCommands(OptionUtils.get(this.getOptions(), Option.STARTUP_NODE_COMMANDS)
+					.toArray(new String[OptionUtils.get(this.getOptions(), Option.STARTUP_NODE_COMMANDS).size()]));
+
 			try {
 				nodeManager.prepareZip();
 				nodeManager.unzipArtifact(this);
@@ -569,6 +572,17 @@ public class RootContainer extends Container {
 		}
 
 		/**
+		 * Setter.
+		 *
+		 * @param commands startup node commands
+		 * @return this
+		 */
+		public RootBuilder startupNodeCommands(String... commands) {
+			OptionUtils.set(container.getOptions(), Option.STARTUP_NODE_COMMANDS, commands);
+			return this;
+		}
+
+		/**
 		 * Builds the container.
 		 *
 		 * @return rootcontainer instance
@@ -580,7 +594,7 @@ public class RootContainer extends Container {
 				if (!OptionUtils.get(container.getOptions(), Option.COMMANDS).contains(zkCommand)) {
 					container.getOptions().get(Option.COMMANDS).add(zkCommand);
 				}
-				if (!SystemProperty.useDefaultRepositories()) {
+				if (SystemProperty.clearDefaultRepositories()) {
 					container.getOptions().get(Option.COMMANDS).add("fabric:profile-edit --pid io.fabric8.agent/org.ops4j.pax.url.mvn.repositories='file:${runtime.home}/"
 							+ "${karaf.default.repository}@snapshots@id=karaf-default, file:${runtime.data}/maven/upload@snapshots@id=fabric-upload' "
 							+ "default");

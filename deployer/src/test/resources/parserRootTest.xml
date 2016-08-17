@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fafram xmlns="urn:org.jboss.fuse.qa">
+	<containers>
+		<root template="true" id="root1">
+			<name>temp1</name>
+			<jvmMemoryOpts xms="1" xmx="2" permMem="3" maxPermMem="4"/>
+			<node host="1" port="2" user="3" password="4"/>
+			<commands>
+				<command>temp1</command>
+			</commands>
+			<users>
+				<user name="user" password="pw" roles="Administrator"/>
+			</users>
+			<bundles>
+				<bundle>bundle1</bundle>
+			</bundles>
+		</root>
+		<root template="true" id="root2" ref="root1">
+			<name>root2</name>
+			<jvmMemoryOpts xms="5" xmx="6" permMem="7" maxPermMem="8"/>
+			<node host="5" port="6" user="7" password="8"/>
+			<jvmOpts>someopts</jvmOpts>
+		</root>
+		<root fabric="true" instances="1" ref="root2">
+			<name>root-final</name>
+			<jvmMemoryOpts xms="9" xmx="10" permMem="11" maxPermMem="12"/>
+			<jvmOpts>-Dproperty=Value</jvmOpts>
+			<workingDir>fafram</workingDir>
+			<node host="9" port="10" user="11" password="12"/>
+			<commands>
+				<command>profile-edit root</command>
+			</commands>
+			<bundles>
+				<bundle>bundle</bundle>
+			</bundles>
+			<profiles>
+				<profile>p</profile>
+			</profiles>
+		</root>
+	</containers>
+</fafram>

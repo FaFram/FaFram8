@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -192,6 +193,15 @@ public class SshContainer extends Container implements ThreadContainer {
 		getExecutor().waitForProvisionStatus(this, status, time);
 	}
 
+	@Override
+	public Executor getExecutor() {
+		// If we need to call .toString() before the parent is set
+		if (super.getParent() == null) {
+			return null;
+		}
+		return super.getParent().getExecutor();
+	}
+
 	/**
 	 * Delete SSH container folder from static node.
 	 */
@@ -201,12 +211,12 @@ public class SshContainer extends Container implements ThreadContainer {
 		final String path;
 		final String workDir = OptionUtils.getString(super.getOptions(), Option.WORKING_DIRECTORY);
 		if (!("".equals(workDir)) || !("".equals(SystemProperty.getWorkingDirectory()))) {
-			// Decide if working directory was set on ssh and if not set the system property as default
+//			 Decide if working directory was set on ssh and if not set the system property as default
 			path = "".equals(workDir) ? SystemProperty.getWorkingDirectory() : workDir;
 		} else {
 			path = "containers";
 		}
-		// Executor needs to be connected before executing command
+//		 Executor needs to be connected before executing command
 		super.getNode().getExecutor().connect();
 		super.getNode().getExecutor().executeCommand("rm -rf " + path + File.separator + super.getName());
 	}
@@ -216,6 +226,7 @@ public class SshContainer extends Container implements ThreadContainer {
 	 */
 	public static class SshBuilder {
 		// Container instance
+		@Getter
 		private Container container;
 
 		/**
@@ -602,6 +613,25 @@ public class SshContainer extends Container implements ThreadContainer {
 		public SshBuilder disableDistributionUpload() {
 			OptionUtils.set(container.getOptions(), Option.DISABLE_DISTRIBUTION_UPLOAD, "");
 			return this;
+		}
+
+		/**
+		 * Setter.
+		 * @param containerName container name
+		 * @return this
+		 */
+		public SshBuilder sameNodeAs(String containerName) {
+			OptionUtils.set(container.getOptions(), Option.SAME_NODE_AS, containerName);
+			return this;
+		}
+
+		/**
+		 * Setter.
+		 * @param otherContainer other container
+		 * @return this
+		 */
+		public SshBuilder sameNodeAs(Container otherContainer) {
+			return sameNodeAs(otherContainer.getName());
 		}
 
 		/**

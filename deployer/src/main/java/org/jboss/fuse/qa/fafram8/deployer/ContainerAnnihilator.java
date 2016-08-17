@@ -36,6 +36,12 @@ public class ContainerAnnihilator implements Callable {
 	@Getter
 	private static volatile boolean stopWork = false;
 
+	/**
+	 * Constructor.
+	 * @param container container
+	 * @param containerAnnihilators set of container annihilators
+	 * @param force force flag
+	 */
 	public ContainerAnnihilator(Container container, Set<ContainerAnnihilator> containerAnnihilators, boolean force) {
 		this.container = container;
 		this.force = force;

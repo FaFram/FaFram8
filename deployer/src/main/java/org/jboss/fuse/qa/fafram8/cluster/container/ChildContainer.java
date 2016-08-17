@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -191,6 +192,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 	 */
 	public static class ChildBuilder {
 		// Container instance
+		@Getter
 		private Container container;
 
 		/**
@@ -372,6 +374,25 @@ public class ChildContainer extends Container implements ThreadContainer {
 		public ChildBuilder datastore(String... datastore) {
 			OptionUtils.set(container.getOptions(), Option.DATASTORE_OPTION, datastore);
 			return this;
+		}
+
+		/**
+		 * Setter.
+		 * @param containerName container name
+		 * @return this
+		 */
+		public ChildBuilder sameNodeAs(String containerName) {
+			OptionUtils.set(container.getOptions(), Option.SAME_NODE_AS, containerName);
+			return this;
+		}
+
+		/**
+		 * Setter.
+		 * @param otherContainer other container
+		 * @return this
+		 */
+		public ChildBuilder sameNodeAs(Container otherContainer) {
+			return sameNodeAs(otherContainer.getName());
 		}
 
 		/**

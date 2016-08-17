@@ -1,21 +1,20 @@
 package org.jboss.fuse.qa.fafram8.configuration;
 
-import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
-import org.jboss.fuse.qa.fafram8.cluster.container.Container;
-import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
-import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
-import org.jboss.fuse.qa.fafram8.cluster.node.Node;
-import org.jboss.fuse.qa.fafram8.cluster.xml.ClusterModel;
-import org.jboss.fuse.qa.fafram8.cluster.xml.ContainerModel;
-import org.jboss.fuse.qa.fafram8.cluster.xml.FrameworkConfigurationModel;
-import org.jboss.fuse.qa.fafram8.exception.FaframException;
-import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
+import org.jboss.fuse.qa.fafram8.cluster.xml.toplevel.FaframModel;
+import org.jboss.fuse.qa.fafram8.cluster.xml.util.UserModel;
+import org.jboss.fuse.qa.fafram8.resource.Fafram;
 
+import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 
 import java.io.File;
+import java.io.IOException;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +26,11 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ConfigurationParser {
+	// Fafram instance
+	private Fafram fafram;
+
 	//Parsed object cluster representation.
-	private ClusterModel clusterModel;
+	private FaframModel faframModel;
 
 	//Unique name incrementer.
 	private int uniqueNameIncrement = 0;
@@ -38,8 +40,11 @@ public class ConfigurationParser {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param fafram fafram instance
 	 */
-	public ConfigurationParser() {
+	public ConfigurationParser(Fafram fafram) {
+		this.fafram = fafram;
 	}
 
 	/**
@@ -47,124 +52,67 @@ public class ConfigurationParser {
 	 *
 	 * @param path path to Fafram8 XML configuration
 	 * @throws JAXBException if an error was encountered while creating the Unmarshaller object.
+	 * @throws SAXException if an error with parsing occures
 	 */
-	public void parseConfigurationFile(String path) throws JAXBException {
+	public void parseConfigurationFile(String path) throws JAXBException, SAXException {
 		log.info("Configuration parser started.");
 
 		log.trace("Creating unmarshaller.");
-		final JAXBContext jaxbContext = JAXBContext.newInstance(ClusterModel.class);
+		final JAXBContext jaxbContext = JAXBContext.newInstance(FaframModel.class);
 		final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
+		final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		Schema schema = null;
+		try {
+			schema = sf.newSchema(ConfigurationParser.class.getClassLoader().getResources("parser/configuration.scheme.xsd").nextElement());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		jaxbUnmarshaller.setSchema(schema);
 		log.trace("Unmarshalling cluster model from " + path);
-		clusterModel = (ClusterModel) jaxbUnmarshaller.unmarshal(new File(path));
-
-		//TODO(ecervena): provisional debug logging
-		for (ContainerModel containerModel : clusterModel.getContainerModelList()) {
-			log.debug(containerModel.toString());
-		}
+		faframModel = (FaframModel) jaxbUnmarshaller.unmarshal(new File(path));
 	}
 
 	/**
-	 * Call of this method will set parsed framework configuration and build container
-	 * objects parsed from Fafram8 XML configuration.
+	 * Applies the configuration from the XML file.
+	 * Sets system properties,
+	 * build containers,
+	 * build brokers,
+	 * set bundles,
+	 * set commands,
+	 * set users,
+	 * set ensemble.
 	 */
-	public void buildContainers() {
-		log.debug("Building containers.");
-		setFrameworkConfiguration(clusterModel.getFrameworkConfigurationModel());
-
-		for (ContainerModel containerModel : clusterModel.getContainerModelList()) {
-			for (int i = 1; i <= containerModel.getInstances(); i++) {
-
-				Container container = null;
-
-				switch (containerModel.getContainerType()) {
-					case "root": {
-						final RootContainer.RootBuilder builder = RootContainer.builder().name(returnUniqueName(containerModel));
-						if (containerModel.getUsername() != null) {
-							builder.user(containerModel.getUsername());
-						}
-						if (containerModel.getPassword() != null) {
-							builder.password(containerModel.getPassword());
-						}
-						if (containerModel.isFabric()) {
-							builder.withFabric();
-						}
-
-						final Node node = Node.builder().host(containerModel.getNode().getHost())
-								.username(containerModel.getNode().getUsername())
-								.password(containerModel.getNode().getPassword())
-								.build();
-						builder.node(node);
-						container = builder.build();
-						break;
-					}
-					case "ssh": {
-						final SshContainer.SshBuilder builder = SshContainer.builder().name(returnUniqueName(containerModel));
-						final Node node = Node.builder().host(containerModel.getNode().getHost())
-								.username(containerModel.getNode().getUsername())
-								.password(containerModel.getNode().getPassword())
-								.build();
-						builder.node(node);
-						final Container parentContainer = ContainerManager.getContainer(containerModel.getParentContainer());
-						if (parentContainer == null) {
-							throw new FaframException("Parent container does not exists.");
-						}
-						builder.parent(parentContainer);
-						container = builder.build();
-						break;
-					}
-					case "child": {
-						final ChildContainer.ChildBuilder builder = ChildContainer.builder().name(returnUniqueName(containerModel));
-						final Container parentContainer = ContainerManager.getContainer(containerModel.getParentContainer());
-						if (parentContainer == null) {
-							throw new FaframException("Parent container does not exists.");
-						}
-						builder.parent(parentContainer);
-						container = builder.build();
-						break;
-					}
-					default:
-						break;
-				}
-
-				if (container != null) {
-					ContainerManager.getContainerList().add(container);
-				}
+	public void applyConfiguration() {
+		if (faframModel.getConfigurationModel() != null) {
+			faframModel.getConfigurationModel().applyConfiguration(fafram);
+		}
+		if (faframModel.getContainersModel() != null) {
+			faframModel.getContainersModel().buildContainers();
+		}
+		if (faframModel.getBrokersModel() != null) {
+			faframModel.getBrokersModel().buildBrokers();
+		}
+		if (faframModel.getBundlesModel() != null) {
+			for (String s : faframModel.getBundlesModel().getBundles()) {
+				fafram.bundles(s);
 			}
-			resetUniqueNameIncrement();
 		}
-	}
-
-	/**
-	 * Set unmarshaled framework properties.
-	 *
-	 * @param frameworkConfigurationModel XML configuration mapping object
-	 */
-	public void setFrameworkConfiguration(FrameworkConfigurationModel frameworkConfigurationModel) {
-		//do the magic
-	}
-
-	/**
-	 * Return unique container name for container mapped by containerModel. This method enables multiple instances
-	 * specification in XML configuration. E.g. &lt;container instances=5&gt;&lt;name&gt;xxx&lt;/name&gt;&lt;/container&gt;
-	 * will results into 5 containers named xxx-1,xxx-2,xxx-3,xxx-4,xxx-5.
-	 *
-	 * @param containerModel XML container mapping object
-	 * @return unique name
-	 */
-	private String returnUniqueName(ContainerModel containerModel) {
-		if (containerModel.getInstances() <= 1) {
-			return containerModel.getName();
+		if (faframModel.getCommandsModel() != null) {
+			for (String s : faframModel.getCommandsModel().getCommands()) {
+				fafram.commands(s);
+			}
 		}
-		uniqueNameIncrement++;
-		return containerModel.getName() + "-" + uniqueNameIncrement;
-	}
-
-	/**
-	 * Private method reseting uniqueNameIncrement field.
-	 */
-	private void resetUniqueNameIncrement() {
-		uniqueNameIncrement = 0;
+		if (faframModel.getEnsembleModel() != null) {
+			final String[] containers = faframModel.getEnsembleModel().getEnsemble().split(",");
+			for (String s : containers) {
+				fafram.ensemble(s);
+			}
+		}
+		if (faframModel.getUsersModel() != null) {
+			for (UserModel userModel : faframModel.getUsersModel().getUsers()) {
+				fafram.addUser(userModel.getName(), userModel.getPassword(), userModel.getRoles());
+			}
+		}
 	}
 }
 

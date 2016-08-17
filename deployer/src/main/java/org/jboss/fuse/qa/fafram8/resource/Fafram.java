@@ -31,6 +31,8 @@ import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.StaticProvider;
 import org.jboss.fuse.qa.fafram8.util.CommandHistory;
+import org.jboss.fuse.qa.fafram8.util.Option;
+import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 import org.jboss.fuse.qa.fafram8.util.callables.Response;
 import org.jboss.fuse.qa.fafram8.validator.Validator;
 
@@ -108,7 +110,6 @@ public class Fafram extends ExternalResource {
 			setDefaultModifiers();
 			buildBundles();
 			Deployer.deploy();
-			ContainerManager.createEnsemble();
 		} catch (Exception ex) {
 			tearDown(true);
 			// Rethrow the exception so that we will know what happened
@@ -137,6 +138,8 @@ public class Fafram extends ExternalResource {
 
 	/**
 	 * Stop method.
+	 *
+	 * @param force force flag
 	 */
 	public void tearDown(boolean force) {
 		try {
@@ -644,18 +647,20 @@ public class Fafram extends ExternalResource {
 	 */
 	public void initConfiguration() {
 		if (SystemProperty.getFabricConfigPath() != null) {
-			this.configurationParser = new ConfigurationParser();
+			this.configurationParser = new ConfigurationParser(this);
 
 			try {
 				configurationParser.parseConfigurationFile(SystemProperty.getFabricConfigPath());
 			} catch (Exception e) {
+				e.printStackTrace();
 				throw new FaframException("XML configuration parsing error.", e);
 			}
 
 			try {
-				configurationParser.buildContainers();
+				configurationParser.applyConfiguration();
 			} catch (Exception e) {
-				throw new FaframException("Error while building containers from parsed model.", e);
+				e.printStackTrace();
+				throw new FaframException("Error while applying configuration from parsed model.", e);
 			}
 		}
 	}
@@ -790,7 +795,8 @@ public class Fafram extends ExternalResource {
 		// Create a temp list without child containers
 		final List<Container> temp = new ArrayList<>();
 		for (Container c : containerList) {
-			if (!(c instanceof ChildContainer) && (c.getNode() == null || c.getNode().getHost() == null || "".equals(c.getNode().getHost()))) {
+			if (!(c instanceof ChildContainer) && (c.getNode() == null || c.getNode().getHost() == null || "".equals(c.getNode().getHost()))
+					&& OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
 				temp.add(c);
 			}
 		}

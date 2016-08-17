@@ -219,14 +219,5 @@
 		<module name="MissingDeprecated"/>
 		<!-- Verifies that java.lang.Override is present when @inheritDoc Javadoc tag is present -->
 		<module name="MissingOverride"/>
-
-		<!-- Metrics -->
-		<!-- http://checkstyle.sourceforge.net/config_metrics.html -->
-
-		<!-- Checks the number (200) of possible execution paths through a function -->
-		<module name="NPathComplexity">
-			<property name="severity" value="warning"/>
-		</module>
-
 	</module>
 </module>

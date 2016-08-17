@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fafram xmlns="urn:org.jboss.fuse.qa">
+	<containers>
+		<root>
+			<name>root</name>
+		</root>
+		<ssh instances="1" id="t1" template="true">
+			<name>1</name>
+			<node host="1" user="1" password="1"/>
+			<version>1</version>
+			<env>1</env>
+			<jvmOpts>1</jvmOpts>
+			<zookeeperPassword>1</zookeeperPassword>
+			<resolver>localhostname</resolver>
+			<manualIp>1</manualIp>
+			<privateKey>1</privateKey>
+			<passPhrase>1</passPhrase>
+			<proxyUri>1</proxyUri>
+			<profiles>
+				<profile>1</profile>
+			</profiles>
+		</ssh>
+		<ssh instances="1" id="t2" ref="t1" template="true">
+			<name>2</name>
+			<node host="2" user="2" password="2"/>
+			<version>2</version>
+			<env>2</env>
+			<parentName>root</parentName>
+			<jvmOpts>2</jvmOpts>
+			<workingDir>2</workingDir>
+			<zookeeperPassword>2</zookeeperPassword>
+			<resolver>localip</resolver>
+			<manualIp>2</manualIp>
+			<minPort>2</minPort>
+			<maxPort>2</maxPort>
+			<commands>
+				<command>2</command>
+			</commands>
+		</ssh>
+		<ssh instances="1" ref="t2">
+			<name>3</name>
+			<node host="3" user="3" password="3"/>
+			<version>3</version>
+			<env>3</env>
+			<jvmOpts>3</jvmOpts>
+			<passPhrase>3</passPhrase>
+			<proxyUri>3</proxyUri>
+			<minPort>3</minPort>
+			<maxPort>3</maxPort>
+			<commands>
+				<command>3</command>
+			</commands>
+			<profiles>
+				<profile>3</profile>
+			</profiles>
+		</ssh>
+	</containers>
+</fafram>

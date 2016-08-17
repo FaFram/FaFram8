@@ -9,11 +9,13 @@ import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
- * Class represents broker in fafram. Main purpose is to provide all necessary commands for creating borker in Fabric.
+ * Class represents broker in fafram. Main purpose is to provide all necessary commands for creating broker in Fabric.
  * Created by mmelko on 09/10/15.
  */
+@ToString
 public class Broker {
 
 	public static final String STANDALONE = "StandAlone";
@@ -72,6 +74,10 @@ public class Broker {
 	@Getter
 	private Map<String, String> pids = new HashMap<>();
 
+	@Setter
+	@Getter
+	private Map<String, String> ports = new HashMap<>();
+
 	/**
 	 * Constructor.
 	 *
@@ -93,6 +99,8 @@ public class Broker {
 		this.group = broker.getGroup();
 		this.data = broker.getData();
 		this.networks = new ArrayList<>(broker.getNetworks());
+		this.networksUsername = broker.getNetworksUsername();
+		this.networksPassword = broker.getNetworksPassword();
 		this.parentProfile = broker.getParentProfile();
 		this.containers = new ArrayList<>(broker.getContainers());
 		this.pids = new HashMap<>(broker.getPids());
@@ -152,13 +160,18 @@ public class Broker {
 			cmd.append(" --data ").append(data);
 		}
 		for (String network : networks) {
-			cmd.append(" --network ").append(network);
+			cmd.append(" --networks ").append(network);
 		}
 		if (!"".equals(networksUsername)) {
-			cmd.append(" --network-username ").append(networksUsername);
+			cmd.append(" --networks-username ").append(networksUsername);
 		}
 		if (!"".equals(networksPassword)) {
-			cmd.append(" --network-password ").append(networksPassword);
+			cmd.append(" --networks-password ").append(networksPassword);
+		}
+		if (!ports.isEmpty()) {
+			for (Map.Entry<String, String> entry : ports.entrySet()) {
+				cmd.append(" --port ").append(entry.getKey()).append("=").append(entry.getValue());
+			}
 		}
 		cmd.append(" ").append(name);
 		return cmd.toString();
@@ -359,6 +372,17 @@ public class Broker {
 		 */
 		public BrokerBuilder addPid(String pid, String value) {
 			this.tempBroker.getPids().put(pid, value);
+			return this;
+		}
+
+		/**
+		 * Adds protocol/port.
+		 * @param protocol protocol
+		 * @param value port
+		 * @return this
+		 */
+		public BrokerBuilder port(String protocol, String value) {
+			this.tempBroker.getPorts().put(protocol, value);
 			return this;
 		}
 

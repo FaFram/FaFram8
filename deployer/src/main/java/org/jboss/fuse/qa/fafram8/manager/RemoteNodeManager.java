@@ -58,7 +58,7 @@ public class RemoteNodeManager implements NodeManager {
 	@Override
 	public void prepareZip() {
 		log.info("Preparing zip...");
-		executor.executeCommand("mkdir " + getFolder());
+		executor.executeCommand("mkdir -p " + getFolder());
 		productZipPath = Downloader.getProduct(executor, this);
 		log.trace("Zip path is " + productZipPath);
 	}
@@ -103,7 +103,7 @@ public class RemoteNodeManager implements NodeManager {
 		try {
 			log.info("Starting container");
 			// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
-			if(isCygwin()) {
+			if (isCygwin()) {
 				executor.reconnect();
 			}
 
