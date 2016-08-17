@@ -28,8 +28,8 @@ import org.jboss.fuse.qa.fafram8.property.FaframProvider;
 import org.jboss.fuse.qa.fafram8.property.Openstack;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
+import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProvisionProvider;
-import org.jboss.fuse.qa.fafram8.provision.provider.StaticProvider;
 import org.jboss.fuse.qa.fafram8.util.CommandHistory;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
@@ -58,9 +58,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class Fafram extends ExternalResource {
-	//Provision provider instance in case of remote deployment
-	@Getter
-	private ProvisionProvider provisionProvider = new StaticProvider();
 
 	@SuppressWarnings("FieldCanBeLocal")
 	private ConfigurationParser configurationParser;
@@ -151,8 +148,8 @@ public class Fafram extends ExternalResource {
 			ex.printStackTrace();
 
 			if (!SystemProperty.isKeepOsResources()) {
-				provisionProvider.cleanIpTables(ContainerManager.getContainerList());
-				provisionProvider.releaseResources();
+				ProviderSingleton.INSTANCE.getProvider().cleanIpTables(ContainerManager.getContainerList());
+				ProviderSingleton.INSTANCE.getProvider().releaseResources();
 			}
 			SystemProperty.clearAllProperties();
 			ModifierExecutor.clearAllModifiers();
@@ -162,8 +159,8 @@ public class Fafram extends ExternalResource {
 		}
 
 		if (!SystemProperty.isKeepOsResources()) {
-			provisionProvider.cleanIpTables(ContainerManager.getContainerList());
-			provisionProvider.releaseResources();
+			ProviderSingleton.INSTANCE.getProvider().cleanIpTables(ContainerManager.getContainerList());
+			ProviderSingleton.INSTANCE.getProvider().releaseResources();
 		}
 
 		// Thread related cleaning
@@ -393,23 +390,27 @@ public class Fafram extends ExternalResource {
 	 *
 	 * @param provider Implementation of ProvisionProvider interface
 	 * @return this
+	 * @deprecated Use {@link Fafram#provider(ProvisionProvider)} instead.
 	 */
+	@Deprecated
 	public Fafram provider(FaframProvider provider) {
-		switch (provider) {
-			case STATIC:
-				provisionProvider = new StaticProvider();
-				SystemProperty.set(FaframConstant.PROVIDER, FaframProvider.STATIC.toString());
-				break;
-			case OPENSTACK:
-				provisionProvider = OpenStackProvisionProvider.getInstance();
-				SystemProperty.set(FaframConstant.PROVIDER, FaframProvider.OPENSTACK.toString());
-				break;
-			default:
-				log.warn("Provider not found! Using default static provider!");
-				provisionProvider = new StaticProvider();
-				SystemProperty.set(FaframConstant.PROVIDER, FaframProvider.STATIC.toString());
-				break;
+		if (FaframProvider.OPENSTACK.equals(provider)) {
+			return provider(OpenStackProvisionProvider.getInstance());
 		}
+		// provision provider singleton is by default initialized with static provider
+		log.warn("Given '{}'! Using default static provider!", provider);
+		return this;
+	}
+
+	/**
+	 * Set ProvisionProvider implementation to Fafram.
+	 *
+	 * @param provider Implementation of ProvisionProvider interface
+	 * @return this
+	 * @since 0.6
+	 */
+	public Fafram provider(ProvisionProvider provider) {
+		ProviderSingleton.INSTANCE.setProvider(provider);
 		return this;
 	}
 
@@ -806,10 +807,10 @@ public class Fafram extends ExternalResource {
 			return;
 		}
 		// Check if there are nodes with the defined names
-		provisionProvider.checkNodes(temp);
-		provisionProvider.createServerPool(temp);
-		provisionProvider.assignAddresses(temp);
-		provisionProvider.loadIPTables(temp);
+		ProviderSingleton.INSTANCE.getProvider().checkNodes(temp);
+		ProviderSingleton.INSTANCE.getProvider().createServerPool(temp);
+		ProviderSingleton.INSTANCE.getProvider().assignAddresses(temp);
+		ProviderSingleton.INSTANCE.getProvider().loadIPTables(temp);
 	}
 
 	/**
@@ -887,7 +888,16 @@ public class Fafram extends ExternalResource {
 	 * @param <T> type of expected data response
 	 * @return {@link Response} wrapper with boolean success/fail and nullable data response
 	 */
+
 	public <T> Response<T> waitFor(Callable<Response<T>> methodBlock, long secondsTimeout) {
 		return rootContainer.getExecutor().waitFor(methodBlock, secondsTimeout);
+	}
+
+	/**
+	 * Get reference to current {@link ProvisionProvider} instance.
+	 * @return current {@link ProvisionProvider} instance
+	 */
+	public ProvisionProvider getProvisionProvider() {
+		return ProviderSingleton.INSTANCE.getProvider();
 	}
 }

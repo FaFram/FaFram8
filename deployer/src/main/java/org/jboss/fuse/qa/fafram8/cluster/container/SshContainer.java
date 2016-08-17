@@ -6,8 +6,8 @@ import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
-import org.jboss.fuse.qa.fafram8.property.FaframProvider;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
+import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
@@ -74,7 +74,7 @@ public class SshContainer extends Container implements ThreadContainer {
 		}
 
 		// If using static provider then clean
-		if (FaframProvider.STATIC.equals(SystemProperty.getProvider())) {
+		if (ProviderSingleton.INSTANCE.isStaticProvider()) {
 			clean();
 		}
 
