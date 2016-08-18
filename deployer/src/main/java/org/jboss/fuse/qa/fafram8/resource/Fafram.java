@@ -30,6 +30,7 @@ import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProvisionProvider;
+import org.jboss.fuse.qa.fafram8.provision.provider.StaticProvider;
 import org.jboss.fuse.qa.fafram8.util.CommandHistory;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
@@ -78,6 +79,11 @@ public class Fafram extends ExternalResource {
 	 * Constructor.
 	 */
 	public Fafram() {
+		if (!ProviderSingleton.INSTANCE.isStaticProvider()) {
+			// ensure static provider is default provider
+			// it is possible that singleton was left in some state in previous test run
+			ProviderSingleton.INSTANCE.setProvider(new StaticProvider());
+		}
 	}
 
 	@Override
