@@ -91,11 +91,9 @@ public class RootContainer extends Container {
 		if ("localhost".equals(super.getNode().getHost())) {
 			nodeManager = new LocalNodeManager(getExecutor());
 		} else {
-			// TODO(avano): this should not be necessary
 			// Re-create the executor
-//			super.getNode().setExecutor(super.getNode().createExecutor());
+			super.getNode().setExecutor(super.getNode().createExecutor());
 			// Connect the node executor
-
 			if (!super.getNode().getExecutor().isConnected()) {
 				log.trace("First time connecting node executor");
 				super.getNode().getExecutor().connect();
@@ -176,6 +174,9 @@ public class RootContainer extends Container {
 		if (!super.isCreated()) {
 			return;
 		}
+
+		super.getNode().getExecutor().stopKeepAliveTimer();
+		super.getExecutor().stopKeepAliveTimer();
 
 		log.info("Destroying container " + super.getName());
 

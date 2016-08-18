@@ -5,6 +5,7 @@ import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
+import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
@@ -112,7 +113,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 		}
 		// Set the fuse path
 		try {
-			super.setFusePath(super.getExecutor().executeCommandSilently("shell:info | grep \"Karaf base\"").trim().replaceAll(" +", " ").split(" ")[1]);
+			super.setFusePath(super.getExecutor().executeCommandSilently("shell:info | grep \"Karaf base\"").trim().replaceAll(" +", " ").split(" ")[2]);
 		} catch (Exception ex) {
 			log.warn("Setting fuse path failed, it won't be available");
 		}
@@ -129,7 +130,14 @@ public class ChildContainer extends Container implements ThreadContainer {
 			return;
 		}
 
-		super.getExecutor().disconnect();
+		if ("localhost".equals(super.getNode().getHost())) {
+			ModifierExecutor.executePostModifiers(this);
+		} else {
+			ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
+		}
+
+		super.getExecutor().stopKeepAliveTimer();
+
 		log.info("Destroying container " + super.getName());
 		if (!executor.isConnected()) {
 			log.trace("Connecting executor " + executor + " before deleting child container");

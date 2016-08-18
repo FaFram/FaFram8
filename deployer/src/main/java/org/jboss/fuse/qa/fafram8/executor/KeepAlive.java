@@ -7,21 +7,17 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Sends keep alive message using the specified executor.
- *
+ * <p>
  * Created by avano on 17.8.16.
  */
 @AllArgsConstructor
 @Slf4j
-public class KeepAliveRunnable extends TimerTask {
+public class KeepAlive extends TimerTask {
 	private Executor executor;
 
 	@Override
 	public void run() {
-		try {
-			log.trace("Sending keepAlive");
-			executor.executeCommandSilently("echo keepAlive");
-		} catch (Exception ex) {
-			// Ignore
-		}
+		log.trace("Sending keepAlive to " + executor.getName());
+		executor.executeCommandSilently("echo keepAlive", false);
 	}
 }

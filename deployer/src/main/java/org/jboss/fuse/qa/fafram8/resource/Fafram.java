@@ -31,6 +31,7 @@ import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProvisionProvider;
 import org.jboss.fuse.qa.fafram8.provision.provider.StaticProvider;
+import org.jboss.fuse.qa.fafram8.timer.TimerUtils;
 import org.jboss.fuse.qa.fafram8.util.CommandHistory;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
@@ -175,6 +176,7 @@ public class Fafram extends ExternalResource {
 		Deployer.getAnnihilatingThreads().clear();
 		Deployer.getSummoningThreads().clear();
 
+		TimerUtils.cleanTimers();
 		SystemProperty.clearAllProperties();
 		ModifierExecutor.clearAllModifiers();
 		ContainerManager.clearAllLists();

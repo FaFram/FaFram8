@@ -6,6 +6,7 @@ import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
+import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
 import org.jboss.fuse.qa.fafram8.util.Option;
@@ -113,11 +114,15 @@ public class SshContainer extends Container implements ThreadContainer {
 		super.setExecutor(super.createExecutor());
 		super.getExecutor().connect();
 		// Node executor should be connected already, because the connect method was called in clean()
+		if (!super.getNode().getExecutor().isConnected()) {
+			log.trace("First time connecting node executor");
+			super.getNode().getExecutor().connect();
+		}
 		super.setOnline(true);
 		// Set the fuse path
 		try {
 			super.setFusePath(super.getExecutor().executeCommandSilently("shell:info | grep \"Karaf base\"").trim().replaceAll(" +", " ")
-					.split(" ")[1]);
+					.split(" ")[2]);
 		} catch (Exception ex) {
 			log.warn("Setting fuse path failed, it won't be available", ex);
 		}
@@ -133,6 +138,11 @@ public class SshContainer extends Container implements ThreadContainer {
 		if (SystemProperty.suppressStart() || !super.isCreated()) {
 			return;
 		}
+
+		ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
+
+		super.getNode().getExecutor().stopKeepAliveTimer();
+		super.getExecutor().stopKeepAliveTimer();
 
 		log.info("Destroying container " + super.getName());
 		if (!executor.isConnected()) {

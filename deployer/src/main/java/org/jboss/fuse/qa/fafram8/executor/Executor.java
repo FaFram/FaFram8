@@ -14,6 +14,7 @@ import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
 import org.jboss.fuse.qa.fafram8.ssh.SSHClient;
+import org.jboss.fuse.qa.fafram8.timer.TimerUtils;
 import org.jboss.fuse.qa.fafram8.util.ExecutorCommandHistory;
 import org.jboss.fuse.qa.fafram8.util.callables.Response;
 
@@ -70,10 +71,11 @@ public class Executor {
 	 *
 	 * @param cmd command
 	 * @param silent do not log if true
+	 * @param logExceptions do not log if false
 	 * @return command response
 	 */
 	@SuppressWarnings("TryWithIdenticalCatches")
-	private String executeCommand(String cmd, boolean silent) {
+	private String executeCommand(String cmd, boolean silent, boolean logExceptions) {
 		try {
 			final String response = client.executeCommand(cmd, silent);
 			if (!silent) {
@@ -82,9 +84,13 @@ public class Executor {
 			history.log(cmd, response);
 			return response;
 		} catch (KarafSessionDownException e) {
-			log.error("Karaf session is down!");
+			if (logExceptions) {
+				log.error("Karaf session is down!");
+			}
 		} catch (SSHClientException e) {
-			log.error("SSHClient exception thrown: " + e);
+			if (logExceptions) {
+				log.error("SSHClient exception thrown: " + e);
+			}
 		}
 
 		return null;
@@ -92,17 +98,35 @@ public class Executor {
 
 	/**
 	 * Executes a command.
+	 * @param cmd command
+	 * @param silent do not log if true
+	 * @return command response
+	 */
+	private String executeCommand(String cmd, boolean silent) {
+		return executeCommand(cmd, silent, true);
+	}
+
+	/**
+	 * Executes a command silently.
 	 *
 	 * @param cmd command
 	 * @return command response
 	 */
-	@SuppressWarnings("TryWithIdenticalCatches")
 	public String executeCommandSilently(String cmd) {
-		return executeCommand(cmd, true);
+		return executeCommandSilently(cmd, true);
 	}
 
 	/**
-	 * ja by s
+	 * Executes a command silently.
+	 * @param cmd command
+	 * @param logExceptions false to not log any exceptions
+	 * @return response
+	 */
+	public String executeCommandSilently(String cmd, boolean logExceptions) {
+		return executeCommand(cmd, true, logExceptions);
+	}
+
+	/**
 	 * Executes a command.
 	 *
 	 * @param cmd command
@@ -684,19 +708,19 @@ public class Executor {
 	 * Starts the keep alive timer for this executor.
 	 */
 	public void startKeepAliveTimer() {
-		log.trace("Creating timer");
-		timer = new Timer(this.getName());
-		timer.schedule(new KeepAliveRunnable(this), 20000, 600000);
+		log.trace("Creating timer for " + this.getName());
+		timer = TimerUtils.getNewTimer(this.getName());
+		timer.schedule(new KeepAlive(this), 300000, 600000);
 	}
 
 	/**
 	 * Stops the keep alive timer for this executor.
 	 */
 	public void stopKeepAliveTimer() {
-		log.trace("Stopping timer");
 		if (timer == null) {
 			return;
 		}
+		log.trace("Stopping timer for " + this.getName());
 		timer.cancel();
 	}
 }

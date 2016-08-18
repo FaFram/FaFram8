@@ -3,6 +3,7 @@ package org.jboss.fuse.qa.fafram8.deployer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
+import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exception.FaframThreadException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
@@ -93,7 +94,7 @@ public final class Deployer {
 	 */
 	private static void setNodeIfNecessary(Container c) {
 		if (!OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
-			c.setNode(ContainerManager.getContainer(OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS)).getNode());
+			c.setNode(Node.builder(ContainerManager.getContainer(OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS)).getNode()).build());
 		}
 	}
 
