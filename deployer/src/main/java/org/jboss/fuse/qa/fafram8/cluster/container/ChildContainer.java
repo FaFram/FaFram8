@@ -72,7 +72,10 @@ public class ChildContainer extends Container implements ThreadContainer {
 		}
 
 		log.info("Creating container " + this);
-		executor.connect();
+		if (!executor.isConnected()) {
+			log.trace("Connecting executor " + executor + " before creating child container");
+			executor.connect();
+		}
 		String jmxUser = super.getUser();
 		String jmxPass = super.getPassword();
 		if (super.getOptions().containsKey(Option.JMX_USER)) {
@@ -101,6 +104,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 			final String port = super.getParent().getExecutor().executeCommandSilently("zk:get /fabric/registry/ports/containers/"
 					+ super.getName() + "/org.apache.karaf.shell/sshPort").trim();
 			childExecutor.getClient().setPort(Integer.parseInt(port));
+			log.trace("Connecting child container's executor after the container has been created");
 			childExecutor.connect();
 			super.setExecutor(childExecutor);
 		} catch (Exception ex) {
@@ -125,11 +129,16 @@ public class ChildContainer extends Container implements ThreadContainer {
 			return;
 		}
 
+		super.getExecutor().disconnect();
 		log.info("Destroying container " + super.getName());
-		executor.connect();
+		if (!executor.isConnected()) {
+			log.trace("Connecting executor " + executor + " before deleting child container");
+			executor.connect();
+		}
 		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
 		ContainerManager.getContainerList().remove(this);
+		super.getExecutor().disconnect();
 	}
 
 	@Override
@@ -142,6 +151,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 	public void start(boolean force) {
 		super.getParent().getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
 		super.getParent().getExecutor().waitForProvisioning(this);
+		super.getExecutor().connect();
 	}
 
 	@Override
@@ -149,12 +159,14 @@ public class ChildContainer extends Container implements ThreadContainer {
 		super.getParent().getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
 		super.getParent().getExecutor().waitForContainerStop(this);
 		super.setOnline(false);
+		super.getExecutor().disconnect();
 	}
 
 	@Override
 	public void kill() {
 		super.getExecutor().executeCommand("exec pkill -9 -f " + super.getName());
 		super.setOnline(false);
+		super.getExecutor().disconnect();
 	}
 
 	@Override

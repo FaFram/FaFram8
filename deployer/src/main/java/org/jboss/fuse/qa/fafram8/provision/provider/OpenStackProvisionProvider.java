@@ -142,13 +142,13 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 			container.getNode().setExecutor(container.getNode().createExecutor());
 		}
 
-		for (Container container : containerList) {
+//		for (Container container : containerList) {
 			// Iterate over all container and try to connect to them (exclude child containers)
-			if (!(container instanceof ChildContainer)) {
-				container.getNode().getExecutor().connect();
-			}
-		}
-		//TODO(ecervena): add ip assigment control
+//			if (!(container instanceof ChildContainer)) {
+//				container.getNode().getExecutor().connect();
+//			}
+//		}
+		//TODO(avano): delete this? ^
 	}
 
 	/**
@@ -232,6 +232,7 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 	 * @param container container on which the iptables should be configured
 	 */
 	private void executeIpTables(Container container) {
+		log.trace("Connnecting node executor to set the IPTables");
 		container.getNode().getExecutor().connect();
 		setCorrectIpTablesFilePath(container.getNode().getExecutor());
 		try {

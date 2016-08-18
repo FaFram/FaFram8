@@ -91,10 +91,15 @@ public class RootContainer extends Container {
 		if ("localhost".equals(super.getNode().getHost())) {
 			nodeManager = new LocalNodeManager(getExecutor());
 		} else {
+			// TODO(avano): this should not be necessary
 			// Re-create the executor
-			super.getNode().setExecutor(super.getNode().createExecutor());
+//			super.getNode().setExecutor(super.getNode().createExecutor());
 			// Connect the node executor
-			super.getNode().getExecutor().connect();
+
+			if (!super.getNode().getExecutor().isConnected()) {
+				log.trace("First time connecting node executor");
+				super.getNode().getExecutor().connect();
+			}
 			nodeManager = new RemoteNodeManager(super.getNode().getExecutor(), super.getExecutor());
 
 			// Set working directory for root container if it was set on root container object
@@ -154,6 +159,7 @@ public class RootContainer extends Container {
 				throw new FaframException(ex);
 			}
 		} else {
+			log.trace("Connecting both executors when using onlyConnect");
 			super.getExecutor().connect();
 			super.getNode().getExecutor().connect();
 		}
@@ -189,6 +195,7 @@ public class RootContainer extends Container {
 		// Force not used with root container
 		executeCommand("system-property karaf.restart.jvm true");
 		nodeManager.restart();
+		log.trace("Connecting the executor after restarting the container");
 		super.getExecutor().connect();
 		if (super.isFabric()) {
 			waitForProvisioning();

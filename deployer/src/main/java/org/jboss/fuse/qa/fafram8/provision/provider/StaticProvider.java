@@ -50,6 +50,7 @@ public class StaticProvider implements ProvisionProvider {
 				}
 				ipAddresses.add(c.getNode().getHost());
 
+				log.trace("Connecting own executor to clean the node");
 				final SSHClient sshClient = new NodeSSHClient().defaultSSHPort().host(c.getNode().getHost())
 						.username(c.getNode().getUsername()).password(c.getNode().getPassword());
 				executor = new Executor(sshClient, c.getNode().getHost());
@@ -114,6 +115,7 @@ public class StaticProvider implements ProvisionProvider {
 			executor = new Executor(sshClient, c.getNode().getHost());
 			log.debug("Loading iptables on node {}.", executor);
 			try {
+				log.trace("Connecting own executor to load IPtables");
 				executor.connect();
 
 				final String directory = ("".equals(SystemProperty.getWorkingDirectory()))
@@ -183,6 +185,7 @@ public class StaticProvider implements ProvisionProvider {
 			executor = new Executor(sshClient, c.getNode().getHost());
 			log.debug("Restoring iptables on node {} back to default.", executor);
 			try {
+				log.trace("Connecting own executor to clean IPTables");
 				executor.connect();
 
 				executor.executeCommand("sudo iptables-restore " + SAVED_IPTABLES);

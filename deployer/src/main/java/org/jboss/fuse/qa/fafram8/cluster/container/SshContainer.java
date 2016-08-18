@@ -92,7 +92,10 @@ public class SshContainer extends Container implements ThreadContainer {
 		}
 
 		log.info("Creating container " + this);
-		executor.connect();
+		if (!executor.isConnected()) {
+			log.trace("Connecting executor " + executor + " before creating child container");
+			executor.connect();
+		}
 		// Recreate the executor because the values could be changed in the process
 		super.getNode().setExecutor(super.getNode().createExecutor());
 
@@ -106,9 +109,10 @@ public class SshContainer extends Container implements ThreadContainer {
 			throw e;
 		}
 
+		log.trace("First time connecting ssh executor");
 		super.setExecutor(super.createExecutor());
 		super.getExecutor().connect();
-		super.getNode().getExecutor().connect();
+		// Node executor should be connected already, because the connect method was called in clean()
 		super.setOnline(true);
 		// Set the fuse path
 		try {
@@ -131,10 +135,16 @@ public class SshContainer extends Container implements ThreadContainer {
 		}
 
 		log.info("Destroying container " + super.getName());
-		executor.connect();
-		super.getParent().getExecutor().executeCommand("container-delete --force " + super.getName());
+		if (!executor.isConnected()) {
+			log.trace("Connecting executor " + executor + " before deleting ssh container");
+			executor.connect();
+		}
+		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
 		ContainerManager.getContainerList().remove(this);
+		log.trace("Disconnecting node/fuse executors after destroying the container");
+		super.getExecutor().disconnect();
+		super.getNode().getExecutor().disconnect();
 	}
 
 	@Override
@@ -148,6 +158,7 @@ public class SshContainer extends Container implements ThreadContainer {
 		super.getParent().getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
 		super.getParent().getExecutor().waitForProvisioning(this);
 		super.setOnline(true);
+		super.getExecutor().connect();
 	}
 
 	@Override
@@ -155,12 +166,14 @@ public class SshContainer extends Container implements ThreadContainer {
 		super.getParent().getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
 		super.getParent().getExecutor().waitForContainerStop(this);
 		super.setOnline(false);
+		super.getExecutor().disconnect();
 	}
 
 	@Override
 	public void kill() {
 		super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());
 		super.setOnline(false);
+		super.getExecutor().disconnect();
 	}
 
 	@Override
@@ -211,12 +224,13 @@ public class SshContainer extends Container implements ThreadContainer {
 		final String path;
 		final String workDir = OptionUtils.getString(super.getOptions(), Option.WORKING_DIRECTORY);
 		if (!("".equals(workDir)) || !("".equals(SystemProperty.getWorkingDirectory()))) {
-//			 Decide if working directory was set on ssh and if not set the system property as default
+			// Decide if working directory was set on ssh and if not set the system property as default
 			path = "".equals(workDir) ? SystemProperty.getWorkingDirectory() : workDir;
 		} else {
 			path = "containers";
 		}
-//		 Executor needs to be connected before executing command
+		// Executor needs to be connected before executing command
+		log.trace("Connecting ssh node executor before cleaning the node");
 		super.getNode().getExecutor().connect();
 		super.getNode().getExecutor().executeCommand("rm -rf " + path + File.separator + super.getName());
 	}

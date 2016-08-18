@@ -19,6 +19,7 @@ import org.jboss.fuse.qa.fafram8.util.callables.Response;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -49,6 +50,8 @@ public class Executor {
 	@Getter
 	@Setter
 	private String name;
+
+	private Timer timer;
 
 	/**
 	 * Constructor.
@@ -170,6 +173,11 @@ public class Executor {
 			}
 			sleep(timeout);
 		}
+
+		// When connected, schedule a new keep alive thread for this executor
+		// First shutdown all other tasks from previous runs, because you can use .connect() without previous .disconnect()
+		this.stopKeepAliveTimer();
+		this.startKeepAliveTimer();
 	}
 
 	/**
@@ -185,6 +193,7 @@ public class Executor {
 	 * Disconnects the client.
 	 */
 	public void disconnect() {
+		this.stopKeepAliveTimer();
 		client.disconnect();
 	}
 
@@ -227,6 +236,9 @@ public class Executor {
 			}
 			sleep(timeout);
 		}
+		// There should be nothing scheduled, but just to be sure
+		this.stopKeepAliveTimer();
+		this.startKeepAliveTimer();
 	}
 
 	/**
@@ -272,6 +284,8 @@ public class Executor {
 	 * Waits for the container to shut down.
 	 */
 	public void waitForShutdown() {
+		this.stopKeepAliveTimer();
+
 		final int step = 5;
 		final long timeout = (step * 1000L);
 		boolean online = true;
@@ -307,6 +321,9 @@ public class Executor {
 	 * @param c container
 	 */
 	public void waitForContainerStop(Container c) {
+		log.trace("Shutting down scheduled executor for container " + c.getName());
+		c.getExecutor().stopKeepAliveTimer();
+
 		final int step = 5;
 		final long timeout = (step * 1000L);
 		boolean online = true;
@@ -334,6 +351,7 @@ public class Executor {
 
 			sleep(timeout);
 		}
+		c.getExecutor().disconnect();
 	}
 
 	/**
@@ -660,5 +678,25 @@ public class Executor {
 		}
 		log.warn("Time is up, fail of {} in {} seconds.", methodBlock, secondsTimeout);
 		return response;
+	}
+
+	/**
+	 * Starts the keep alive timer for this executor.
+	 */
+	public void startKeepAliveTimer() {
+		log.trace("Creating timer");
+		timer = new Timer(this.getName());
+		timer.schedule(new KeepAliveRunnable(this), 20000, 600000);
+	}
+
+	/**
+	 * Stops the keep alive timer for this executor.
+	 */
+	public void stopKeepAliveTimer() {
+		log.trace("Stopping timer");
+		if (timer == null) {
+			return;
+		}
+		timer.cancel();
 	}
 }
