@@ -14,7 +14,6 @@ import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import java.io.File;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -41,7 +40,6 @@ public class RemoteNodeManager implements NodeManager {
 	private String productPath;
 
 	// Working directory for root container for overriding system property fafram.working.dir
-	@Setter
 	private String workingDirectory = "";
 
 	/**
@@ -84,7 +82,7 @@ public class RemoteNodeManager implements NodeManager {
 
 		// Problem if WORKING_DIRECTORY is set because then the first command doesn't work
 
-		productPath = "".equals(SystemProperty.getWorkingDirectory())
+		productPath = "".equals(SystemProperty.getWorkingDirectory()) || "".equals(workingDirectory)
 				? executor.executeCommand("ls -d $PWD" + SEP + getFolder() + SEP + "*" + SEP).trim()
 				: executor.executeCommand("ls -d " + getFolder() + SEP + "*" + SEP).trim();
 
@@ -107,9 +105,18 @@ public class RemoteNodeManager implements NodeManager {
 			if (isCygwin()) {
 				log.trace("Reconnecting the executor because of cygwin");
 				executor.reconnect();
+				Thread.sleep(30000);
+				executor.reconnect();
 			}
 
 			executor.executeCommand(productPath + "bin" + SEP + "start");
+			Thread.sleep(40000);
+			String status = executor.executeCommand(productPath + "bin" + SEP + "status");
+			log.error(status);
+			if(status.contains("Not")){
+				executor.reconnect();
+				executor.executeCommand(productPath + "bin" + SEP + "start");
+			}
 			fuseExecutor.waitForBoot();
 			// TODO(avano): special usecase for remote standalone starting? maybe not necessary
 			if (!SystemProperty.isFabric() && !SystemProperty.skipBrokerWait()) {
@@ -139,13 +146,35 @@ public class RemoteNodeManager implements NodeManager {
 	 */
 	public void clean() {
 		// todo(rjakubco): create better cleaning mechanism for Fabric on Windows machines
+
 		log.debug("Killing container");
 		executor.executeCommand("pkill -9 -f karaf.base");
 
-		log.debug("Deleting Fafram folder on " + executor.getClient().getHost());
-		final String directory = SystemProperty.getWorkingDirectory().isEmpty()
-				? SystemProperty.getFaframFolder() : SystemProperty.getWorkingDirectory() + SEP + SystemProperty.getFaframFolder();
-		executor.executeCommand("rm -rf " + directory);
+		log.debug("Deleting Fuse folder on " + executor.getClient().getHost());
+
+//		final String tempDir =
+//		final String directory = SystemProperty.getWorkingDirectory().isEmpty()
+//				? SystemProperty.getFaframFolder() : SystemProperty.getWorkingDirectory() + SEP + SystemProperty.getFaframFolder();
+		executor.executeCommand("rm -rf " + getFolder());
+	}
+
+	/**
+	 * Stops specific karaf instance that is define by provided container path
+	 *
+	 * @param containerPath path to container home dir
+	 */
+	public void clean(String containerPath) {
+		// todo(rjakubco): create better cleaning mechanism for Fabric on Windows machines
+
+		log.debug("Killing container");
+		executor.executeCommand("pkill -9 -f " + containerPath);
+
+		log.debug("Deleting container folder on " + executor.getClient().getHost());
+
+//		final String tempDir =
+//		final String directory = SystemProperty.getWorkingDirectory().isEmpty()
+//				? SystemProperty.getFaframFolder() : SystemProperty.getWorkingDirectory() + SEP + SystemProperty.getFaframFolder();
+		executor.executeCommand("rm -rf " + getFolder());
 	}
 
 	/**
@@ -194,5 +223,9 @@ public class RemoteNodeManager implements NodeManager {
 	 */
 	public boolean isCygwin() {
 		return StringUtils.containsIgnoreCase(executor.executeCommandSilently("uname"), "cyg");
+	}
+
+	public void setWorkingDirectory(String workingDirectory) {
+		this.workingDirectory = workingDirectory;
 	}
 }

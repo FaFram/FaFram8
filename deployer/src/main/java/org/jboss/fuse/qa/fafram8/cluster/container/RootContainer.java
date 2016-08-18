@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RootContainer extends Container {
 	// Node manager instance - sets up the container on the host
-	private NodeManager nodeManager;
+	protected NodeManager nodeManager;
 	@Setter
 	@Getter
 	private Modifier usersMod = null;
@@ -87,55 +87,11 @@ public class RootContainer extends Container {
 		final String logMsg = (super.isOnlyConnect()) ? "Connecting to " : "Creating ";
 		log.info(logMsg + this);
 
-		// Instantiate the node manager based on node.getHost()
-		if ("localhost".equals(super.getNode().getHost())) {
-			nodeManager = new LocalNodeManager(getExecutor());
-		} else {
-			// Re-create the executor
-			super.getNode().setExecutor(super.getNode().createExecutor());
-			// Connect the node executor
-			if (!super.getNode().getExecutor().isConnected()) {
-				log.trace("First time connecting node executor");
-				super.getNode().getExecutor().connect();
-			}
-			nodeManager = new RemoteNodeManager(super.getNode().getExecutor(), super.getExecutor());
+		if (!super.isOnlyConnect() || SystemProperty.isClean()) {
+			modifyContainer();
 
-			// Set working directory for root container if it was set on root container object
-			// It will be either empty string of file system path
-			if (!OptionUtils.getString(super.getOptions(), Option.WORKING_DIRECTORY).isEmpty()) {
-				((RemoteNodeManager) nodeManager).setWorkingDirectory(OptionUtils.getString(super.getOptions(), Option.WORKING_DIRECTORY));
-			}
-		}
-
-		// If we shouldn't skip default user and the usersMod is null == we dont add specific user to the container, so add fafram/fafram
-		if (usersMod == null && !SystemProperty.skipDefaultUser()) {
-			// Add default user which is now fafram/fafram with only role Administrator for more transparent tests
-			ModifierExecutor.addModifiers(
-					putProperty(super.getNode().getHost(), "etc/users.properties", super.getUser(), super.getPassword() + ",Administrator"));
-		// If we should skip default user and the usersMod is set, use usersMod, otherwise the modifier from Fafram.addUser() will be used
-		} else if (usersMod != null) {
-			usersMod.setHost(super.getNode().getHost());
-			ModifierExecutor.addModifiers(usersMod);
-			usersMod = null;
-		}
-
-		if (!SystemProperty.getJavaHome().isEmpty()) {
-			ModifierExecutor.addModifiers(setJavaHome(SystemProperty.getJavaHome()));
-		}
-
-		if (!OptionUtils.get(getOptions(), Option.JVM_MEM_OPTS).isEmpty()) {
-			ModifierExecutor.addModifiers(JvmMemoryModifier.setJvmMemOpts(OptionUtils.get(getOptions(), Option.JVM_MEM_OPTS)));
-		}
-
-		ModifierExecutor.addModifiers(setExecutable("bin/karaf", "bin/start", "bin/stop", "bin/client", "bin/fuse"),
-				setRootName(this, super.getNode().getHost()), addJvmOpts(OptionUtils.get(getOptions(), Option.JVM_OPTS)));
-
-		if (!super.isOnlyConnect()) {
 			nodeManager.clean();
 			nodeManager.checkRunningContainer();
-			super.getNode().getExecutor().executeCommands(OptionUtils.get(this.getOptions(), Option.STARTUP_NODE_COMMANDS)
-					.toArray(new String[OptionUtils.get(this.getOptions(), Option.STARTUP_NODE_COMMANDS).size()]));
-
 			try {
 				nodeManager.prepareZip();
 				nodeManager.unzipArtifact(this);
@@ -159,8 +115,60 @@ public class RootContainer extends Container {
 		} else {
 			log.trace("Connecting both executors when using onlyConnect");
 			super.getExecutor().connect();
-			super.getNode().getExecutor().connect();
+//			super.getNode().getExecutor().connect();
 		}
+	}
+
+
+
+
+
+	/**
+	 *
+	 */
+	protected void modifyContainer() {
+
+		// Instantiate the node manager based on node.getHost()
+		if ("localhost".equals(super.getNode().getHost())) {
+			nodeManager = new LocalNodeManager(getExecutor());
+		} else {
+			// Re-create the executor
+			super.getNode().setExecutor(super.getNode().createExecutor());
+			// Connect the node executor
+			if (!super.getNode().getExecutor().isConnected()) {
+				log.trace("First time connecting node executor");
+				super.getNode().getExecutor().connect();
+			}
+			nodeManager = new RemoteNodeManager(super.getNode().getExecutor(), super.getExecutor());
+			// Set working directory for root container if it was set on root container object
+			// It will be either empty string of file system path
+			if (!OptionUtils.getString(super.getOptions(), Option.WORKING_DIRECTORY).isEmpty()) {
+				((RemoteNodeManager) nodeManager).setWorkingDirectory(OptionUtils.getString(super.getOptions(), Option.WORKING_DIRECTORY));
+			}
+		}
+
+		// If we shouldn't skip default user and the usersMod is null == we dont add specific user to the container, so add fafram/fafram
+		if (usersMod == null && !SystemProperty.skipDefaultUser()) {
+			// Add default user which is now fafram/fafram with only role Administrator for more transparent tests
+			ModifierExecutor.addModifiers(
+					putProperty(super.getNode().getHost(), "etc/users.properties", super.getUser(), super.getPassword() + ",Administrator"));
+			// If we should skip default user and the usersMod is set, use usersMod, otherwise the modifier from Fafram.addUser() will be used
+		} else if (usersMod != null) {
+			usersMod.setHost(super.getNode().getHost());
+			ModifierExecutor.addModifiers(usersMod);
+			usersMod = null;
+		}
+
+		if (!SystemProperty.getJavaHome().isEmpty()) {
+			ModifierExecutor.addModifiers(setJavaHome(SystemProperty.getJavaHome()));
+		}
+
+		if (!OptionUtils.get(getOptions(), Option.JVM_MEM_OPTS).isEmpty()) {
+			ModifierExecutor.addModifiers(JvmMemoryModifier.setJvmMemOpts(OptionUtils.get(getOptions(), Option.JVM_MEM_OPTS)));
+		}
+
+		ModifierExecutor.addModifiers(setExecutable("bin/karaf", "bin/start", "bin/stop", "bin/client", "bin/fuse"),
+				setRootName(this, super.getNode().getHost()), addJvmOpts(OptionUtils.get(getOptions(), Option.JVM_OPTS)));
 	}
 
 	@Override
@@ -286,6 +294,7 @@ public class RootContainer extends Container {
 	public static class RootBuilder {
 		// Container instance
 		private Container container;
+
 		/**
 		 * Constructor.
 		 *
@@ -345,8 +354,8 @@ public class RootContainer extends Container {
 		 * Setter.
 		 *
 		 * @param user username
-		 * @deprecated if you want to change this, use addUser in RootContainer.builder()
 		 * @return this
+		 * @deprecated if you want to change this, use addUser in RootContainer.builder()
 		 */
 		@Deprecated
 		public RootBuilder user(String user) {
@@ -358,8 +367,8 @@ public class RootContainer extends Container {
 		 * Setter.
 		 *
 		 * @param password password
-		 * @deprecated if you want to change this, use addUser in RootContainer.builder()
 		 * @return this
+		 * @deprecated if you want to change this, use addUser in RootContainer.builder()
 		 */
 		@Deprecated
 		public RootBuilder password(String password) {
@@ -369,6 +378,7 @@ public class RootContainer extends Container {
 
 		/**
 		 * Adds the user to the container and uses his credentials as login ssh credentials.
+		 *
 		 * @param user username
 		 * @param pass password
 		 * @param roles comma-separated roles

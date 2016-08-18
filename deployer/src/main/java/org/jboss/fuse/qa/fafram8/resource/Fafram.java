@@ -249,6 +249,7 @@ public class Fafram extends ExternalResource {
 	 * @param password password
 	 * @param roles comma-separated roles
 	 * @return this
+	 * @deprecated use addUser in RootContainer
 	 */
 	public Fafram addUser(String user, String password, String roles) {
 		ModifierExecutor.addModifiers(putProperty("etc/users.properties", user, password + "," + roles));
