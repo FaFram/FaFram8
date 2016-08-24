@@ -165,6 +165,9 @@ public class RootContainer extends Container {
 
 	@Override
 	public void destroy() {
+		super.getNode().getExecutor().stopKeepAliveTimer();
+		super.getExecutor().stopKeepAliveTimer();
+
 		if ("localhost".equals(super.getNode().getHost())) {
 			ModifierExecutor.executePostModifiers(this);
 		} else {
@@ -175,15 +178,14 @@ public class RootContainer extends Container {
 			return;
 		}
 
-		super.getNode().getExecutor().stopKeepAliveTimer();
-		super.getExecutor().stopKeepAliveTimer();
-
 		log.info("Destroying container " + super.getName());
 
-		if (super.isOnline()) {
+		if (super.isCreated()) {
 			nodeManager.stopAndClean(false);
+			log.trace("Disconnecting executor after destroying root container");
 			super.getExecutor().disconnect();
 			if (super.getNode().getExecutor() != null && super.getNode().getExecutor().isConnected()) {
+				log.trace("Disconnecting node executor after destroying root container");
 				super.getNode().getExecutor().disconnect();
 			}
 		}
@@ -208,6 +210,8 @@ public class RootContainer extends Container {
 		// Force not used with root container
 		nodeManager.startFuse();
 		super.setOnline(true);
+		log.trace("Connecting the executor after starting the container");
+		super.getExecutor().connect();
 		if (super.isFabric()) {
 			waitForProvisioning();
 		}
@@ -218,12 +222,16 @@ public class RootContainer extends Container {
 		// Force not used with root container
 		nodeManager.stop();
 		super.setOnline(false);
+		log.trace("Disconnecting executor in root's stop()");
+		super.getExecutor().disconnect();
 	}
 
 	@Override
 	public void kill() {
 		nodeManager.kill();
 		super.setOnline(false);
+		log.trace("Disconnecting executor in root's kill()");
+		super.getExecutor().disconnect();
 	}
 
 	@Override

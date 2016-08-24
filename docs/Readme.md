@@ -250,6 +250,7 @@ The workflow or properties can be modified using system properties. Full list of
 * clear.default.repositores - Flag if FaFram should remove default repositories
 * command.retry.timeout - Retry timeout in seconds when the command response contains "not found"
 * with.threads - Run Fafram in thread mode (spawning containers in threads)
+* without.public.ip - Emergency flag for use with ssh containers without public ip - disables the executors
 
 ### Patches
 

@@ -130,13 +130,13 @@ public class ChildContainer extends Container implements ThreadContainer {
 			return;
 		}
 
+		super.getExecutor().stopKeepAliveTimer();
+
 		if ("localhost".equals(super.getNode().getHost())) {
 			ModifierExecutor.executePostModifiers(this);
 		} else {
 			ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
 		}
-
-		super.getExecutor().stopKeepAliveTimer();
 
 		log.info("Destroying container " + super.getName());
 		if (!executor.isConnected()) {
@@ -146,6 +146,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
 		ContainerManager.getContainerList().remove(this);
+		log.trace("Disconnecting executor after destroying container");
 		super.getExecutor().disconnect();
 	}
 
@@ -159,6 +160,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 	public void start(boolean force) {
 		super.getParent().getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
 		super.getParent().getExecutor().waitForProvisioning(this);
+		log.trace("Connecting executor in childs's start()");
 		super.getExecutor().connect();
 	}
 
@@ -167,6 +169,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 		super.getParent().getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
 		super.getParent().getExecutor().waitForContainerStop(this);
 		super.setOnline(false);
+		log.trace("Disconnecting executor in childs's stop()");
 		super.getExecutor().disconnect();
 	}
 
@@ -174,6 +177,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 	public void kill() {
 		super.getExecutor().executeCommand("exec pkill -9 -f " + super.getName());
 		super.setOnline(false);
+		log.trace("Disconnecting executor in childs's kill()");
 		super.getExecutor().disconnect();
 	}
 

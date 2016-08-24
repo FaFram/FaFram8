@@ -265,7 +265,7 @@ public final class Deployer {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				if (!force) {
-					throw new FaframException("Error while destroying child/ssh container! " + ex);
+					throw new FaframException("Error while destroying container! " + ex);
 				}
 			}
 		}

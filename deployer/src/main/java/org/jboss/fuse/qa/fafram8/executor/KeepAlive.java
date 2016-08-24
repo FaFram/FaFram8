@@ -18,6 +18,6 @@ public class KeepAlive extends TimerTask {
 	@Override
 	public void run() {
 		log.trace("Sending keepAlive to " + executor.getName());
-		executor.executeCommandSilently("echo keepAlive", false);
+		executor.executeCommandSilently("echo keepAlive", true);
 	}
 }

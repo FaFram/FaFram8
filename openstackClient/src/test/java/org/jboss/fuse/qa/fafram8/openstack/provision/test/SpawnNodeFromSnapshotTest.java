@@ -31,6 +31,5 @@ public class SpawnNodeFromSnapshotTest {
 		final OpenStackClient osm = OpenStackClient.builder().defaultOS7client().build();
 		final Server server = osm.getServerFromRegister("fafram8-hello-kitty");
 		osm.deleteSpawnedServer(server.getName());
-		log.error("Instance " + server.getName() + " with ID " + server.getId() + " has been deleted.");
 	}
 }

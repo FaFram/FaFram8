@@ -53,6 +53,8 @@ public class Executor {
 	private String name;
 
 	private Timer timer;
+	private static final long TIMER_START_DELAY = 300000L;
+	private static final long TIMER_DELAY = 600000L;
 
 	/**
 	 * Constructor.
@@ -71,24 +73,24 @@ public class Executor {
 	 *
 	 * @param cmd command
 	 * @param silent do not log if true
-	 * @param logExceptions do not log if false
+	 * @param ignoreExceptions do not log if true
 	 * @return command response
 	 */
 	@SuppressWarnings("TryWithIdenticalCatches")
-	private String executeCommand(String cmd, boolean silent, boolean logExceptions) {
+	private String executeCommand(String cmd, boolean silent, boolean ignoreExceptions) {
 		try {
-			final String response = client.executeCommand(cmd, silent);
+			final String response = client.executeCommand(cmd, silent, ignoreExceptions);
 			if (!silent) {
 				log.debug("Response: " + response);
 			}
 			history.log(cmd, response);
 			return response;
 		} catch (KarafSessionDownException e) {
-			if (logExceptions) {
+			if (!ignoreExceptions) {
 				log.error("Karaf session is down!");
 			}
 		} catch (SSHClientException e) {
-			if (logExceptions) {
+			if (!ignoreExceptions) {
 				log.error("SSHClient exception thrown: " + e);
 			}
 		}
@@ -119,11 +121,11 @@ public class Executor {
 	/**
 	 * Executes a command silently.
 	 * @param cmd command
-	 * @param logExceptions false to not log any exceptions
+	 * @param ignoreExceptions true to not log any exceptions
 	 * @return response
 	 */
-	public String executeCommandSilently(String cmd, boolean logExceptions) {
-		return executeCommand(cmd, true, logExceptions);
+	public String executeCommandSilently(String cmd, boolean ignoreExceptions) {
+		return executeCommand(cmd, true, ignoreExceptions);
 	}
 
 	/**
@@ -461,7 +463,7 @@ public class Executor {
 
 		while (!isSuccessful) {
 			handleProvisionWaitTime(elapsed, waitFor, status, provisionStatus, time);
-
+			provisionStatus = "";
 			String reason = "";
 
 			try {
@@ -497,7 +499,6 @@ public class Executor {
 						.equals(reason) ? "" : "(" + reason + ")") + ("".equals(provisionStatus) ? "" : "("
 						+ provisionStatus + ")"));
 				elapsed += step;
-				provisionStatus = "";
 				sleep(timeout);
 			}
 		}
@@ -715,7 +716,7 @@ public class Executor {
 	public void startKeepAliveTimer() {
 		log.trace("Creating timer for " + this.getName());
 		timer = TimerUtils.getNewTimer(this.getName());
-		timer.schedule(new KeepAlive(this), 300000, 600000);
+		timer.schedule(new KeepAlive(this), TIMER_START_DELAY, TIMER_DELAY);
 	}
 
 	/**

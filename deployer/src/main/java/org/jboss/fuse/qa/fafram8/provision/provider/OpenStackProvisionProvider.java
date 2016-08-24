@@ -141,14 +141,6 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 			container.getNode().setHost(ip);
 			container.getNode().setExecutor(container.getNode().createExecutor());
 		}
-
-//		for (Container container : containerList) {
-			// Iterate over all container and try to connect to them (exclude child containers)
-//			if (!(container instanceof ChildContainer)) {
-//				container.getNode().getExecutor().connect();
-//			}
-//		}
-		//TODO(avano): delete this? ^
 	}
 
 	/**

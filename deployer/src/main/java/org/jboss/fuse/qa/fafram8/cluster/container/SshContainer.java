@@ -100,8 +100,11 @@ public class SshContainer extends Container implements ThreadContainer {
 		}
 
 		if (!SystemProperty.isWithoutPublicIp()) {
-			// Recreate the executor because the values could be changed in the process
-			super.getNode().setExecutor(super.getNode().createExecutor());
+			// Connect the node executor before executing the container-create-ssh command - that will ensure that the machine is up
+			if (!super.getNode().getExecutor().isConnected()) {
+				log.trace("First time connecting node executor");
+				super.getNode().getExecutor().connect();
+			}
 		} else {
 			log.warn(FaframConstant.WITHOUT_PUBLIC_IP + " is set, node won't be available");
 		}
@@ -119,11 +122,6 @@ public class SshContainer extends Container implements ThreadContainer {
 			log.trace("First time connecting ssh executor");
 			super.setExecutor(super.createExecutor());
 			super.getExecutor().connect();
-			// Node executor should be connected already, because the connect method was called in clean()
-			if (!super.getNode().getExecutor().isConnected()) {
-				log.trace("First time connecting node executor");
-				super.getNode().getExecutor().connect();
-			}
 		} else {
 			log.warn(FaframConstant.WITHOUT_PUBLIC_IP + " is set, executeCommand / executeNodeCommand won't work");
 		}
@@ -181,6 +179,7 @@ public class SshContainer extends Container implements ThreadContainer {
 		super.getParent().getExecutor().waitForProvisioning(this);
 		super.setOnline(true);
 		if (!SystemProperty.isWithoutPublicIp()) {
+			log.trace("Connecting executor in ssh's start()");
 			super.getExecutor().connect();
 		}
 	}
@@ -191,6 +190,7 @@ public class SshContainer extends Container implements ThreadContainer {
 		super.getParent().getExecutor().waitForContainerStop(this);
 		super.setOnline(false);
 		if (!SystemProperty.isWithoutPublicIp()) {
+			log.trace("Disconnecting executor in ssh's stop()");
 			super.getExecutor().disconnect();
 		}
 	}
@@ -200,6 +200,7 @@ public class SshContainer extends Container implements ThreadContainer {
 		if (!SystemProperty.isWithoutPublicIp()) {
 			super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());
 			super.setOnline(false);
+			log.trace("Disconnecting executor in ssh's kill()");
 			super.getExecutor().disconnect();
 		} else {
 			log.warn(FaframConstant.WITHOUT_PUBLIC_IP + " is set, kill won't work");

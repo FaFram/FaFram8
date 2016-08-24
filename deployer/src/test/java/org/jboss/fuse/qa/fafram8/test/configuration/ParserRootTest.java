@@ -57,7 +57,7 @@ public class ParserRootTest {
 
 	@AfterClass
 	public static void tearDown() {
-		fafram.tearDown();
+		fafram.tearDown(true);
 	}
 }
 

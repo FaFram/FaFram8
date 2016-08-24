@@ -41,7 +41,7 @@ public class FuseSSHClient extends SSHClient {
 	}
 
 	@Override
-	public String executeCommand(String command, boolean suppressLog) throws KarafSessionDownException,
+	public String executeCommand(String command, boolean suppressLog, boolean ignoreExceptions) throws KarafSessionDownException,
 			SSHClientException {
 		if (!suppressLog) {
 			log.info("Executing command: " + command);
@@ -106,5 +106,11 @@ public class FuseSSHClient extends SSHClient {
 			log.error(ex.getLocalizedMessage());
 			throw new SSHClientException(ex);
 		}
+	}
+
+	@Override
+	public String executeCommand(String command, boolean suppressLog) throws KarafSessionDownException,
+			SSHClientException {
+		return executeCommand(command, suppressLog, false);
 	}
 }
