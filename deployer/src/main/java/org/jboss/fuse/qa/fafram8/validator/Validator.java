@@ -9,8 +9,8 @@ import org.jboss.fuse.qa.fafram8.exception.ValidatorException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.patcher.Patcher;
 import org.jboss.fuse.qa.fafram8.property.FaframConstant;
-import org.jboss.fuse.qa.fafram8.property.FaframProvider;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
+import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -60,7 +60,7 @@ public final class Validator {
 	 * @param c root container
 	 */
 	private static void validateRootContainer(Container c) {
-		if (SystemProperty.getProvider().equals(FaframProvider.STATIC)) {
+		if (ProviderSingleton.INSTANCE.isStaticProvider()) {
 			if (c.getNode() == null) {
 				throw new ValidatorException("Root container (" + c.getName() + ") node is null!");
 			}
@@ -74,7 +74,7 @@ public final class Validator {
 			throw new ValidatorException("Root name can't be empty!");
 		}
 
-		if (SystemProperty.getProvider().equals(FaframProvider.STATIC)) {
+		if (ProviderSingleton.INSTANCE.isStaticProvider()) {
 			if (c.getNode().getPort() == 0 || c.getNode().getUsername() == null
 					|| c.getNode().getPassword() == null) {
 				throw new ValidatorException("Atleast one of root container node attributes (" + c.getName() + ") is not set!");
@@ -118,7 +118,7 @@ public final class Validator {
 			throw new ValidatorException("SSH container name can't be empty!");
 		}
 
-		if (SystemProperty.getProvider().equals(FaframProvider.STATIC)) {
+		if (ProviderSingleton.INSTANCE.isStaticProvider()) {
 			if (c.getNode() == null) {
 				throw new ValidatorException("SSH container node is null!");
 			}
@@ -153,7 +153,7 @@ public final class Validator {
 	private static void validateNullZip(String host) {
 		final String zipFile = SystemProperty.getFuseZip();
 
-		if ((!"localhost".equals(host) || !SystemProperty.getProvider().equals(FaframProvider.STATIC)) && zipFile == null) {
+		if ((!"localhost".equals(host) || !ProviderSingleton.INSTANCE.isStaticProvider()) && zipFile == null) {
 			throw new ValidatorException(FaframConstant.FUSE_ZIP + " property is not set on remote!");
 		}
 
@@ -174,7 +174,7 @@ public final class Validator {
 		}
 
 		// If we are on localhost and using custom zip
-		if ("localhost".equals(host) && (zipFile != null && zipFile.startsWith("file")) && !SystemProperty.getProvider().equals(FaframProvider.OPENSTACK)) {
+		if ("localhost".equals(host) && (zipFile != null && zipFile.startsWith("file")) && ProviderSingleton.INSTANCE.isStaticProvider()) {
 			if (!new File(StringUtils.substringAfter(zipFile, "file:")).exists()) {
 				throw new ValidatorException(String.format("Specified file (%s) does not exist!", zipFile));
 			}

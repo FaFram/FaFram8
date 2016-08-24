@@ -459,19 +459,6 @@ public class SystemProperty {
 	/**
 	 * Getter.
 	 *
-	 * @return provider property
-	 */
-	public static FaframProvider getProvider() {
-		if (System.getProperty(FaframConstant.PROVIDER) == null) {
-			return FaframProvider.STATIC;
-		} else {
-			return FaframProvider.valueOf(System.getProperty(FaframConstant.PROVIDER));
-		}
-	}
-
-	/**
-	 * Getter.
-	 *
 	 * @return skipBrokerWait property
 	 */
 	public static Boolean skipBrokerWait() {
