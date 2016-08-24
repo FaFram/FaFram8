@@ -7,6 +7,7 @@ import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
+import org.jboss.fuse.qa.fafram8.property.FaframConstant;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
 import org.jboss.fuse.qa.fafram8.util.Option;
@@ -75,7 +76,7 @@ public class SshContainer extends Container implements ThreadContainer {
 		}
 
 		// If using static provider then clean
-		if (ProviderSingleton.INSTANCE.isStaticProvider()) {
+		if (ProviderSingleton.INSTANCE.isStaticProvider() && !SystemProperty.isWithoutPublicIp()) {
 			clean();
 		}
 
@@ -94,12 +95,16 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		log.info("Creating container " + this);
 		if (!executor.isConnected()) {
-			log.trace("Connecting executor " + executor + " before creating child container");
+			log.trace("Connecting executor " + executor + " before creating ssh container");
 			executor.connect();
 		}
-		// Recreate the executor because the values could be changed in the process
-		super.getNode().setExecutor(super.getNode().createExecutor());
 
+		if (!SystemProperty.isWithoutPublicIp()) {
+			// Recreate the executor because the values could be changed in the process
+			super.getNode().setExecutor(super.getNode().createExecutor());
+		} else {
+			log.warn(FaframConstant.WITHOUT_PUBLIC_IP + " is set, node won't be available");
+		}
 		executor.executeCommand(String.format("container-create-ssh --user %s --password %s --host %s %s %s",
 				super.getNode().getUsername(), super.getNode().getPassword(), super.getNode().getHost(), OptionUtils.getCommand(super.getOptions()), super.getName()));
 		super.setCreated(true);
@@ -110,13 +115,17 @@ public class SshContainer extends Container implements ThreadContainer {
 			throw e;
 		}
 
-		log.trace("First time connecting ssh executor");
-		super.setExecutor(super.createExecutor());
-		super.getExecutor().connect();
-		// Node executor should be connected already, because the connect method was called in clean()
-		if (!super.getNode().getExecutor().isConnected()) {
-			log.trace("First time connecting node executor");
-			super.getNode().getExecutor().connect();
+		if (!SystemProperty.isWithoutPublicIp()) {
+			log.trace("First time connecting ssh executor");
+			super.setExecutor(super.createExecutor());
+			super.getExecutor().connect();
+			// Node executor should be connected already, because the connect method was called in clean()
+			if (!super.getNode().getExecutor().isConnected()) {
+				log.trace("First time connecting node executor");
+				super.getNode().getExecutor().connect();
+			}
+		} else {
+			log.warn(FaframConstant.WITHOUT_PUBLIC_IP + " is set, executeCommand / executeNodeCommand won't work");
 		}
 		super.setOnline(true);
 		// Set the fuse path
@@ -139,11 +148,12 @@ public class SshContainer extends Container implements ThreadContainer {
 			return;
 		}
 
-		ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
+		if (!SystemProperty.isWithoutPublicIp()) {
+			ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
 
-		super.getNode().getExecutor().stopKeepAliveTimer();
-		super.getExecutor().stopKeepAliveTimer();
-
+			super.getNode().getExecutor().stopKeepAliveTimer();
+			super.getExecutor().stopKeepAliveTimer();
+		}
 		log.info("Destroying container " + super.getName());
 		if (!executor.isConnected()) {
 			log.trace("Connecting executor " + executor + " before deleting ssh container");
@@ -152,9 +162,11 @@ public class SshContainer extends Container implements ThreadContainer {
 		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
 		ContainerManager.getContainerList().remove(this);
-		log.trace("Disconnecting node/fuse executors after destroying the container");
-		super.getExecutor().disconnect();
-		super.getNode().getExecutor().disconnect();
+		if (!SystemProperty.isWithoutPublicIp()) {
+			log.trace("Disconnecting node/fuse executors after destroying the container");
+			super.getExecutor().disconnect();
+			super.getNode().getExecutor().disconnect();
+		}
 	}
 
 	@Override
@@ -168,7 +180,9 @@ public class SshContainer extends Container implements ThreadContainer {
 		super.getParent().getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
 		super.getParent().getExecutor().waitForProvisioning(this);
 		super.setOnline(true);
-		super.getExecutor().connect();
+		if (!SystemProperty.isWithoutPublicIp()) {
+			super.getExecutor().connect();
+		}
 	}
 
 	@Override
@@ -176,14 +190,20 @@ public class SshContainer extends Container implements ThreadContainer {
 		super.getParent().getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
 		super.getParent().getExecutor().waitForContainerStop(this);
 		super.setOnline(false);
-		super.getExecutor().disconnect();
+		if (!SystemProperty.isWithoutPublicIp()) {
+			super.getExecutor().disconnect();
+		}
 	}
 
 	@Override
 	public void kill() {
-		super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());
-		super.setOnline(false);
-		super.getExecutor().disconnect();
+		if (!SystemProperty.isWithoutPublicIp()) {
+			super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());
+			super.setOnline(false);
+			super.getExecutor().disconnect();
+		} else {
+			log.warn(FaframConstant.WITHOUT_PUBLIC_IP + " is set, kill won't work");
+		}
 	}
 
 	@Override

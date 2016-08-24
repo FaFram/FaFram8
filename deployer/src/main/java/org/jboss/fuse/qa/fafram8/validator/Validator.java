@@ -11,6 +11,8 @@ import org.jboss.fuse.qa.fafram8.patcher.Patcher;
 import org.jboss.fuse.qa.fafram8.property.FaframConstant;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
+import org.jboss.fuse.qa.fafram8.util.Option;
+import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -122,8 +124,8 @@ public final class Validator {
 			if (c.getNode() == null) {
 				throw new ValidatorException("SSH container node is null!");
 			}
-
-			if (c.getNode().getHost() == null || c.getNode().getUsername() == null || c.getNode().getPassword() == null) {
+			if ((c.getNode().getHost() == null || c.getNode().getUsername() == null || c.getNode().getPassword() == null)
+					&& OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
 				throw new ValidatorException("Atleast one of ssh container (" + c.getName() + ") node attributes is not set!");
 			}
 		}

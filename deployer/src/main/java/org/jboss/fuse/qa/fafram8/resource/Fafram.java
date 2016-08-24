@@ -176,7 +176,7 @@ public class Fafram extends ExternalResource {
 		Deployer.getAnnihilatingThreads().clear();
 		Deployer.getSummoningThreads().clear();
 
-		TimerUtils.cleanTimers();
+		TimerUtils.cancelTimers();
 		SystemProperty.clearAllProperties();
 		ModifierExecutor.clearAllModifiers();
 		ContainerManager.clearAllLists();

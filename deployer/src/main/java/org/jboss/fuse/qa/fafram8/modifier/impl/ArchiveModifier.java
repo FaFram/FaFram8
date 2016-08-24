@@ -96,7 +96,7 @@ public class ArchiveModifier extends Modifier {
 		for (String s : archiveFiles) {
 			final String response = super.getExecutor().executeCommand(
 					"find " + container.getFusePath() + " -type f -wholename \""
-							+ container.getFusePath() + File.separator + s + "\"");
+							+ container.getFusePath() + (container.getFusePath().endsWith(File.separator) ? "" : File.separator) + s + "\"");
 			if (!(response == null || response.isEmpty())) {
 				for (String filePath : response.split("\n")) {
 					try {

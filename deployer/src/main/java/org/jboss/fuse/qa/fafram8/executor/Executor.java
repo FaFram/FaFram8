@@ -346,8 +346,10 @@ public class Executor {
 	 */
 	public void waitForContainerStop(Container c) {
 		log.trace("Shutting down scheduled executor for container " + c.getName());
-		c.getExecutor().stopKeepAliveTimer();
-
+		// Because we can stop ssh container through root's executor and in that case the "c" here would be ssh container, but the executor is from root
+		if (this.getName().equals(c.getName())) {
+			c.getExecutor().stopKeepAliveTimer();
+		}
 		final int step = 5;
 		final long timeout = (step * 1000L);
 		boolean online = true;
@@ -375,7 +377,10 @@ public class Executor {
 
 			sleep(timeout);
 		}
-		c.getExecutor().disconnect();
+		// Because we can stop ssh container through root's executor and in that case the "c" here would be ssh container, but the executor is from root
+		if (this.getName().equals(c.getName())) {
+			c.getExecutor().disconnect();
+		}
 	}
 
 	/**
