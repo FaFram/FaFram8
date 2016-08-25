@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -47,6 +48,9 @@ public class ContainerManager {
 	private static List<Broker> brokers = null;
 
 	private static List<String> ensembleList = null;
+
+	@Getter
+	private static boolean ensembleCreated = false;
 
 	/**
 	 * Constructor.
@@ -179,6 +183,8 @@ public class ContainerManager {
 			ensembleList.remove(i);
 		}
 
+		ensembleCreated = false;
+
 		log.debug("Container manager lists cleared");
 	}
 
@@ -208,6 +214,7 @@ public class ContainerManager {
 			throw new FaframException("Container " + c.getName() + " did not provision in time");
 		}
 		// ENTESB-5110: Reconnect the client after fabric:create
+		log.trace("Reconnecting the executor after fabric:create");
 		c.getExecutor().reconnect();
 		uploadBundles(c);
 	}
@@ -463,6 +470,7 @@ public class ContainerManager {
 			throw new FaframException("No root container found in the ensemble list!");
 		}
 		// Maybe this will solve the insufficient roles that happen sometimes
+		log.trace("Reconnecting ensemble's root container executor before creating ensemble (should solve insufficient roles that happened sometimes)");
 		ensembleRoot.getExecutor().reconnect();
 		ensembleRoot.executeCommand("ensemble-add --force " + ensembleString.toString());
 
@@ -470,6 +478,35 @@ public class ContainerManager {
 		for (String cName : ensembleList) {
 			getContainer(cName).waitForProvisioning();
 		}
+
+		ensembleCreated = true;
+	}
+
+	/**
+	 * Destroys the ensemble - it gets the first root container from the ensemble list and executes ensemble-remove command on it.
+	 */
+	public static void destroyEnsemble() {
+		if (!ensembleCreated || ensembleList.isEmpty()) {
+			return;
+		}
+		Container ensembleRoot = null;
+		final StringBuilder ensembleString = new StringBuilder("");
+		for (String s : ensembleList) {
+			final Container c = getContainer(s);
+			if (c == null) {
+				throw new FaframException("Container " + s + " not found in container list");
+			}
+			if (c.isRoot() && ensembleRoot == null) {
+				ensembleRoot = c;
+			} else {
+				ensembleString.append(s).append(" ");
+			}
+		}
+		if (ensembleRoot == null) {
+			throw new FaframException("No root container found in the ensemble list!");
+		}
+		ensembleRoot.executeCommand("ensemble-remove --force " + ensembleString.toString());
+		ensembleCreated = false;
 	}
 
 	/**

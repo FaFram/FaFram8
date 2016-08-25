@@ -43,8 +43,6 @@ public final class Deployer {
 	@Getter
 	private static ConcurrentHashMap<Container, ContainerAnnihilator> annihilatingThreads = new ConcurrentHashMap<>();
 
-	private static boolean ensembleCreated = false;
-
 	/**
 	 * Private constructor.
 	 */
@@ -80,9 +78,8 @@ public final class Deployer {
 					setNodeIfNecessary(c);
 					c.create();
 				}
-				if (ContainerManager.isEnsembleReady() && !ensembleCreated) {
+				if (ContainerManager.isEnsembleReady() && !ContainerManager.isEnsembleCreated()) {
 					ContainerManager.createEnsemble();
-					ensembleCreated = true;
 				}
 			}
 		}
@@ -108,6 +105,12 @@ public final class Deployer {
 		if (SystemProperty.isKeepContainers()) {
 			return;
 		}
+
+		if (ContainerManager.isEnsembleCreated()) {
+			log.info("Emsemble was created, removing containers from ensemble before destroying");
+			ContainerManager.destroyEnsemble();
+		}
+
 		// Doing thread cleaning is not the best idea because it is not really stable.
 		// For now just do it in the stable old way
 		destroyWithoutThreads(force);
