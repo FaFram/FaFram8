@@ -41,8 +41,7 @@ public class FuseSSHClient extends SSHClient {
 	}
 
 	@Override
-	public String executeCommand(String command, boolean suppressLog, boolean ignoreExceptions) throws KarafSessionDownException,
-			SSHClientException {
+	public String executeCommand(String command, boolean suppressLog, boolean ignoreExceptions) throws KarafSessionDownException, SSHClientException {
 		if (!suppressLog) {
 			log.info("Executing command: " + command);
 		}
@@ -94,13 +93,14 @@ public class FuseSSHClient extends SSHClient {
 			return returnString;
 		} catch (JSchException ex) {
 			if (ex.getMessage().contains("session is down")) {
-				if (!suppressLog) {
+				if (!suppressLog && !ignoreExceptions) {
 					log.error("JschException caught - Session is down");
 				}
 				throw new KarafSessionDownException(ex);
 			}
-
-			log.error("Cannot execute Fuse ssh command: \"" + command + "\"", ex);
+			if (!ignoreExceptions) {
+				log.error("Cannot execute Fuse ssh command: \"" + command + "\"", ex);
+			}
 			throw new SSHClientException(ex);
 		} catch (IOException ex) {
 			log.error(ex.getLocalizedMessage());
@@ -109,8 +109,7 @@ public class FuseSSHClient extends SSHClient {
 	}
 
 	@Override
-	public String executeCommand(String command, boolean suppressLog) throws KarafSessionDownException,
-			SSHClientException {
+	public String executeCommand(String command, boolean suppressLog) throws KarafSessionDownException, SSHClientException {
 		return executeCommand(command, suppressLog, false);
 	}
 }

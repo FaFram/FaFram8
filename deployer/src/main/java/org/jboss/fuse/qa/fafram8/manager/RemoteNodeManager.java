@@ -71,6 +71,7 @@ public class RemoteNodeManager implements NodeManager {
 		if (isCygwin()) {
 			productZipPath = "$(cygpath -w " + productZipPath + ")";
 			// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
+			log.trace("Reconnecting the executor because of cygwin");
 			executor.reconnect();
 		}
 
@@ -104,6 +105,7 @@ public class RemoteNodeManager implements NodeManager {
 			log.info("Starting container");
 			// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
 			if (isCygwin()) {
+				log.trace("Reconnecting the executor because of cygwin");
 				executor.reconnect();
 			}
 
