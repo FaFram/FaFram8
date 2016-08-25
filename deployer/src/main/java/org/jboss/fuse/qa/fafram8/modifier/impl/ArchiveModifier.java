@@ -93,10 +93,15 @@ public class ArchiveModifier extends Modifier {
 		final String randomFolder = super.getExecutor().getClient().getHost() + "-" + UUID.randomUUID().toString().substring(0, endIndex);
 		final NodeSSHClient sshClient = (NodeSSHClient) super.getExecutor().getClient();
 
+		if (container.getFusePath() == null) {
+			log.warn("Container fuse path was null, skipping archiver");
+			return;
+		}
+
 		for (String s : archiveFiles) {
 			final String response = super.getExecutor().executeCommand(
 					"find " + container.getFusePath() + " -type f -wholename \""
-							+ container.getFusePath() + s + "\"");
+							+ container.getFusePath() + (container.getFusePath().endsWith(File.separator) ? "" : File.separator) + s + "\"");
 			if (!(response == null || response.isEmpty())) {
 				for (String filePath : response.split("\n")) {
 					try {

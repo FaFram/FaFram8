@@ -195,4 +195,7 @@ public final class FaframConstant {
 
 	// Property for setting if fafram should try to restart container if it ended in failed stated
 	public static final String RETRY_PROVISIONING = "retry.provisioning";
+
+	// Flag that ssh containers do not have public ip
+	public static final String WITHOUT_PUBLIC_IP = "without.public.ip";
 }

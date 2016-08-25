@@ -3,6 +3,7 @@ package org.jboss.fuse.qa.fafram8.deployer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
+import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exception.FaframThreadException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
@@ -42,6 +43,8 @@ public final class Deployer {
 	@Getter
 	private static ConcurrentHashMap<Container, ContainerAnnihilator> annihilatingThreads = new ConcurrentHashMap<>();
 
+	private static boolean ensembleCreated = false;
+
 	/**
 	 * Private constructor.
 	 */
@@ -72,7 +75,6 @@ public final class Deployer {
 			deployWithThreads();
 			ContainerManager.createEnsemble();
 		} else {
-			boolean ensembleCreated = false;
 			for (Container c : ContainerManager.getContainerList()) {
 				if (!c.isCreated()) {
 					setNodeIfNecessary(c);
@@ -92,7 +94,7 @@ public final class Deployer {
 	 */
 	private static void setNodeIfNecessary(Container c) {
 		if (!OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
-			c.setNode(ContainerManager.getContainer(OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS)).getNode());
+			c.setNode(Node.builder(ContainerManager.getContainer(OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS)).getNode()).build());
 		}
 	}
 
@@ -263,7 +265,7 @@ public final class Deployer {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				if (!force) {
-					throw new FaframException("Error while destroying child/ssh container! " + ex);
+					throw new FaframException("Error while destroying container! " + ex);
 				}
 			}
 		}

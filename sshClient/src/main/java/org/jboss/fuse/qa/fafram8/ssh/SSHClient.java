@@ -80,6 +80,19 @@ public abstract class SSHClient {
 			SSHClientException;
 
 	/**
+	 * Same as executeCommand(String command, boolean suppressLog), but with option to ignore exception logging.
+	 * @param command command to be executed
+	 * @param suppressLog supress exception/command logging
+	 * @param ignoreExceptions ignore exceptions if true
+	 * @return String containing response from command
+	 * @throws KarafSessionDownException throws this exception if Karaf is down(specific for FuseSSHClient)
+	 * @throws SSHClientException common exception for sshclient when there is some problem in connecting
+	 * (auth fail, timeout, wrong host/port)
+	 */
+	public abstract String executeCommand(String command, boolean suppressLog, boolean ignoreExceptions) throws KarafSessionDownException,
+			SSHClientException;
+
+	/**
 	 * Method for creating connection and session, that is is used in executeCommand() method.
 	 *
 	 * @param suppressLog supress exception logging

@@ -5,6 +5,7 @@ import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
+import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
@@ -72,7 +73,10 @@ public class ChildContainer extends Container implements ThreadContainer {
 		}
 
 		log.info("Creating container " + this);
-		executor.connect();
+		if (!executor.isConnected()) {
+			log.trace("Connecting executor " + executor + " before creating child container");
+			executor.connect();
+		}
 		String jmxUser = super.getUser();
 		String jmxPass = super.getPassword();
 		if (super.getOptions().containsKey(Option.JMX_USER)) {
@@ -101,6 +105,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 			final String port = super.getParent().getExecutor().executeCommandSilently("zk:get /fabric/registry/ports/containers/"
 					+ super.getName() + "/org.apache.karaf.shell/sshPort").trim();
 			childExecutor.getClient().setPort(Integer.parseInt(port));
+			log.trace("Connecting child container's executor after the container has been created");
 			childExecutor.connect();
 			super.setExecutor(childExecutor);
 		} catch (Exception ex) {
@@ -108,7 +113,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 		}
 		// Set the fuse path
 		try {
-			super.setFusePath(super.getExecutor().executeCommandSilently("shell:info | grep \"Karaf base\"").trim().replaceAll(" +", " ").split(" ")[1]);
+			super.setFusePath(super.getExecutor().executeCommandSilently("shell:info | grep \"Karaf base\"").trim().replaceAll(" +", " ").split(" ")[2]);
 		} catch (Exception ex) {
 			log.warn("Setting fuse path failed, it won't be available");
 		}
@@ -125,11 +130,24 @@ public class ChildContainer extends Container implements ThreadContainer {
 			return;
 		}
 
+		super.getExecutor().stopKeepAliveTimer();
+
+		if ("localhost".equals(super.getNode().getHost())) {
+			ModifierExecutor.executePostModifiers(this);
+		} else {
+			ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
+		}
+
 		log.info("Destroying container " + super.getName());
-		executor.connect();
+		if (!executor.isConnected()) {
+			log.trace("Connecting executor " + executor + " before deleting child container");
+			executor.connect();
+		}
 		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
 		ContainerManager.getContainerList().remove(this);
+		log.trace("Disconnecting executor after destroying container");
+		super.getExecutor().disconnect();
 	}
 
 	@Override
@@ -142,6 +160,8 @@ public class ChildContainer extends Container implements ThreadContainer {
 	public void start(boolean force) {
 		super.getParent().getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
 		super.getParent().getExecutor().waitForProvisioning(this);
+		log.trace("Connecting executor in childs's start()");
+		super.getExecutor().connect();
 	}
 
 	@Override
@@ -149,12 +169,16 @@ public class ChildContainer extends Container implements ThreadContainer {
 		super.getParent().getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
 		super.getParent().getExecutor().waitForContainerStop(this);
 		super.setOnline(false);
+		log.trace("Disconnecting executor in childs's stop()");
+		super.getExecutor().disconnect();
 	}
 
 	@Override
 	public void kill() {
 		super.getExecutor().executeCommand("exec pkill -9 -f " + super.getName());
 		super.setOnline(false);
+		log.trace("Disconnecting executor in childs's kill()");
+		super.getExecutor().disconnect();
 	}
 
 	@Override

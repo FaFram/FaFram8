@@ -26,7 +26,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NodeSSHClient extends SSHClient {
 	@Override
-	public String executeCommand(String command, boolean suppressLog) throws KarafSessionDownException,
+	public String executeCommand(String command, boolean suppressLog) throws KarafSessionDownException, SSHClientException {
+		return executeCommand(command, suppressLog, false);
+	}
+
+	@Override
+	public String executeCommand(String command, boolean suppressLog, boolean ignoreExceptions) throws KarafSessionDownException,
 			SSHClientException {
 		String returnString;
 
@@ -48,10 +53,14 @@ public class NodeSSHClient extends SSHClient {
 			channel.disconnect();
 			return returnString;
 		} catch (JSchException ex) {
-			log.error("Cannot execute ssh command: \"" + command + "\"", ex);
+			if (!ignoreExceptions) {
+				log.error("Cannot execute ssh command: \"" + command + "\"", ex);
+			}
 			throw new SSHClientException(ex);
 		} catch (IOException ex) {
-			log.error(ex.getLocalizedMessage());
+			if (!ignoreExceptions) {
+				log.error(ex.getLocalizedMessage());
+			}
 			throw new SSHClientException(ex);
 		}
 	}
@@ -94,7 +103,7 @@ public class NodeSSHClient extends SSHClient {
 		log.info("Reading file from remote machine path " + remotePath);
 
 		final ChannelSftp sftpChannel;
-		String propertyFileString = "";
+		String propertyFileString;
 
 		try {
 			sftpChannel = (ChannelSftp) session.openChannel("sftp");

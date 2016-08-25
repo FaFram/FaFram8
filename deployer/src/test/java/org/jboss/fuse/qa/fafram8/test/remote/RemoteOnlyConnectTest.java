@@ -82,8 +82,8 @@ public class RemoteOnlyConnectTest {
 
 	@AfterClass
 	public static void after() {
-		osm.releaseResources();
 		System.clearProperty(FaframConstant.KEEP_CONTAINERS);
 		System.clearProperty(FaframConstant.KEEP_OS_RESOURCES);
+		osm.releaseResources();
 	}
 }

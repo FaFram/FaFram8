@@ -94,7 +94,10 @@ public class RootContainer extends Container {
 			// Re-create the executor
 			super.getNode().setExecutor(super.getNode().createExecutor());
 			// Connect the node executor
-			super.getNode().getExecutor().connect();
+			if (!super.getNode().getExecutor().isConnected()) {
+				log.trace("First time connecting node executor");
+				super.getNode().getExecutor().connect();
+			}
 			nodeManager = new RemoteNodeManager(super.getNode().getExecutor(), super.getExecutor());
 
 			// Set working directory for root container if it was set on root container object
@@ -154,6 +157,7 @@ public class RootContainer extends Container {
 				throw new FaframException(ex);
 			}
 		} else {
+			log.trace("Connecting both executors when using onlyConnect");
 			super.getExecutor().connect();
 			super.getNode().getExecutor().connect();
 		}
@@ -161,6 +165,9 @@ public class RootContainer extends Container {
 
 	@Override
 	public void destroy() {
+		super.getNode().getExecutor().stopKeepAliveTimer();
+		super.getExecutor().stopKeepAliveTimer();
+
 		if ("localhost".equals(super.getNode().getHost())) {
 			ModifierExecutor.executePostModifiers(this);
 		} else {
@@ -173,10 +180,12 @@ public class RootContainer extends Container {
 
 		log.info("Destroying container " + super.getName());
 
-		if (super.isOnline()) {
+		if (super.isCreated()) {
 			nodeManager.stopAndClean(false);
+			log.trace("Disconnecting executor after destroying root container");
 			super.getExecutor().disconnect();
 			if (super.getNode().getExecutor() != null && super.getNode().getExecutor().isConnected()) {
+				log.trace("Disconnecting node executor after destroying root container");
 				super.getNode().getExecutor().disconnect();
 			}
 		}
@@ -189,6 +198,7 @@ public class RootContainer extends Container {
 		// Force not used with root container
 		executeCommand("system-property karaf.restart.jvm true");
 		nodeManager.restart();
+		log.trace("Connecting the executor after restarting the container");
 		super.getExecutor().connect();
 		if (super.isFabric()) {
 			waitForProvisioning();
@@ -200,6 +210,8 @@ public class RootContainer extends Container {
 		// Force not used with root container
 		nodeManager.startFuse();
 		super.setOnline(true);
+		log.trace("Connecting the executor after starting the container");
+		super.getExecutor().connect();
 		if (super.isFabric()) {
 			waitForProvisioning();
 		}
@@ -210,12 +222,16 @@ public class RootContainer extends Container {
 		// Force not used with root container
 		nodeManager.stop();
 		super.setOnline(false);
+		log.trace("Disconnecting executor in root's stop()");
+		super.getExecutor().disconnect();
 	}
 
 	@Override
 	public void kill() {
 		nodeManager.kill();
 		super.setOnline(false);
+		log.trace("Disconnecting executor in root's kill()");
+		super.getExecutor().disconnect();
 	}
 
 	@Override

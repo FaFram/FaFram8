@@ -14,11 +14,13 @@ import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
 import org.jboss.fuse.qa.fafram8.ssh.SSHClient;
+import org.jboss.fuse.qa.fafram8.timer.TimerUtils;
 import org.jboss.fuse.qa.fafram8.util.ExecutorCommandHistory;
 import org.jboss.fuse.qa.fafram8.util.callables.Response;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +52,10 @@ public class Executor {
 	@Setter
 	private String name;
 
+	private Timer timer;
+	private static final long TIMER_START_DELAY = 300000L;
+	private static final long TIMER_DELAY = 600000L;
+
 	/**
 	 * Constructor.
 	 *
@@ -67,21 +73,26 @@ public class Executor {
 	 *
 	 * @param cmd command
 	 * @param silent do not log if true
+	 * @param ignoreExceptions do not log if true
 	 * @return command response
 	 */
 	@SuppressWarnings("TryWithIdenticalCatches")
-	private String executeCommand(String cmd, boolean silent) {
+	private String executeCommand(String cmd, boolean silent, boolean ignoreExceptions) {
 		try {
-			final String response = client.executeCommand(cmd, silent);
+			final String response = client.executeCommand(cmd, silent, ignoreExceptions);
 			if (!silent) {
 				log.debug("Response: " + response);
 			}
 			history.log(cmd, response);
 			return response;
 		} catch (KarafSessionDownException e) {
-			log.error("Karaf session is down!");
+			if (!ignoreExceptions) {
+				log.error("Karaf session is down!");
+			}
 		} catch (SSHClientException e) {
-			log.error("SSHClient exception thrown: " + e);
+			if (!ignoreExceptions) {
+				log.error("SSHClient exception thrown: " + e);
+			}
 		}
 
 		return null;
@@ -89,17 +100,35 @@ public class Executor {
 
 	/**
 	 * Executes a command.
+	 * @param cmd command
+	 * @param silent do not log if true
+	 * @return command response
+	 */
+	private String executeCommand(String cmd, boolean silent) {
+		return executeCommand(cmd, silent, true);
+	}
+
+	/**
+	 * Executes a command silently.
 	 *
 	 * @param cmd command
 	 * @return command response
 	 */
-	@SuppressWarnings("TryWithIdenticalCatches")
 	public String executeCommandSilently(String cmd) {
-		return executeCommand(cmd, true);
+		return executeCommandSilently(cmd, true);
 	}
 
 	/**
-	 * ja by s
+	 * Executes a command silently.
+	 * @param cmd command
+	 * @param ignoreExceptions true to not log any exceptions
+	 * @return response
+	 */
+	public String executeCommandSilently(String cmd, boolean ignoreExceptions) {
+		return executeCommand(cmd, true, ignoreExceptions);
+	}
+
+	/**
 	 * Executes a command.
 	 *
 	 * @param cmd command
@@ -170,6 +199,11 @@ public class Executor {
 			}
 			sleep(timeout);
 		}
+
+		// When connected, schedule a new keep alive thread for this executor
+		// First shutdown all other tasks from previous runs, because you can use .connect() without previous .disconnect()
+		this.stopKeepAliveTimer();
+		this.startKeepAliveTimer();
 	}
 
 	/**
@@ -185,6 +219,7 @@ public class Executor {
 	 * Disconnects the client.
 	 */
 	public void disconnect() {
+		this.stopKeepAliveTimer();
 		client.disconnect();
 	}
 
@@ -227,6 +262,9 @@ public class Executor {
 			}
 			sleep(timeout);
 		}
+		// There should be nothing scheduled, but just to be sure
+		this.stopKeepAliveTimer();
+		this.startKeepAliveTimer();
 	}
 
 	/**
@@ -272,6 +310,8 @@ public class Executor {
 	 * Waits for the container to shut down.
 	 */
 	public void waitForShutdown() {
+		this.stopKeepAliveTimer();
+
 		final int step = 5;
 		final long timeout = (step * 1000L);
 		boolean online = true;
@@ -307,6 +347,11 @@ public class Executor {
 	 * @param c container
 	 */
 	public void waitForContainerStop(Container c) {
+		log.trace("Shutting down scheduled executor for container " + c.getName());
+		// Because we can stop ssh container through root's executor and in that case the "c" here would be ssh container, but the executor is from root
+		if (this.getName().equals(c.getName())) {
+			c.getExecutor().stopKeepAliveTimer();
+		}
 		final int step = 5;
 		final long timeout = (step * 1000L);
 		boolean online = true;
@@ -333,6 +378,10 @@ public class Executor {
 			}
 
 			sleep(timeout);
+		}
+		// Because we can stop ssh container through root's executor and in that case the "c" here would be ssh container, but the executor is from root
+		if (this.getName().equals(c.getName())) {
+			c.getExecutor().disconnect();
 		}
 	}
 
@@ -414,7 +463,7 @@ public class Executor {
 
 		while (!isSuccessful) {
 			handleProvisionWaitTime(elapsed, waitFor, status, provisionStatus, time);
-
+			provisionStatus = "";
 			String reason = "";
 
 			try {
@@ -450,7 +499,6 @@ public class Executor {
 						.equals(reason) ? "" : "(" + reason + ")") + ("".equals(provisionStatus) ? "" : "("
 						+ provisionStatus + ")"));
 				elapsed += step;
-				provisionStatus = "";
 				sleep(timeout);
 			}
 		}
@@ -660,5 +708,25 @@ public class Executor {
 		}
 		log.warn("Time is up, fail of {} in {} seconds.", methodBlock, secondsTimeout);
 		return response;
+	}
+
+	/**
+	 * Starts the keep alive timer for this executor.
+	 */
+	public void startKeepAliveTimer() {
+		log.trace("Creating timer for " + this.getName());
+		timer = TimerUtils.getNewTimer(this.getName());
+		timer.schedule(new KeepAlive(this), TIMER_START_DELAY, TIMER_DELAY);
+	}
+
+	/**
+	 * Stops the keep alive timer for this executor.
+	 */
+	public void stopKeepAliveTimer() {
+		if (timer == null) {
+			return;
+		}
+		log.trace("Stopping timer for " + this.getName());
+		timer.cancel();
 	}
 }

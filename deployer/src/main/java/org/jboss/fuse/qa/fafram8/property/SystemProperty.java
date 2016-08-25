@@ -543,10 +543,19 @@ public class SystemProperty {
 	/**
 	 * Getter.
 	 *
-	 * @return retry.provisioning propertyF
+	 * @return retry.provisioning property
 	 */
 	public static boolean isRetryProvisioning() {
 		return System.getProperty(FaframConstant.RETRY_PROVISIONING) != null;
+	}
+
+	/**
+	 * Getter.
+	 *
+	 * @return without.public.ip property
+	 */
+	public static boolean isWithoutPublicIp() {
+		return System.getProperty(FaframConstant.WITHOUT_PUBLIC_IP) != null;
 	}
 
 	/**

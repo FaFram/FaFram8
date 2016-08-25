@@ -435,7 +435,6 @@ public class ContainerManager {
 				OptionUtils.get(c.getOptions(), Option.PROFILE).add(b.getProfileName());
 				//wait for provision
 				c.waitForProvisioning();
-				c.getExecutor().reconnect();
 			}
 		}
 	}

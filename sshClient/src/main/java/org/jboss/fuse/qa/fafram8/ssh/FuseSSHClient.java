@@ -41,7 +41,7 @@ public class FuseSSHClient extends SSHClient {
 	}
 
 	@Override
-	public String executeCommand(String command, boolean suppressLog) throws KarafSessionDownException,
+	public String executeCommand(String command, boolean suppressLog, boolean ignoreExceptions) throws KarafSessionDownException,
 			SSHClientException {
 		if (!suppressLog) {
 			log.info("Executing command: " + command);
@@ -54,18 +54,18 @@ public class FuseSSHClient extends SSHClient {
 
 			int retries = 0;
 
-			channel = session.openChannel("exec");
-			((ChannelExec) channel).setCommand(command);
-
-			channel.setInputStream(null);
-			((ChannelExec) channel).setErrStream(System.err);
-
 			String returnString = "";
 			do {
 				if (retries == retriesCount) {
 					// If we retried it 2 times already, break
 					break;
 				}
+
+				channel = session.openChannel("exec");
+				((ChannelExec) channel).setCommand(command);
+
+				channel.setInputStream(null);
+				((ChannelExec) channel).setErrStream(System.err);
 
 				final InputStream in = channel.getInputStream();
 
@@ -106,5 +106,11 @@ public class FuseSSHClient extends SSHClient {
 			log.error(ex.getLocalizedMessage());
 			throw new SSHClientException(ex);
 		}
+	}
+
+	@Override
+	public String executeCommand(String command, boolean suppressLog) throws KarafSessionDownException,
+			SSHClientException {
+		return executeCommand(command, suppressLog, false);
 	}
 }
