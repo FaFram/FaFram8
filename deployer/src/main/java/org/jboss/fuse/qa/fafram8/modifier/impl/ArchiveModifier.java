@@ -7,7 +7,6 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exceptions.CopyFileException;
-import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
@@ -53,7 +52,7 @@ public class ArchiveModifier extends Modifier {
 	 * Archives files on localhost.
 	 */
 	private void archiveLocalFiles(Container container) {
-		log.info("Archiving files with patterns: {}", archiveFiles);
+		log.info("Archiving files with patterns: \"{}\" relative to \"{}\"", archiveFiles, container.getFusePath());
 
 		try {
 			// setup Ant Directory Scanner
@@ -66,13 +65,13 @@ public class ArchiveModifier extends Modifier {
 			scanner.scan();
 			final String[] foundFiles = scanner.getIncludedFiles();
 
-			log.info("Archiving {} file" + (foundFiles.length > 1 ? "s" : "") + " to {}", foundFiles.length, archiveTargetPath);
+			log.info("Archiving {} file" + (foundFiles.length != 1 ? "s" : "") + " to {}", foundFiles.length, archiveTargetPath);
 			for (String fileName : foundFiles) {
-				//scanner returns paths relative to fuseDir
+				// scanner returns paths relative to fuseDir
 				final Path p = Paths.get(container.getFusePath(), fileName);
 				log.debug("Archiving file {}", fileName);
-				//create target directory structure
-				final Path target = getTargetPath(fileName);
+				// create target directory structure
+				final Path target = getTargetPath(container, fileName);
 				Files.createDirectories(target.getParent());
 				// for instance copy
 				// from: $FUSE_HOME/data/log/fuse.log
@@ -132,8 +131,7 @@ public class ArchiveModifier extends Modifier {
 	 * @param fileName file name to use
 	 * @return absolute target path
 	 */
-	private Path getTargetPath(String fileName) {
-		final Container container = ContainerManager.getRootContainerByHost("localhost");
+	private Path getTargetPath(Container container, String fileName) {
 		if (System.getenv("WORKSPACE") == null) {
 			return Paths.get(archiveTargetPath.toString(), StringUtils.substringBetween(
 					Paths.get(container.getFusePath(), fileName).toAbsolutePath().toString(),
