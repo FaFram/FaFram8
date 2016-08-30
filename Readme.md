@@ -1,13 +1,5 @@
-# Fafram8
+# FaFram8
 
-## Contributing
-Prerequisites:
-- java jdk 1.7
-- maven
-- installed lombok plugin - see https://projectlombok.org/download.html
+a.k.a FAbric FRAMework for [JBoss Fuse](https://www.redhat.com/en/technologies/jboss-middleware/fuse)
 
-Implementing features:
-- create a new issue in gitlab - not necessary for small fixes, etc.
-- follow standard git workflow: https://mojo.redhat.com/docs/DOC-965472
-- follow java code conventions: https://mojo.redhat.com/docs/DOC-965491
-- implement tests for new features
+See the [Deployer docs](docs/Readme.md) or [Example usage](docs/Examples.md)
