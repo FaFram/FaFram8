@@ -12,7 +12,9 @@ import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.manager.LocalNodeManager;
 import org.jboss.fuse.qa.fafram8.manager.NodeManager;
+import org.jboss.fuse.qa.fafram8.manager.RemoteLinuxNodeManager;
 import org.jboss.fuse.qa.fafram8.manager.RemoteNodeManager;
+import org.jboss.fuse.qa.fafram8.manager.RemoteWindowsNodeManager;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.modifier.impl.JvmMemoryModifier;
@@ -38,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RootContainer extends Container {
 	// Node manager instance - sets up the container on the host
+	@Getter
 	protected NodeManager nodeManager;
 	@Setter
 	@Getter
@@ -119,10 +122,6 @@ public class RootContainer extends Container {
 		}
 	}
 
-
-
-
-
 	/**
 	 *
 	 */
@@ -139,7 +138,12 @@ public class RootContainer extends Container {
 				log.trace("First time connecting node executor");
 				super.getNode().getExecutor().connect();
 			}
-			nodeManager = new RemoteNodeManager(super.getNode().getExecutor(), super.getExecutor());
+			if(super.getNode().getExecutor().isCygwin()){
+				log.trace("Using RemoteWindowsNodeManager!");
+				nodeManager = new RemoteWindowsNodeManager(super.getNode().getExecutor(), super.getExecutor());
+			} else {
+				nodeManager = new RemoteLinuxNodeManager(super.getNode().getExecutor(), super.getExecutor());
+			}
 			// Set working directory for root container if it was set on root container object
 			// It will be either empty string of file system path
 			if (!OptionUtils.getString(super.getOptions(), Option.WORKING_DIRECTORY).isEmpty()) {
@@ -173,6 +177,9 @@ public class RootContainer extends Container {
 
 	@Override
 	public void destroy() {
+		if (!super.isCreated()) {
+			return;
+		}
 		super.getNode().getExecutor().stopKeepAliveTimer();
 		super.getExecutor().stopKeepAliveTimer();
 
@@ -180,10 +187,6 @@ public class RootContainer extends Container {
 			ModifierExecutor.executePostModifiers(this);
 		} else {
 			ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
-		}
-
-		if (!super.isCreated()) {
-			return;
 		}
 
 		log.info("Destroying container " + super.getName());

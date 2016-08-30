@@ -8,8 +8,9 @@ import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
-import org.jboss.fuse.qa.fafram8.manager.RemoteNodeManager;
+import org.jboss.fuse.qa.fafram8.manager.RemoteWindowsNodeManager;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
+import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
@@ -57,15 +58,18 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 
 	@Override
 	public void create() {
-		create(super.getParent().getExecutor());
+		create(null);
 	}
 
 	// for thread support
 	@Override
 	public void create(Executor executor) {
 		//TODO set working dir for join container -> because by default root container will create fafram -> this is problem if creating more than 1 container on the same node
+		super.setFuseSshPort(SSH_PORT + counter.get());
+		log.trace("Connecting in JoinContainer");
 		super.setExecutor(super.createExecutor());
 		log.info("Creating JoinContainer: " + this);
+
 
 		super.modifyContainer();
 
@@ -79,7 +83,7 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 		ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.management.cfg", "rmiServerPort", String.valueOf(RMI_SERVER_PORT + counter.get())));
 		counter.addAndGet(1);
 
-		((RemoteNodeManager) nodeManager).clean(OptionUtils.getString(this.getOptions(), Option.WORKING_DIRECTORY));
+		((RemoteWindowsNodeManager) nodeManager).clean(OptionUtils.getString(this.getOptions(), Option.WORKING_DIRECTORY));
 		nodeManager.checkRunningContainer();
 		try {
 			nodeManager.prepareZip();
@@ -88,12 +92,17 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 			nodeManager.prepareFuse(this);
 			nodeManager.startFuse();
 
-			final String zookeeperUri = StringUtils.substringBetween(getParent().getExecutor().executeCommandSilently("fabric:info"), "ZooKeeper URI:", "\n").trim();
+			// Parent info
+			String uri = super.getParent().getExecutor().executeCommand("fabric:info");
+			log.error(uri);
+			final String zookeeperUri = StringUtils.substringBetween(uri, "ZooKeeper URI:", "\n").trim();
 			String options = parseOptions();
 
 			// Name of the container should be changed in property files -> only join with correct password for root and zookeeperUri from root
-			super.executeCommands("fabric:join " + options + " " + zookeeperUri);
-			executor.waitForProvisioning(this);
+			super.getExecutor().connect();
+			super.getExecutor().executeCommands("fabric:join " + options + " " + zookeeperUri);
+			super.getExecutor().waitForProvisioning(this);
+			ModifierExecutor.clearAllModifiers();
 		} catch (FaframException ex) {
 			ex.printStackTrace();
 			ContainerSummoner.setStopWork(true);
@@ -116,10 +125,12 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 				? OptionUtils.getString(this.getOptions(), Option.ZOOKEEPER_PASSWORD)
 				: OptionUtils.getString(this.getOptions(), Option.PASSWORD);
 		
-		log.error(zookeeperPassword);
-		builder.append(zookeeperPassword);
+		log.trace("Zookeeper password: " + zookeeperPassword);
+		if(zookeeperPassword == null || zookeeperPassword.isEmpty()){
+			builder.append(SystemProperty.getFusePassword());
+		}
 
-		// TODO: refactor to correct getter
+
 		if (!OptionUtils.get(this.getOptions(), Option.PROFILE).isEmpty()) {
 			for (String profile : this.getOptions().get(Option.PROFILE)) {
 				builder.append(" --profile ").append(profile);
@@ -147,7 +158,8 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 	}
 
 	/**
-	 * Root builder class - this class returns the RootContainer object and it is the only way the root container should be built.
+	 * Root builder class - this class returns the JoinContainer object and it is the only way the join container should be built.
+	 * For internal use only.
 	 */
 	public static class JoinBuilder {
 		// Container instance

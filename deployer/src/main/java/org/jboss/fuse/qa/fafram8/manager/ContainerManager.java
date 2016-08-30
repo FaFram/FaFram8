@@ -197,7 +197,6 @@ public class ContainerManager {
 		if (!c.isFabric()) {
 			return;
 		}
-
 		// Construct the fabric create arguments from fabric property and profiles
 		String fabricString = OptionUtils.getString(c.getOptions(), Option.FABRIC_CREATE);
 
@@ -205,8 +204,17 @@ public class ContainerManager {
 			fabricString += " --profile " + profile;
 		}
 
-		c.executeCommand("fabric:create" + (fabricString.startsWith(" ") ? StringUtils.EMPTY : " ") + fabricString);
+		// Successfully creating Fabric on Windows requires some special hacking ...
+		if(c.getNode().getExecutor().isCygwin()){
+			setupWindowsFabric(c, fabricString);
+		} else {
+			// TODO(rjakubco): windows specific
+			c.getExecutor().reconnect();
+			c.executeCommand("fabric:create" + (fabricString.startsWith(" ") ? StringUtils.EMPTY : " ") + fabricString);
 
+		}
+
+		// Continue...
 		try {
 			c.getExecutor().waitForProvisioning(c);
 		} catch (FaframException ex) {
@@ -217,6 +225,21 @@ public class ContainerManager {
 		log.trace("Reconnecting the executor after fabric:create");
 		c.getExecutor().reconnect();
 		uploadBundles(c);
+	}
+
+	public static void setupWindowsFabric(Container c, String fabricString) {
+		c.getExecutor().reconnect();
+		c.executeCommand("fabric:create" + (fabricString.startsWith(" ") ? StringUtils.EMPTY : " ") + fabricString);
+
+		try {
+			Thread.sleep(20000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if (!((RemoteNodeManager) ((RootContainer) c).getNodeManager()).isRunning()) {
+			log.error("STARTING again");
+			((RootContainer) c).getNodeManager().startFuse();
+		}
 	}
 
 	/**
@@ -514,6 +537,7 @@ public class ContainerManager {
 
 	/**
 	 * Checks if all ensemble members are already created.
+	 *
 	 * @return true if all ensemble members are already created, false otherwise.
 	 */
 	public static boolean isEnsembleReady() {
@@ -532,6 +556,7 @@ public class ContainerManager {
 
 	/**
 	 * Gets the containers by the name substring.
+	 *
 	 * @param containerFilter container substring to search
 	 * @return array of maching containers
 	 */

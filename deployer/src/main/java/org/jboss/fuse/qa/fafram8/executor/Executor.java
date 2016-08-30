@@ -729,4 +729,13 @@ public class Executor {
 		log.trace("Stopping timer for " + this.getName());
 		timer.cancel();
 	}
+
+	/**
+	 * Checks if remote node is a windows server.
+	 *
+	 * @return true if remote node is a windows server
+	 */
+	public boolean isCygwin() {
+		return StringUtils.containsIgnoreCase(executeCommandSilently("uname"), "cyg");
+	}
 }

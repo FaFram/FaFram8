@@ -157,25 +157,25 @@ public class SshContainer extends Container implements ThreadContainer {
 		}
 
 		if (getJoinContainer() == null) {
-		if (!SystemProperty.isWithoutPublicIp()) {
-			ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
+			if (!SystemProperty.isWithoutPublicIp()) {
+				ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
 
-			super.getNode().getExecutor().stopKeepAliveTimer();
-			super.getExecutor().stopKeepAliveTimer();
-		}
-		log.info("Destroying container " + super.getName());
-		if (!executor.isConnected()) {
-			log.trace("Connecting executor " + executor + " before deleting ssh container");
-			executor.connect();
-		}
-		executor.executeCommand("container-delete --force " + super.getName());
-		super.setCreated(false);
-		ContainerManager.getContainerList().remove(this);
-		if (!SystemProperty.isWithoutPublicIp()) {
-			log.trace("Disconnecting node/fuse executors after destroying the container");
-			super.getExecutor().disconnect();
-			super.getNode().getExecutor().disconnect();
-		}
+				super.getNode().getExecutor().stopKeepAliveTimer();
+				super.getExecutor().stopKeepAliveTimer();
+			}
+			log.info("Destroying container " + super.getName());
+			if (!executor.isConnected()) {
+				log.trace("Connecting executor " + executor + " before deleting ssh container");
+				executor.connect();
+			}
+			executor.executeCommand("container-delete --force " + super.getName());
+			super.setCreated(false);
+			ContainerManager.getContainerList().remove(this);
+			if (!SystemProperty.isWithoutPublicIp()) {
+				log.trace("Disconnecting node/fuse executors after destroying the container");
+				super.getExecutor().disconnect();
+				super.getNode().getExecutor().disconnect();
+			}
 		} else {
 			joinContainer.destroy();
 		}
@@ -194,13 +194,13 @@ public class SshContainer extends Container implements ThreadContainer {
 	@Override
 	public void start(boolean force) {
 		if (getJoinContainer() == null) {
-		super.getParent().getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
-		super.getParent().getExecutor().waitForProvisioning(this);
-		super.setOnline(true);
-		if (!SystemProperty.isWithoutPublicIp()) {
-			log.trace("Connecting executor in ssh's start()");
-			super.getExecutor().connect();
-		}
+			super.getParent().getExecutor().executeCommand("container-start " + (force ? "--force " : "") + super.getName());
+			super.getParent().getExecutor().waitForProvisioning(this);
+			super.setOnline(true);
+			if (!SystemProperty.isWithoutPublicIp()) {
+				log.trace("Connecting executor in ssh's start()");
+				super.getExecutor().connect();
+			}
 		} else {
 			joinContainer.start(force);
 		}
@@ -209,13 +209,13 @@ public class SshContainer extends Container implements ThreadContainer {
 	@Override
 	public void stop(boolean force) {
 		if (getJoinContainer() == null) {
-		super.getParent().getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
-		super.getParent().getExecutor().waitForContainerStop(this);
-		super.setOnline(false);
-		if (!SystemProperty.isWithoutPublicIp()) {
-			log.trace("Disconnecting executor in ssh's stop()");
-			super.getExecutor().disconnect();
-		}
+			super.getParent().getExecutor().executeCommand("container-stop " + (force ? "--force " : "") + super.getName());
+			super.getParent().getExecutor().waitForContainerStop(this);
+			super.setOnline(false);
+			if (!SystemProperty.isWithoutPublicIp()) {
+				log.trace("Disconnecting executor in ssh's stop()");
+				super.getExecutor().disconnect();
+			}
 		} else {
 			joinContainer.stop(force);
 		}
@@ -224,14 +224,14 @@ public class SshContainer extends Container implements ThreadContainer {
 	@Override
 	public void kill() {
 		if (getJoinContainer() == null) {
-		if (!SystemProperty.isWithoutPublicIp()) {
-			super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());
-			super.setOnline(false);
-			log.trace("Disconnecting executor in ssh's kill()");
-			super.getExecutor().disconnect();
-		} else {
-			log.warn(FaframConstant.WITHOUT_PUBLIC_IP + " is set, kill won't work");
-		}
+			if (!SystemProperty.isWithoutPublicIp()) {
+				super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());
+				super.setOnline(false);
+				log.trace("Disconnecting executor in ssh's kill()");
+				super.getExecutor().disconnect();
+			} else {
+				log.warn(FaframConstant.WITHOUT_PUBLIC_IP + " is set, kill won't work");
+			}
 		} else {
 			joinContainer.kill();
 		}
@@ -297,7 +297,6 @@ public class SshContainer extends Container implements ThreadContainer {
 			return super.isCreated();
 		} else {
 			return joinContainer.isCreated();
-
 		}
 	}
 
@@ -308,7 +307,6 @@ public class SshContainer extends Container implements ThreadContainer {
 		} else {
 			return joinContainer.isCreated();
 		}
-
 	}
 
 	@Override
@@ -736,6 +734,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param containerName container name
 		 * @return this
 		 */
@@ -746,6 +745,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param otherContainer other container
 		 * @return this
 		 */
