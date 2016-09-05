@@ -77,27 +77,29 @@ public class WindowsExecutor extends Executor {
 
 	@Override
 	public String executeCommandSilently(String cmd, boolean ignoreExceptions) {
+		log.trace("Reconnecting executor on Windows before executing commands silently");
 		reconnectSilently();
 		return super.executeCommandSilently(cmd, ignoreExceptions);
 	}
 
 	@Override
 	public String executeCommand(String cmd) {
+		log.trace("Reconnecting executor on Windows before executing command");
 		reconnectSilently();
 		return super.executeCommand(cmd);
 	}
 
 	@Override
 	public List<String> executeCommands(String... commands) {
+		log.trace("Reconnecting executor on Windows before executing commands");
 		reconnectSilently();
 		return super.executeCommands(commands);
 	}
 
 	@Override
 	public String executeCommandSilently(String cmd) {
+		log.trace("Reconnecting executor on Windows before executing command silently");
 		reconnectSilently();
 		return super.executeCommandSilently(cmd);
-
-
 	}
 }

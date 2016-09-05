@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class Deployer {
 	private static final int TIMEOUT = 3;
+	private static final int THREAD_POOL = 10;
 
 	@Getter
 	@Setter
@@ -128,7 +129,7 @@ public final class Deployer {
 	 * Creates containers using threads.
 	 */
 	private static void deployWithThreads() {
-		final ExecutorService executorService = Executors.newFixedThreadPool(10);
+		final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL);
 		final Set<Future> futureSet = new HashSet<>();
 
 		for (Container c : ContainerManager.getContainerList()) {
@@ -286,23 +287,23 @@ public final class Deployer {
 	 * Connects to each node of SSH containers and check if OS is windows. If it is then convert SSHContainer to JoinContainer.
 	 */
 	private static void checkOSandConvertContainers() {
-		List<Container> tempContainers = new ArrayList<>(ContainerManager.getContainerList());
+		final List<Container> tempContainers = new ArrayList<>(ContainerManager.getContainerList());
 		for (int i = 0; i < tempContainers.size(); i++) {
-			Container container = tempContainers.get(i);
+			final Container container = tempContainers.get(i);
 
 			if (container instanceof SshContainer) {
-				Executor executor = container.getNode().createExecutor();
+				final Executor executor = container.getNode().createExecutor();
 				log.trace("Connecting node executor for checking OS on the machine");
 				executor.connect();
 
-				String os = executor.executeCommandSilently("uname");
+				final String os = executor.executeCommandSilently("uname");
 				if (StringUtils.containsIgnoreCase(os, "cyg")) {
 					// Create JoinContainer from SshContainer
 					log.info("Container " + container.getName() + " running on Windows. Converting to join container!");
-					Container joinContainer = JoinContainer.joinBuilder(container).build();
+					final Container joinContainer = JoinContainer.joinBuilder(container).build();
 
 					// Replace parent for all child containers
-					Set<Container> children = ContainerManager.getChildContainers(container);
+					final Set<Container> children = ContainerManager.getChildContainers(container);
 					for (Container child : children) {
 						child.setParent(joinContainer);
 						child.setParentName(joinContainer.getName());

@@ -5,7 +5,7 @@ package org.jboss.fuse.qa.fafram8.manager;
  *
  * @author : Roman Jakubco (rjakubco@redhat.com)
  */
-public interface RemoteNodeManager extends NodeManager{
+public interface RemoteNodeManager extends NodeManager {
 
 	/**
 	 * Creates folder path on remote machines.
@@ -20,7 +20,7 @@ public interface RemoteNodeManager extends NodeManager{
 	 *
 	 * @param workingDirectory working directory
 	 */
-	void  setWorkingDirectory(String workingDirectory);
+	void setWorkingDirectory(String workingDirectory);
 
 	/**
 	 * Stops specific karaf instance that is define by provided container path.

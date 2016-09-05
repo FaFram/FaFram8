@@ -49,6 +49,10 @@ public class RemoteWindowsTest {
 	@AfterClass
 	public static void After() {
 		System.clearProperty(FaframConstant.FUSE_ZIP);
+		System.clearProperty(FaframConstant.OPENSTACK_IMAGE);
+		System.clearProperty(FaframConstant.OPENSTACK_FLAVOR);
+		System.clearProperty(FaframConstant.HOST_USER);
+		System.clearProperty(FaframConstant.HOST_PASSWORD);
 	}
 
 	@Test

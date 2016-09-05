@@ -56,6 +56,9 @@ public class Executor {
 	private static final long TIMER_START_DELAY = 300000L;
 	private static final long TIMER_DELAY = 600000L;
 
+	/**
+	 * Constructor.
+	 */
 	public Executor() {
 	}
 

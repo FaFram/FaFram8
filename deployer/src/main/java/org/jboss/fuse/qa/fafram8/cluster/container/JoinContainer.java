@@ -8,6 +8,7 @@ import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
+import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.manager.RemoteWindowsNodeManager;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
@@ -20,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,13 +32,14 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class JoinContainer extends RootContainer implements ThreadContainer {
-
-	private static AtomicInteger counter = new AtomicInteger(0);
-	private final static int ACTIVEMQ_PORT = 61616;
-	private final static int ORG_OSGI_SERVICE_HTTP_PORT = 8181;
-	private final static int SSH_PORT = 8101;
-	private final static int RMI_REGISTRY_PORT = 1099;
-	private final static int RMI_SERVER_PORT = 44444;
+	@Getter
+	@Setter
+	private AtomicInteger counter = new AtomicInteger(0);
+	private static final int ACTIVEMQ_PORT = 61616;
+	private static final int ORG_OSGI_SERVICE_HTTP_PORT = 8181;
+	private static final int SSH_PORT = 8101;
+	private static final int RMI_REGISTRY_PORT = 1099;
+	private static final int RMI_SERVER_PORT = 44444;
 
 	/**
 	 * Builder getter.
@@ -69,18 +73,27 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 		super.setExecutor(super.createExecutor());
 		log.info("Creating JoinContainer: " + this);
 
-
 		super.modifyContainer();
 
-		// Modify ports for running multiple join containers on the same node
-		ModifierExecutor.addModifiers(putProperty("etc/system.properties", "activemq.port", String.valueOf(ACTIVEMQ_PORT + counter.get())));
-		ModifierExecutor.addModifiers(putProperty("etc/system.properties", "org.osgi.service.http.port", String.valueOf(ORG_OSGI_SERVICE_HTTP_PORT + counter.get())));
-		ModifierExecutor.addModifiers(
-				putProperty("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", String.valueOf(ORG_OSGI_SERVICE_HTTP_PORT + counter.get())));
-		ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.shell.cfg", "sshPort", String.valueOf(SSH_PORT + counter.get())));
-		ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", String.valueOf(RMI_REGISTRY_PORT + counter.get())));
-		ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.management.cfg", "rmiServerPort", String.valueOf(RMI_SERVER_PORT + counter.get())));
-		counter.addAndGet(1);
+		if (!OptionUtils.getString(this.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
+			final JoinContainer container = (JoinContainer) ContainerManager.getContainer(OptionUtils.getString(this.getOptions(), Option.SAME_NODE_AS));
+			// Modify ports for running multiple join containers on the same node
+			ModifierExecutor.addModifiers(putProperty("etc/system.properties", "activemq.port",
+					String.valueOf(ACTIVEMQ_PORT + container.getCounter().addAndGet(1))));
+			ModifierExecutor.addModifiers(putProperty("etc/system.properties", "org.osgi.service.http.port",
+					String.valueOf(ORG_OSGI_SERVICE_HTTP_PORT + container.getCounter().addAndGet(1))));
+			ModifierExecutor.addModifiers(
+					putProperty("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port",
+							String.valueOf(ORG_OSGI_SERVICE_HTTP_PORT + container.getCounter().addAndGet(1))));
+			ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.shell.cfg", "sshPort",
+					String.valueOf(SSH_PORT + container.getCounter().addAndGet(1))));
+			ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.management.cfg", "rmiRegistryPort",
+					String.valueOf(RMI_REGISTRY_PORT + container.getCounter().addAndGet(1))));
+			ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.management.cfg", "rmiServerPort",
+					String.valueOf(RMI_SERVER_PORT + container.getCounter().addAndGet(1))));
+			// Add 1 to counter of this container. This is needed when somebody use this container to run other container on the same node
+			counter.addAndGet(1);
+		}
 
 		((RemoteWindowsNodeManager) nodeManager).clean(OptionUtils.getString(this.getOptions(), Option.WORKING_DIRECTORY));
 		nodeManager.checkRunningContainer();
@@ -92,10 +105,9 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 			nodeManager.startFuse();
 
 			// Parent info
-			String uri = super.getParent().getExecutor().executeCommand("fabric:info");
-			log.error(uri);
+			final String uri = super.getParent().getExecutor().executeCommand("fabric:info");
 			final String zookeeperUri = StringUtils.substringBetween(uri, "ZooKeeper URI:", "\n").trim();
-			String options = parseOptions();
+			final String options = parseOptions();
 
 			// Name of the container should be changed in property files -> only join with correct password for root and zookeeperUri from root
 			log.trace("First time connecting join executor");
@@ -117,19 +129,18 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 	 * @return string containing options
 	 */
 	private String parseOptions() {
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 
 		builder.append(" --zookeeper-password ");
 
-		String zookeeperPassword = OptionUtils.getString(this.getOptions(), Option.ZOOKEEPER_PASSWORD).isEmpty()
+		final String zookeeperPassword = OptionUtils.getString(this.getOptions(), Option.ZOOKEEPER_PASSWORD).isEmpty()
 				? OptionUtils.getString(this.getOptions(), Option.ZOOKEEPER_PASSWORD)
 				: OptionUtils.getString(this.getOptions(), Option.PASSWORD);
-		
+
 		log.trace("Zookeeper password: " + zookeeperPassword);
-		if(zookeeperPassword == null || zookeeperPassword.isEmpty()){
+		if (zookeeperPassword == null || zookeeperPassword.isEmpty()) {
 			builder.append(SystemProperty.getFusePassword());
 		}
-
 
 		if (!OptionUtils.get(this.getOptions(), Option.PROFILE).isEmpty()) {
 			for (String profile : this.getOptions().get(Option.PROFILE)) {
@@ -137,16 +148,16 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 			}
 		}
 
-		if (!OptionUtils.get(this.getOptions(), Option.MAX_PORT).isEmpty()) {
+		if (!OptionUtils.getString(this.getOptions(), Option.MAX_PORT).isEmpty()) {
 			builder.append(" --max-port ").append(OptionUtils.getString(this.getOptions(), Option.MAX_PORT));
 		}
-		if (!OptionUtils.get(this.getOptions(), Option.MIN_PORT).isEmpty()) {
+		if (!OptionUtils.getString(this.getOptions(), Option.MIN_PORT).isEmpty()) {
 			builder.append(" --min-port ").append(OptionUtils.getString(this.getOptions(), Option.MIN_PORT));
 		}
-		if (!OptionUtils.get(this.getOptions(), Option.RESOLVER).isEmpty()) {
+		if (!OptionUtils.getString(this.getOptions(), Option.RESOLVER).isEmpty()) {
 			builder.append(" --resolver ").append(OptionUtils.getString(this.getOptions(), Option.RESOLVER));
 		}
-		if (!OptionUtils.get(this.getOptions(), Option.MANUAL_IP).isEmpty()) {
+		if (!OptionUtils.getString(this.getOptions(), Option.MANUAL_IP).isEmpty()) {
 			builder.append(" --manual-ip ").append(OptionUtils.getString(this.getOptions(), Option.MANUAL_IP));
 		}
 		return builder.toString();

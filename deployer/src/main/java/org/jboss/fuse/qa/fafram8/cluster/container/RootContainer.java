@@ -124,7 +124,7 @@ public class RootContainer extends Container {
 	}
 
 	/**
-	 *
+	 * Sets and modifies all necessary options and things for root container.
 	 */
 	protected void modifyContainer() {
 		// Instantiate the node manager based on node.getHost()
@@ -138,7 +138,7 @@ public class RootContainer extends Container {
 				log.trace("First time connecting node executor");
 				super.getNode().getExecutor().connect();
 			}
-			if(super.getNode().getExecutor().isCygwin()){
+			if (super.getNode().getExecutor().isCygwin()) {
 				log.trace("Using RemoteWindowsNodeManager!");
 				nodeManager = new RemoteWindowsNodeManager(new WindowsExecutor(super.getNode().getExecutor()), super.getExecutor());
 			} else {

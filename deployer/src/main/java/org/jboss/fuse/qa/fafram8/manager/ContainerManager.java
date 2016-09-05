@@ -205,13 +205,10 @@ public class ContainerManager {
 		}
 
 		// Successfully creating Fabric on Windows requires some special hacking ...
-		if(c.getNode().getExecutor().isCygwin()){
+		if (c.getNode().getExecutor().isCygwin()) {
 			setupWindowsFabric(c, fabricString);
 		} else {
-			// TODO(rjakubco): windows specific
-			c.getExecutor().reconnect();
 			c.executeCommand("fabric:create" + (fabricString.startsWith(" ") ? StringUtils.EMPTY : " ") + fabricString);
-
 		}
 
 		// Continue...
@@ -227,8 +224,13 @@ public class ContainerManager {
 		uploadBundles(c);
 	}
 
+	/**
+	 * Windows requires some special steps for successful fabric creation.
+	 *
+	 * @param c container on which fabric should be created
+	 * @param fabricString fabric:create options that will be added to fabric:create command
+	 */
 	public static void setupWindowsFabric(Container c, String fabricString) {
-		c.getExecutor().reconnect();
 		c.executeCommand("fabric:create" + (fabricString.startsWith(" ") ? StringUtils.EMPTY : " ") + fabricString);
 
 		try {
