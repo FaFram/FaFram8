@@ -29,7 +29,7 @@ public class RemoteWindowsTest {
 	private Container root = RootContainer.builder().name("windows-root").withFabric("--resolver localip").build();
 
 	private Container ssh = SshContainer.builder().name("windows-ssh").parent(root).build();
-	private Container ssh2 = SshContainer.builder().name("second-ssh").directory("test/dir").profiles("hawtio").parent(root).sameNodeAs(ssh).build();
+	private Container ssh2 = SshContainer.builder().name("second-ssh").directory("/home/hudson/test/dir").profiles("hawtio").parent(root).sameNodeAs(ssh).build();
 	private Container childSsh = ChildContainer.builder().name("child-root").parent(ssh).build();
 
 	@Rule
@@ -44,6 +44,7 @@ public class RemoteWindowsTest {
 		System.setProperty(FaframConstant.HOST_PASSWORD, "redhat");
 		// add correct path on windows
 		System.setProperty(FaframConstant.FUSE_ZIP, FaframTestBase.CURRENT_WIN_LOCAL_URL);
+		System.setProperty(FaframConstant.START_WAIT_TIME, "600");
 	}
 
 	@AfterClass
@@ -53,6 +54,7 @@ public class RemoteWindowsTest {
 		System.clearProperty(FaframConstant.OPENSTACK_FLAVOR);
 		System.clearProperty(FaframConstant.HOST_USER);
 		System.clearProperty(FaframConstant.HOST_PASSWORD);
+		System.clearProperty(FaframConstant.START_WAIT_TIME);
 	}
 
 	@Test

@@ -9,7 +9,7 @@ import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
-import org.jboss.fuse.qa.fafram8.manager.RemoteWindowsNodeManager;
+import org.jboss.fuse.qa.fafram8.manager.RemoteNodeManager;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.util.Option;
@@ -68,34 +68,34 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 	// for thread support
 	@Override
 	public void create(Executor executor) {
-		super.setFuseSshPort(SSH_PORT + counter.get());
+		if (!OptionUtils.getString(this.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
+			final JoinContainer container = (JoinContainer) ContainerManager.getContainer(OptionUtils.getString(this.getOptions(), Option.SAME_NODE_AS));
+			super.setFuseSshPort(SSH_PORT + container.getCounter().incrementAndGet());
+
+			// Modify ports for running multiple join containers on the same node
+			ModifierExecutor.addModifiers(putProperty("etc/system.properties", "activemq.port",
+					String.valueOf(ACTIVEMQ_PORT + container.getCounter().get())));
+			ModifierExecutor.addModifiers(putProperty("etc/system.properties", "org.osgi.service.http.port",
+					String.valueOf(ORG_OSGI_SERVICE_HTTP_PORT + container.getCounter().get())));
+			ModifierExecutor.addModifiers(
+					putProperty("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port",
+							String.valueOf(ORG_OSGI_SERVICE_HTTP_PORT + container.getCounter().get())));
+			ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.shell.cfg", "sshPort",
+					String.valueOf(SSH_PORT + container.getCounter().get())));
+			ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.management.cfg", "rmiRegistryPort",
+					String.valueOf(RMI_REGISTRY_PORT + container.getCounter().get())));
+			ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.management.cfg", "rmiServerPort",
+					String.valueOf(RMI_SERVER_PORT + container.getCounter().get())));
+			// Add 1 to counter of this container. This is needed when somebody use this container to run other container on the same node
+		}
+
 		log.trace("Connecting in JoinContainer");
 		super.setExecutor(super.createExecutor());
 		log.info("Creating JoinContainer: " + this);
 
 		super.modifyContainer();
 
-		if (!OptionUtils.getString(this.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
-			final JoinContainer container = (JoinContainer) ContainerManager.getContainer(OptionUtils.getString(this.getOptions(), Option.SAME_NODE_AS));
-			// Modify ports for running multiple join containers on the same node
-			ModifierExecutor.addModifiers(putProperty("etc/system.properties", "activemq.port",
-					String.valueOf(ACTIVEMQ_PORT + container.getCounter().addAndGet(1))));
-			ModifierExecutor.addModifiers(putProperty("etc/system.properties", "org.osgi.service.http.port",
-					String.valueOf(ORG_OSGI_SERVICE_HTTP_PORT + container.getCounter().addAndGet(1))));
-			ModifierExecutor.addModifiers(
-					putProperty("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port",
-							String.valueOf(ORG_OSGI_SERVICE_HTTP_PORT + container.getCounter().addAndGet(1))));
-			ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.shell.cfg", "sshPort",
-					String.valueOf(SSH_PORT + container.getCounter().addAndGet(1))));
-			ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.management.cfg", "rmiRegistryPort",
-					String.valueOf(RMI_REGISTRY_PORT + container.getCounter().addAndGet(1))));
-			ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.management.cfg", "rmiServerPort",
-					String.valueOf(RMI_SERVER_PORT + container.getCounter().addAndGet(1))));
-			// Add 1 to counter of this container. This is needed when somebody use this container to run other container on the same node
-			counter.addAndGet(1);
-		}
-
-		((RemoteWindowsNodeManager) nodeManager).clean(OptionUtils.getString(this.getOptions(), Option.WORKING_DIRECTORY));
+		((RemoteNodeManager) nodeManager).clean(OptionUtils.getString(this.getOptions(), Option.WORKING_DIRECTORY));
 		nodeManager.checkRunningContainer();
 		try {
 			nodeManager.prepareZip();

@@ -205,7 +205,8 @@ public class ContainerManager {
 		}
 
 		// Successfully creating Fabric on Windows requires some special hacking ...
-		if (c.getNode().getExecutor().isCygwin()) {
+		// We need to first check if executor is connected if not then we are working on localhost and don't need to check OS
+		if (c.getNode().getExecutor().isConnected() && c.getNode().getExecutor().isCygwin()) {
 			setupWindowsFabric(c, fabricString);
 		} else {
 			c.executeCommand("fabric:create" + (fabricString.startsWith(" ") ? StringUtils.EMPTY : " ") + fabricString);

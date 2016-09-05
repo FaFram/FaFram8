@@ -80,7 +80,7 @@ public final class Deployer {
 			deployWithThreads();
 			ContainerManager.createEnsemble();
 		} else {
-			// Deployment on windows is not supported...unfortunately....
+			// Multithread deployment on windows is not supported...unfortunately....
 			checkOSandConvertContainers();
 			for (Container c : ContainerManager.getContainerList()) {
 				if (!c.isCreated()) {

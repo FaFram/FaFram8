@@ -15,7 +15,6 @@ import org.jboss.fuse.qa.fafram8.manager.LocalNodeManager;
 import org.jboss.fuse.qa.fafram8.manager.NodeManager;
 import org.jboss.fuse.qa.fafram8.manager.RemoteLinuxNodeManager;
 import org.jboss.fuse.qa.fafram8.manager.RemoteNodeManager;
-import org.jboss.fuse.qa.fafram8.manager.RemoteWindowsNodeManager;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.modifier.impl.JvmMemoryModifier;
@@ -96,6 +95,8 @@ public class RootContainer extends Container {
 
 			nodeManager.clean();
 			nodeManager.checkRunningContainer();
+			super.getNode().getExecutor().executeCommands(OptionUtils.get(this.getOptions(), Option.STARTUP_NODE_COMMANDS)
+					.toArray(new String[OptionUtils.get(this.getOptions(), Option.STARTUP_NODE_COMMANDS).size()]));
 			try {
 				nodeManager.prepareZip();
 				nodeManager.unzipArtifact(this);
@@ -140,7 +141,7 @@ public class RootContainer extends Container {
 			}
 			if (super.getNode().getExecutor().isCygwin()) {
 				log.trace("Using RemoteWindowsNodeManager!");
-				nodeManager = new RemoteWindowsNodeManager(new WindowsExecutor(super.getNode().getExecutor()), super.getExecutor());
+				nodeManager = new RemoteLinuxNodeManager(new WindowsExecutor(super.getNode().getExecutor()), super.getExecutor());
 			} else {
 				nodeManager = new RemoteLinuxNodeManager(super.getNode().getExecutor(), super.getExecutor());
 			}

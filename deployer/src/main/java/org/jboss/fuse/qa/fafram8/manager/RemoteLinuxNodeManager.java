@@ -65,6 +65,10 @@ public class RemoteLinuxNodeManager implements RemoteNodeManager {
 	public void unzipArtifact(RootContainer container) {
 		log.info("Unzipping fuse from " + productZipPath);
 		// Jar can't unzip to specified directory, so we need to change the dir first
+		if (executor.isCygwin()) {
+			productZipPath = "$(cygpath -w " + productZipPath + ")";
+		}
+
 		if (productZipPath.contains(getFolder())) {
 			executor.executeCommand("cd " + getFolder() + "; jar xf $(basename " + productZipPath + ")");
 		} else {
@@ -73,7 +77,7 @@ public class RemoteLinuxNodeManager implements RemoteNodeManager {
 
 		// Problem if WORKING_DIRECTORY is set because then the first command doesn't work
 
-		productPath = "".equals(SystemProperty.getWorkingDirectory()) || "".equals(workingDirectory)
+		productPath = "".equals(SystemProperty.getWorkingDirectory()) && "".equals(workingDirectory)
 				? executor.executeCommand("ls -d $PWD" + SEP + getFolder() + SEP + "*" + SEP).trim()
 				: executor.executeCommand("ls -d " + getFolder() + SEP + "*" + SEP).trim();
 
@@ -194,7 +198,6 @@ public class RemoteLinuxNodeManager implements RemoteNodeManager {
 	@Override
 	public boolean isRunning() {
 		log.info("Checking container");
-		// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
 		return !StringUtils.containsIgnoreCase(executor.executeCommandSilently(productPath + "bin" + SEP + "status"), "not");
 	}
 }
