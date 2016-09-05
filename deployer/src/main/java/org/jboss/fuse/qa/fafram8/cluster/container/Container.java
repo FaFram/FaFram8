@@ -324,7 +324,7 @@ public abstract class Container implements Comparable<Container> {
 	 * @return this
 	 */
 	public Container commands(List<String> commands) {
-		OptionUtils.set(getOptions(), Option.COMMANDS, commands.toArray(new String[commands.size()]));
+		OptionUtils.set(getOptions(), Option.COMMANDS, commands);
 		return this;
 	}
 
@@ -335,7 +335,7 @@ public abstract class Container implements Comparable<Container> {
 	 * @return this
 	 */
 	public Container bundles(List<String> bundles) {
-		OptionUtils.set(getOptions(), Option.BUNDLES, bundles.toArray(new String[bundles.size()]));
+		OptionUtils.set(getOptions(), Option.BUNDLES, bundles);
 		return this;
 	}
 
@@ -357,7 +357,7 @@ public abstract class Container implements Comparable<Container> {
 	 * @return this
 	 */
 	public Container profiles(List<String> profiles) {
-		OptionUtils.set(getOptions(), Option.PROFILE, profiles.toArray(new String[profiles.size()]));
+		OptionUtils.set(getOptions(), Option.PROFILE, profiles);
 		return this;
 	}
 
@@ -412,7 +412,7 @@ public abstract class Container implements Comparable<Container> {
 	 * @return this
 	 */
 	public Container env(List<String> envs) {
-		OptionUtils.set(getOptions(), Option.ENV, envs.toArray(new String[envs.size()]));
+		OptionUtils.set(getOptions(), Option.ENV, envs);
 		return this;
 	}
 
@@ -423,7 +423,7 @@ public abstract class Container implements Comparable<Container> {
 	 * @return this
 	 */
 	public Container jvmOpts(List<String> jvmOpts) {
-		OptionUtils.set(getOptions(), Option.JVM_OPTS, jvmOpts.toArray(new String[jvmOpts.size()]));
+		OptionUtils.set(getOptions(), Option.JVM_OPTS, jvmOpts);
 		return this;
 	}
 
@@ -434,7 +434,7 @@ public abstract class Container implements Comparable<Container> {
 	 * @return this
 	 */
 	public Container jvmMemOpts(List<String> jvmMemOpts) {
-		OptionUtils.set(getOptions(), Option.JVM_MEM_OPTS, jvmMemOpts.toArray(new String[jvmMemOpts.size()]));
+		OptionUtils.set(getOptions(), Option.JVM_MEM_OPTS, jvmMemOpts);
 		return this;
 	}
 
