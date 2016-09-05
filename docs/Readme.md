@@ -251,6 +251,7 @@ The workflow or properties can be modified using system properties. Full list of
 * command.retry.timeout - Retry timeout in seconds when the command response contains "not found"
 * with.threads - Run Fafram in thread mode (spawning containers in threads)
 * without.public.ip - Emergency flag for use with ssh containers without public ip - disables the executors
+* retry.provisioning - Flag to tell FaFram to try restart container if it get to "failed" state (that can happen if there is problem with proxy). Useful in big and time consuming deployments
 
 ### Patches
 
