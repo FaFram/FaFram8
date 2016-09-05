@@ -34,6 +34,17 @@ public final class OptionUtils {
 	}
 
 	/**
+	 * Persists the value in the specified map. If the value already exists it checks the singleValued attribute
+	 * and if it is true, then it overwrites the entry, otherwise it adds it to the list.
+	 * @param map options map
+	 * @param option option
+	 * @param values values to insert
+	 */
+	public static void set(Map<Option, List<String>> map, Option option, List<String> values) {
+		set(map, option, values.toArray(new String[values.size()]));
+	}
+
+	/**
 	 * Removes the switch if presents and trims the entry.
 	 * @param option option
 	 * @param values values array
@@ -134,5 +145,16 @@ public final class OptionUtils {
 		} else {
 			return list.get(0);
 		}
+	}
+
+	/**
+	 * Overwrite the specified option with new values.
+	 * @param map options map
+	 * @param option option
+	 * @param newValue new value
+	 */
+	public static void overwrite(Map<Option, List<String>> map, Option option, List<String> newValue) {
+		get(map, option).clear();
+		set(map, option, newValue);
 	}
 }

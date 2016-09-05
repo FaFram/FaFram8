@@ -403,8 +403,11 @@ public class ContainerManager {
 		final Container root = getRoot();
 
 		for (Broker b : brokers) {
-			//add all necessary command into list
-			OptionUtils.get(root.getOptions(), Option.COMMANDS).addAll(b.getCreateCommands());
+			//add all necessary command into list - add them in the start of the list
+			final List<String> cmds = new ArrayList();
+			cmds.addAll(b.getCreateCommands());
+			cmds.addAll(OptionUtils.get(root.getOptions(), Option.COMMANDS));
+			OptionUtils.overwrite(root.getOptions(), Option.COMMANDS, cmds);
 			// assign profiles to all commands
 			for (String containerName : b.getContainers()) {
 				final Container c = getContainer(containerName);
@@ -562,23 +565,6 @@ public class ContainerManager {
 		}
 
 		return containers;
-	}
-
-	/**
-	 * Gets RootContainer with given host (Fafram8 doesn't support 2 root containers on the same node).
-	 *
-	 * @param host host
-	 * @return root container with given host
-	 */
-	public static Container getRootContainerByHost(String host) {
-		for (Container container : ContainerManager.getContainerList()) {
-			if (container instanceof RootContainer) {
-				if (host.equals(container.getNode().getHost())) {
-					return container;
-				}
-			}
-		}
-		throw new FaframException("Container with given host doesn't exist!");
 	}
 }
 
