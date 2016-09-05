@@ -67,8 +67,6 @@ public class RemoteWindowsNodeManager implements RemoteNodeManager {
 		// Check if remote machine is windows and convert zip path to windows path using cygwin
 
 		productZipPath = "$(cygpath -w " + productZipPath + ")";
-		// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
-		executor.reconnect();
 
 		// Jar can't unzip to specified directory, so we need to change the dir first
 		if (productZipPath.contains(getFolder())) {
@@ -98,8 +96,6 @@ public class RemoteWindowsNodeManager implements RemoteNodeManager {
 	public void startFuse() {
 		try {
 			log.info("Starting container");
-			// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
-			executor.reconnect();
 			executor.executeCommand(productPath + "bin" + SEP + "start");
 
 			fuseExecutor.waitForBoot();
@@ -121,7 +117,6 @@ public class RemoteWindowsNodeManager implements RemoteNodeManager {
 
 	@Override
 	public void stop() {
-		executor.reconnect();
 		log.info("Stopping container");
 		executor.executeCommand(productPath + "bin" + SEP + "stop");
 		fuseExecutor.waitForShutdown();
@@ -141,12 +136,6 @@ public class RemoteWindowsNodeManager implements RemoteNodeManager {
 
 	@Override
 	public void clean(String containerPath) {
-// Maybe better cleaning
-//		if (isCygwin()) {
-//			executor.executeCommand("for pid in $( jps -l | grep -i karaf | awk '{ print $1 }' ); do tskill $pid /V; done");
-//		} else {
-//			executor.executeCommand("pkill -9 -f karaf.base");
-//		}
 		log.debug("Killing container");
 		executor.executeCommand("pkill -9 -f " + containerPath);
 
@@ -170,10 +159,8 @@ public class RemoteWindowsNodeManager implements RemoteNodeManager {
 
 	@Override
 	public void restart() {
-		executor.reconnect();
 		executor.executeCommand(productPath + SEP + "bin" + SEP + "stop");
 		fuseExecutor.waitForShutdown();
-//		startFuse();
 	}
 
 	@Override
@@ -197,7 +184,6 @@ public class RemoteWindowsNodeManager implements RemoteNodeManager {
 	@Override
 	public boolean isRunning() {
 		log.debug("Checking container's status....");
-		executor.reconnect();
 		return !StringUtils.containsIgnoreCase(executor.executeCommand(productPath + "bin" + SEP + "status"), "not");
 	}
 }

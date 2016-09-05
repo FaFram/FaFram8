@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,64 +31,51 @@ public abstract class Container implements Comparable<Container> {
 	public static final int DEFAULT_FUSE_PORT = 8101;
 
 	@Getter
-	@Setter
 	private String name;
 
 	@Getter
-	@Setter
 	private Executor executor;
 
 	@Getter
-	@Setter
 	private Node node;
 
 	@Getter
-	@Setter
 	private Container parent;
 
 	@Getter
-	@Setter
 	// Because when using .containers(Root, Child), the child is spawned before the root is in the list,
 	// so we just save it's name and assign the actual container object later
 	private String parentName;
 
 	@Getter
-	@Setter
 	private boolean root;
 
 	@Getter
-	@Setter
 	private boolean online;
 
 	@Getter
-	@Setter
 	// Flag if the container was really created - for example suppressStart does not create the containers and then the destroy methods
 	// were causing problems
 	private boolean created;
 
 	@Getter
-	@Setter
 	private boolean fabric;
 
 	@Getter
-	@Setter
 	private Map<Option, List<String>> options = getInitialOptionsMap();
 
 	// Full path to unzipped product directory for root container
 	@Getter
-	@Setter
 	private String fusePath;
 
 	// Property for deciding if we should clean environment or only try to connect to running instance
 	// Default value is set to false
 	@Getter
-	@Setter
 	private boolean onlyConnect = false;
 
 	// SSH port of Fuse instance. This parameter is used only when using onlyConnect feature for connecting to running Fuse instance
 	// This port is used when creating executor for Fuse
 	@Getter
-	@Setter
 	private int fuseSshPort = DEFAULT_FUSE_PORT;
 
 	/**
@@ -487,5 +473,57 @@ public abstract class Container implements Comparable<Container> {
 			c = currentParent;
 		} while (c != null);
 		return count;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setExecutor(Executor executor) {
+		this.executor = executor;
+	}
+
+	public void setNode(Node node) {
+		this.node = node;
+	}
+
+	public void setParent(Container parent) {
+		this.parent = parent;
+	}
+
+	public void setParentName(String parentName) {
+		this.parentName = parentName;
+	}
+
+	public void setRoot(boolean root) {
+		this.root = root;
+	}
+
+	public void setOnline(boolean online) {
+		this.online = online;
+	}
+
+	public void setCreated(boolean created) {
+		this.created = created;
+	}
+
+	public void setFabric(boolean fabric) {
+		this.fabric = fabric;
+	}
+
+	public void setOptions(Map<Option, List<String>> options) {
+		this.options = options;
+	}
+
+	public void setFusePath(String fusePath) {
+		this.fusePath = fusePath;
+	}
+
+	public void setOnlyConnect(boolean onlyConnect) {
+		this.onlyConnect = onlyConnect;
+	}
+
+	public void setFuseSshPort(int fuseSshPort) {
+		this.fuseSshPort = fuseSshPort;
 	}
 }

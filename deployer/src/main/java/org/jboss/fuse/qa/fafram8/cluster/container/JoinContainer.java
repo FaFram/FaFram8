@@ -64,7 +64,6 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 	// for thread support
 	@Override
 	public void create(Executor executor) {
-		//TODO set working dir for join container -> because by default root container will create fafram -> this is problem if creating more than 1 container on the same node
 		super.setFuseSshPort(SSH_PORT + counter.get());
 		log.trace("Connecting in JoinContainer");
 		super.setExecutor(super.createExecutor());
@@ -99,6 +98,7 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 			String options = parseOptions();
 
 			// Name of the container should be changed in property files -> only join with correct password for root and zookeeperUri from root
+			log.trace("First time connecting join executor");
 			super.getExecutor().connect();
 			super.getExecutor().executeCommands("fabric:join " + options + " " + zookeeperUri);
 			super.getExecutor().waitForProvisioning(this);

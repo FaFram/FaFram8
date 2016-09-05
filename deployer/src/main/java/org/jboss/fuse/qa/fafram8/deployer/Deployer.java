@@ -74,13 +74,13 @@ public final class Deployer {
 			}
 		}
 
-		checkOSandConvertContainers();
-
 		if (SystemProperty.isWithThreads()) {
 			log.info("*******************************Deploying with THREADS*******************************");
 			deployWithThreads();
 			ContainerManager.createEnsemble();
 		} else {
+			// Deployment on windows is not supported...unfortunately....
+			checkOSandConvertContainers();
 			for (Container c : ContainerManager.getContainerList()) {
 				if (!c.isCreated()) {
 					c.create();
@@ -292,10 +292,10 @@ public final class Deployer {
 
 			if (container instanceof SshContainer) {
 				Executor executor = container.getNode().createExecutor();
+				log.trace("Connecting node executor for checking OS on the machine");
 				executor.connect();
 
 				String os = executor.executeCommandSilently("uname");
-				// TODO(rjakubco): Wrong for testing purposes -> correct for merge
 				if (StringUtils.containsIgnoreCase(os, "cyg")) {
 					// Create JoinContainer from SshContainer
 					log.info("Container " + container.getName() + " running on Windows. Converting to join container!");

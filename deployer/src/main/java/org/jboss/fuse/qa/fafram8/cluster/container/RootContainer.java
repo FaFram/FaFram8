@@ -9,6 +9,7 @@ import static org.jboss.fuse.qa.fafram8.modifier.impl.RootNameModifier.setRootNa
 import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
+import org.jboss.fuse.qa.fafram8.executor.WindowsExecutor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.manager.LocalNodeManager;
 import org.jboss.fuse.qa.fafram8.manager.NodeManager;
@@ -118,7 +119,7 @@ public class RootContainer extends Container {
 		} else {
 			log.trace("Connecting both executors when using onlyConnect");
 			super.getExecutor().connect();
-//			super.getNode().getExecutor().connect();
+			super.getNode().getExecutor().connect();
 		}
 	}
 
@@ -126,10 +127,9 @@ public class RootContainer extends Container {
 	 *
 	 */
 	protected void modifyContainer() {
-
 		// Instantiate the node manager based on node.getHost()
 		if ("localhost".equals(super.getNode().getHost())) {
-			nodeManager = new LocalNodeManager(getExecutor());
+			nodeManager = new LocalNodeManager(super.getExecutor());
 		} else {
 			// Re-create the executor
 			super.getNode().setExecutor(super.getNode().createExecutor());
@@ -140,7 +140,7 @@ public class RootContainer extends Container {
 			}
 			if(super.getNode().getExecutor().isCygwin()){
 				log.trace("Using RemoteWindowsNodeManager!");
-				nodeManager = new RemoteWindowsNodeManager(super.getNode().getExecutor(), super.getExecutor());
+				nodeManager = new RemoteWindowsNodeManager(new WindowsExecutor(super.getNode().getExecutor()), super.getExecutor());
 			} else {
 				nodeManager = new RemoteLinuxNodeManager(super.getNode().getExecutor(), super.getExecutor());
 			}
@@ -239,7 +239,7 @@ public class RootContainer extends Container {
 
 	@Override
 	public void kill() {
-		nodeManager.kill();
+		super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());
 		super.setOnline(false);
 		log.trace("Disconnecting executor in root's kill()");
 		super.getExecutor().disconnect();

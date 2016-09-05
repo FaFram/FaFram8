@@ -1,6 +1,6 @@
 package org.jboss.fuse.qa.fafram8.test.remote;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
@@ -19,26 +19,21 @@ import org.junit.Test;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * test cases:
- * - join on windows
- * - 2 containers on the same node
- * - ssh container with join
- * - kill, stop, destroy, start, restart
- * - working dir set on ssh - what happens to join
- * http://dashboard.centralci.eng.rdu2.redhat.com/dashboard/project/images/b2005497-4aaf-4a64-817d-847d5d9319f9/
+ * Test for windows fabric deployment.
+ *
+ * Windows snapshot on OpenStack: http://dashboard.centralci.eng.rdu2.redhat.com/dashboard/project/images/3fe107d5-df68-4f43-954d-a71d2ae4a3aa/
  * @author : Roman Jakubco (rjakubco@redhat.com)
  */
 @Slf4j
 public class RemoteWindowsTest {
-	private Container root = RootContainer.builder().name("windows-root").withFabric().build();
+	private Container root = RootContainer.builder().name("windows-root").withFabric("--resolver localip").build();
 
 	private Container ssh = SshContainer.builder().name("windows-ssh").parent(root).build();
-	private Container ssh2 = SshContainer.builder().name("second-ssh").profiles("hawtio").parent(root).sameNodeAs(ssh).build();
-	private Container ssh3 = SshContainer.builder().name("third-ssh").directory("/home/fuse/test/dir/").parent(root).sameNodeAs(ssh).build();
+	private Container ssh2 = SshContainer.builder().name("second-ssh").directory("test/dir").profiles("hawtio").parent(root).sameNodeAs(ssh).build();
 	private Container childSsh = ChildContainer.builder().name("child-root").parent(ssh).build();
 
 	@Rule
-	public Fafram fafram = new Fafram().provider(FaframProvider.OPENSTACK).containers(root, ssh, ssh2, ssh3, childSsh);
+	public Fafram fafram = new Fafram().provider(FaframProvider.OPENSTACK).containers(root, ssh, ssh2, childSsh);
 
 	@BeforeClass
 	public static void Before() {
@@ -49,7 +44,6 @@ public class RemoteWindowsTest {
 		System.setProperty(FaframConstant.HOST_PASSWORD, "redhat");
 		// add correct path on windows
 		System.setProperty(FaframConstant.FUSE_ZIP, FaframTestBase.CURRENT_WIN_LOCAL_URL);
-//		System.setProperty(FaframConstant.WITH_THREADS, "");
 	}
 
 	@AfterClass
@@ -59,14 +53,12 @@ public class RemoteWindowsTest {
 
 	@Test
 	public void testWindowsCluster() throws Exception {
-		ssh2.kill();
-		assertFalse(ssh2.executeNodeCommand("ps aux | grep " + ssh2.getName()).contains("karaf.base"));
+		System.out.println(root.executeCommand("container-list"));
+		assertTrue(ssh2.executeCommand("shell:info | grep \"Karaf base\"").contains("C:\\Users\\hudson\\test\\dircontainers\\second-ssh"));
+		assertTrue(ssh.executeCommand("shell:info | grep \"Karaf base\"").contains("C:\\Users\\hudson\\containers\\windows-ssh\\fafram"));
+		ssh2.restart();
 
-		ssh3.restart();
-
-		ssh3.stop();
-
-		ssh3.start();
-
+		ssh.stop();
+		ssh.start();
 	}
 }
