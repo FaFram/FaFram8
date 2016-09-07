@@ -16,6 +16,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OneAttributeModel {
-	@XmlAttribute
+	@XmlAttribute(name = "path")
 	private String value;
 }
