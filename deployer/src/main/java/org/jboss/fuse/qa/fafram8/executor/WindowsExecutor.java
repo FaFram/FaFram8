@@ -63,8 +63,8 @@ public class WindowsExecutor extends Executor {
 
 		// When connected, schedule a new keep alive thread for this executor
 		// First shutdown all other tasks from previous runs, because you can use .connect() without previous .disconnect()
-		this.stopKeepAliveTimer();
-		this.startKeepAliveTimer();
+		super.stopKeepAliveTimer();
+		super.startKeepAliveTimer();
 	}
 
 	/**

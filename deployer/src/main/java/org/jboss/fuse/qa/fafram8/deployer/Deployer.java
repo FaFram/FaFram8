@@ -185,7 +185,6 @@ public final class Deployer {
 
 	/**
 	 * NOT USED
-	 * TODO(rjakubco): Upgrade and improve and check if works for joined containers
 	 * Destroys containers using threads.
 	 *
 	 * @param force flag if the exceptions should be ignored

@@ -240,7 +240,7 @@ public class ContainerManager {
 			e.printStackTrace();
 		}
 		if (!((RemoteNodeManager) ((RootContainer) c).getNodeManager()).isRunning()) {
-			log.error("STARTING again");
+			log.trace("STARTING again");
 			((RootContainer) c).getNodeManager().startFuse();
 		}
 	}

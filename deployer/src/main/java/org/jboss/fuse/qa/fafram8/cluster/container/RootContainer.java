@@ -13,7 +13,6 @@ import org.jboss.fuse.qa.fafram8.executor.WindowsExecutor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.manager.LocalNodeManager;
 import org.jboss.fuse.qa.fafram8.manager.NodeManager;
-import org.jboss.fuse.qa.fafram8.manager.RemoteLinuxNodeManager;
 import org.jboss.fuse.qa.fafram8.manager.RemoteNodeManager;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
@@ -141,9 +140,9 @@ public class RootContainer extends Container {
 			}
 			if (super.getNode().getExecutor().isCygwin()) {
 				log.trace("Using RemoteWindowsNodeManager!");
-				nodeManager = new RemoteLinuxNodeManager(new WindowsExecutor(super.getNode().getExecutor()), super.getExecutor());
+				nodeManager = new RemoteNodeManager(new WindowsExecutor(super.getNode().getExecutor()), super.getExecutor());
 			} else {
-				nodeManager = new RemoteLinuxNodeManager(super.getNode().getExecutor(), super.getExecutor());
+				nodeManager = new RemoteNodeManager(super.getNode().getExecutor(), super.getExecutor());
 			}
 			// Set working directory for root container if it was set on root container object
 			// It will be either empty string of file system path

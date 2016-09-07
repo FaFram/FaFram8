@@ -65,7 +65,6 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 		create(null);
 	}
 
-	// for thread support
 	@Override
 	public void create(Executor executor) {
 		if (!OptionUtils.getString(this.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
@@ -86,10 +85,8 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 					String.valueOf(RMI_REGISTRY_PORT + container.getCounter().get())));
 			ModifierExecutor.addModifiers(putProperty("etc/org.apache.karaf.management.cfg", "rmiServerPort",
 					String.valueOf(RMI_SERVER_PORT + container.getCounter().get())));
-			// Add 1 to counter of this container. This is needed when somebody use this container to run other container on the same node
 		}
 
-		log.trace("Connecting in JoinContainer");
 		super.setExecutor(super.createExecutor());
 		log.info("Creating JoinContainer: " + this);
 
@@ -105,7 +102,7 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 			nodeManager.startFuse();
 
 			// Parent info
-			final String uri = super.getParent().getExecutor().executeCommand("fabric:info");
+			final String uri = super.getParent().getExecutor().executeCommandSilently("fabric:info");
 			final String zookeeperUri = StringUtils.substringBetween(uri, "ZooKeeper URI:", "\n").trim();
 			final String options = parseOptions();
 
@@ -208,7 +205,6 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 						.name(join.getName())
 						.user(join.getUser())
 						.password(join.getPassword())
-						// TODO(rjakubco): Not sure if join container can be recognized as root but probably it shouldn't
 						.root(false)
 
 						// We need to create a new instance of the node for the cloning case, otherwise all clones
