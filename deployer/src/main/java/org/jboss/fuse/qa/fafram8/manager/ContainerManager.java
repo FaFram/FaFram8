@@ -404,7 +404,7 @@ public class ContainerManager {
 
 		for (Broker b : brokers) {
 			//add all necessary command into list - add them in the start of the list
-			final List<String> cmds = new ArrayList();
+			final List<String> cmds = new ArrayList<>();
 			cmds.addAll(b.getCreateCommands());
 			cmds.addAll(OptionUtils.get(root.getOptions(), Option.COMMANDS));
 			OptionUtils.overwrite(root.getOptions(), Option.COMMANDS, cmds);
@@ -566,5 +566,42 @@ public class ContainerManager {
 
 		return containers;
 	}
-}
 
+	/**
+	 * Checks container logs for exceptions.
+	 */
+	public static void checkContainerLogs() {
+		// Do this using container-connect, as it should be usable even without public ip addresses
+		final StringBuilder builder = new StringBuilder();
+		final Container root;
+		try {
+			root = getRoot();
+		} catch (FaframException ex) {
+			// In fafram tests, there can be no root, therefore do nothing
+			return;
+		}
+		if (SystemProperty.suppressStart() || root.getExecutor() == null) {
+			return;
+		}
+		for (Container container : containerList) {
+			final String response;
+			if (root.getName().equals(container.getName())) {
+				response = root.getExecutor().executeCommandSilently("log:display-exception", true);
+			} else {
+				response = root.getExecutor().executeCommandSilently("container-connect " + container.getName() + " log:display-exception", true);
+			}
+			if (response != null && !response.trim().isEmpty()) {
+				builder.append("Container ").append(container.getName()).append(" contains exceptions in log!").append("\n");
+			}
+		}
+		if (!builder.toString().isEmpty()) {
+			log.warn("* * * * * * * * * * * * * * *");
+			for (String s : builder.toString().split("\n")) {
+				if (!s.isEmpty()) {
+					log.warn(s);
+				}
+			}
+			log.warn("* * * * * * * * * * * * * * *");
+		}
+	}
+}
