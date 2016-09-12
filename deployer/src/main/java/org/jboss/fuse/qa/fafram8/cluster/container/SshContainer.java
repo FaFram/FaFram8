@@ -108,6 +108,10 @@ public class SshContainer extends Container implements ThreadContainer {
 		} else {
 			log.warn(FaframConstant.WITHOUT_PUBLIC_IP + " is set, node won't be available");
 		}
+
+		// We can create executor even if the node does not have public IP
+		super.setExecutor(super.createExecutor());
+
 		executor.executeCommand(String.format("container-create-ssh --user %s --password %s --host %s %s %s",
 				super.getNode().getUsername(), super.getNode().getPassword(), super.getNode().getHost(), OptionUtils.getCommand(super.getOptions()), super.getName()));
 		super.setCreated(true);
@@ -120,7 +124,6 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		if (!SystemProperty.isWithoutPublicIp()) {
 			log.trace("First time connecting ssh executor");
-			super.setExecutor(super.createExecutor());
 			super.getExecutor().connect();
 		} else {
 			log.warn(FaframConstant.WITHOUT_PUBLIC_IP + " is set, executeCommand / executeNodeCommand won't work");
