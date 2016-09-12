@@ -54,7 +54,7 @@
 				The same applies for child and ssh containers.
 				Current drawback is that the template should be the same container type as the children.
 		-->
-		<root fabric="true" instances="1">
+		<root fabric="true" fabricArguments="--resolver localip --global-resolver localip" instances="1">
 			<name>ecervena-root123</name>
 			<jvmMemoryOpts xms="512M" xmx="1024M" permMem="512M" maxPermMem="1024M"/>
 			<jvmOpts>-Dproperty=Value</jvmOpts>

@@ -64,4 +64,7 @@ public class XmlRootContainerModel {
 
 	@XmlElement(name = "bundles")
 	private BundlesModel bundlesModel;
+
+	@XmlAttribute
+	private String fabricArguments;
 }

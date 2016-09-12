@@ -112,6 +112,9 @@ public class ContainersModel {
 		if (root.isFabric()) {
 			builder.withFabric();
 		}
+		if (root.getFabricArguments() != null) {
+			builder.withFabric(root.getFabricArguments());
+		}
 		if (root.getJvmMemoryOpts() != null) {
 			builder.jvmMemoryOpts(root.getJvmMemoryOpts().getXms(), root.getJvmMemoryOpts().getXmx(), root.getJvmMemoryOpts().getPermMem(), root.getJvmMemoryOpts().getMaxPermMem());
 		}

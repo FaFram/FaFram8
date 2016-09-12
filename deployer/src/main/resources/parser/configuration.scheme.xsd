@@ -97,6 +97,7 @@
 			<xs:element name="bundles" type="tns:bundlesType" minOccurs="0"/>
 		</xs:all>
 		<xs:attribute name="fabric" type="xs:boolean"/>
+		<xs:attribute name="fabricArguments" type="xs:string"/>
 		<xs:attribute name="id" type="xs:string"/>
 		<xs:attribute name="ref" type="xs:string"/>
 		<xs:attribute name="instances" type="xs:integer"/>
