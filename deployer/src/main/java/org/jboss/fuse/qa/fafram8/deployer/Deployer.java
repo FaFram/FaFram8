@@ -1,17 +1,22 @@
 package org.jboss.fuse.qa.fafram8.deployer;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
+import org.jboss.fuse.qa.fafram8.cluster.container.JoinContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
 import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exception.FaframThreadException;
+import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.openstack.exception.InvokerPoolInterruptedException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class Deployer {
 	private static final int TIMEOUT = 3;
+	private static final int THREAD_POOL = 10;
 
 	@Getter
 	@Setter
@@ -55,6 +61,7 @@ public final class Deployer {
 	public static void deploy() {
 		// Convert all parentName attributes to parent container object on all containers
 		for (Container container : ContainerManager.getContainerList()) {
+			setNodeIfNecessary(container);
 			if (!(container instanceof RootContainer)) {
 				if (container.getParent() == null) {
 					// Search the parent by its name
@@ -69,13 +76,14 @@ public final class Deployer {
 		}
 
 		if (SystemProperty.isWithThreads()) {
-			log.info("Deploying with threads!");
+			log.info("*******************************Deploying with THREADS*******************************");
 			deployWithThreads();
 			ContainerManager.createEnsemble();
 		} else {
+			// Multithread deployment on windows is not supported...unfortunately....
+			checkOSandConvertContainers();
 			for (Container c : ContainerManager.getContainerList()) {
 				if (!c.isCreated()) {
-					setNodeIfNecessary(c);
 					c.create();
 				}
 				if (ContainerManager.isEnsembleReady() && !ContainerManager.isEnsembleCreated()) {
@@ -87,6 +95,7 @@ public final class Deployer {
 
 	/**
 	 * Sets the node to the container if the container has "setNodeAs" set.
+	 *
 	 * @param c container
 	 */
 	private static void setNodeIfNecessary(Container c) {
@@ -120,17 +129,18 @@ public final class Deployer {
 	 * Creates containers using threads.
 	 */
 	private static void deployWithThreads() {
-		final ExecutorService executorService = Executors.newFixedThreadPool(10);
+		final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL);
 		final Set<Future> futureSet = new HashSet<>();
 
 		for (Container c : ContainerManager.getContainerList()) {
 			final ContainerSummoner containerSummoner;
 			if (!c.isCreated()) {
 				setNodeIfNecessary(c);
-				if (c instanceof RootContainer) {
+				if (c instanceof RootContainer && !(c instanceof JoinContainer)) {
 					containerSummoner = new ContainerSummoner(c, null);
 				} else {
 					final ContainerSummoner parentSummoner = summoningThreads.get(c.getParent().getName());
+					OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS);
 					containerSummoner = new ContainerSummoner(c, parentSummoner);
 				}
 				summoningThreads.putIfAbsent(c.getName(), containerSummoner);
@@ -153,7 +163,6 @@ public final class Deployer {
 		}
 
 		if (failed || ContainerSummoner.isStopWork()) {
-			log.debug("Shutting down spawning threads because flag " + failed + " or " + ContainerSummoner.isStopWork());
 			ContainerSummoner.setStopWork(true);
 			for (Future future : futureSet) {
 				future.cancel(true);
@@ -176,7 +185,6 @@ public final class Deployer {
 
 	/**
 	 * NOT USED
-	 * TODO(rjakubco): Upgrade and improve
 	 * Destroys containers using threads.
 	 *
 	 * @param force flag if the exceptions should be ignored
@@ -269,6 +277,41 @@ public final class Deployer {
 				ex.printStackTrace();
 				if (!force) {
 					throw new FaframException("Error while destroying container! " + ex);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Connects to each node of SSH containers and check if OS is windows. If it is then convert SSHContainer to JoinContainer.
+	 */
+	private static void checkOSandConvertContainers() {
+		final List<Container> tempContainers = new ArrayList<>(ContainerManager.getContainerList());
+		for (int i = 0; i < tempContainers.size(); i++) {
+			final Container container = tempContainers.get(i);
+
+			if (container instanceof SshContainer) {
+				final Executor executor = container.getNode().createExecutor();
+				log.trace("Connecting node executor for checking OS on the machine");
+				executor.connect();
+
+				final String os = executor.executeCommandSilently("uname");
+				if (StringUtils.containsIgnoreCase(os, "cyg")) {
+					// Create JoinContainer from SshContainer
+					log.info("Container " + container.getName() + " running on Windows. Converting to join container!");
+					final Container joinContainer = JoinContainer.joinBuilder(container).build();
+
+					// Replace parent for all child containers
+					final Set<Container> children = ContainerManager.getChildContainers(container);
+					for (Container child : children) {
+						child.setParent(joinContainer);
+						child.setParentName(joinContainer.getName());
+					}
+
+					// Remove SshContainer from ContainerList and replace it witj JoinContainer
+					ContainerManager.getContainerList().remove(i);
+					ContainerManager.getContainerList().add(i, joinContainer);
+					((SshContainer) container).setJoinContainer((JoinContainer) joinContainer);
 				}
 			}
 		}

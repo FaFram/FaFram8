@@ -251,6 +251,7 @@ The workflow or properties can be modified using system properties. Full list of
 * command.retry.timeout - Retry timeout in seconds when the command response contains "not found"
 * with.threads - Run Fafram in thread mode (spawning containers in threads)
 * without.public.ip - Emergency flag for use with ssh containers without public ip - disables the executors
+* retry.provisioning - Flag to tell FaFram to try restart container if it get to "failed" state (that can happen if there is problem with proxy). Useful in big and time consuming deployments
 
 ### Patches
 
@@ -335,6 +336,16 @@ Fafram8 provides support for building custom Maven project with custom goals and
 
  MavenPomInvoker.buildMvnProject(new MavenProject("/home/user/path/pom.xml", properties, "clean", "test);
  ```
+
+### Deploying Fabric with threads
+FaFram8 provides support for multithread creation of a Fabric cluster. It connects to a Fuse shell in multiple threads and executes the creation of maximum of 10 containers at the same time. To turn on this feature, you only need to add "-Dwith.threads" property to Maven execution command and FaFram8 starts to creating the cluster with threads. It can really help with big deployments where it can save a lot of time.
+
+Disclaimer: This feature should be used only if you are completly sure that your tests can handle multithread creation and they are fined tuned.
+
+### Windows support
+FaFram8 now supports also deployment of Fabric cluster on Windows machines. There is no need for special configuration or to explicitly tell FaFram8 that you are deploying cluster to windows machines. This mean you can have the same test configuration for both Linux and Windows deployment because FaFram8 automatically checks the operating system on all provided machines and if neccessary it converts defined SSH containers to "JoinContainers" (representation of SSH container as a root container on the Windows machine). It works also for deployment of multiple containers on the same node as it automatically changes necessary ports for running multiple instances of Fuse on the same node.
+
+Unfortunately this feature doesn't work with multithread deployment because Windows machines with cygwin have problem with handling multiple connections.
 
 ## FaFram8 example usage
 

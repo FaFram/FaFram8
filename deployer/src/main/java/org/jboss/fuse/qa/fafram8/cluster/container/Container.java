@@ -214,6 +214,7 @@ public abstract class Container implements Comparable<Container> {
 
 	/**
 	 * Getter.
+	 *
 	 * @return user
 	 */
 	public String getUser() {
@@ -222,6 +223,7 @@ public abstract class Container implements Comparable<Container> {
 
 	/**
 	 * Getter.
+	 *
 	 * @return password
 	 */
 	public String getPassword() {
@@ -451,6 +453,7 @@ public abstract class Container implements Comparable<Container> {
 
 	/**
 	 * Gets the initialized options map.
+	 *
 	 * @return initialized options map
 	 */
 	private Map<Option, List<String>> getInitialOptionsMap() {

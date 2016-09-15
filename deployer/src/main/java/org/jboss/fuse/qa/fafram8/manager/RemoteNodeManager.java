@@ -14,11 +14,10 @@ import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import java.io.File;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Remote node manager class.
+ * Specific remote node manager for Linux deployments.
  *
  * @author : Roman Jakubco (rjakubco@redhat.com)
  */
@@ -41,7 +40,6 @@ public class RemoteNodeManager implements NodeManager {
 	private String productPath;
 
 	// Working directory for root container for overriding system property fafram.working.dir
-	@Setter
 	private String workingDirectory = "";
 
 	/**
@@ -66,16 +64,11 @@ public class RemoteNodeManager implements NodeManager {
 	@Override
 	public void unzipArtifact(RootContainer container) {
 		log.info("Unzipping fuse from " + productZipPath);
-
-		// Check if remote machine is windows and convert zip path to windows path using cygwin
-		if (isCygwin()) {
+		// Jar can't unzip to specified directory, so we need to change the dir first
+		if (executor.isCygwin()) {
 			productZipPath = "$(cygpath -w " + productZipPath + ")";
-			// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
-			log.trace("Reconnecting the executor because of cygwin");
-			executor.reconnect();
 		}
 
-		// Jar can't unzip to specified directory, so we need to change the dir first
 		if (productZipPath.contains(getFolder())) {
 			executor.executeCommand("cd " + getFolder() + "; jar xf $(basename " + productZipPath + ")");
 		} else {
@@ -84,7 +77,7 @@ public class RemoteNodeManager implements NodeManager {
 
 		// Problem if WORKING_DIRECTORY is set because then the first command doesn't work
 
-		productPath = "".equals(SystemProperty.getWorkingDirectory())
+		productPath = "".equals(SystemProperty.getWorkingDirectory()) && "".equals(workingDirectory)
 				? executor.executeCommand("ls -d $PWD" + SEP + getFolder() + SEP + "*" + SEP).trim()
 				: executor.executeCommand("ls -d " + getFolder() + SEP + "*" + SEP).trim();
 
@@ -103,13 +96,8 @@ public class RemoteNodeManager implements NodeManager {
 	public void startFuse() {
 		try {
 			log.info("Starting container");
-			// TODO(rjakubco): win specific a.k.a wtf? Session has to be restarted to jar command to work
-			if (isCygwin()) {
-				log.trace("Reconnecting the executor because of cygwin");
-				executor.reconnect();
-			}
-
 			executor.executeCommand(productPath + "bin" + SEP + "start");
+
 			fuseExecutor.waitForBoot();
 			// TODO(avano): special usecase for remote standalone starting? maybe not necessary
 			if (!SystemProperty.isFabric() && !SystemProperty.skipBrokerWait()) {
@@ -137,15 +125,30 @@ public class RemoteNodeManager implements NodeManager {
 	/**
 	 * Stops all karaf instances and removes them.
 	 */
+	@Override
 	public void clean() {
 		// todo(rjakubco): create better cleaning mechanism for Fabric on Windows machines
+
 		log.debug("Killing container");
 		executor.executeCommand("pkill -9 -f karaf.base");
 
-		log.debug("Deleting Fafram folder on " + executor.getClient().getHost());
-		final String directory = SystemProperty.getWorkingDirectory().isEmpty()
-				? SystemProperty.getFaframFolder() : SystemProperty.getWorkingDirectory() + SEP + SystemProperty.getFaframFolder();
-		executor.executeCommand("rm -rf " + directory);
+		log.debug("Deleting Fuse folder on " + executor.getClient().getHost());
+
+		executor.executeCommand("rm -rf " + getFolder());
+	}
+
+	/**
+	 * Stops specific karaf instance that is define by provided container path.
+	 *
+	 * @param containerPath path to container home dir
+	 */
+	public void clean(String containerPath) {
+		log.debug("Killing container");
+		executor.executeCommand("pkill -9 -f " + containerPath);
+
+		log.debug("Deleting container folder on " + executor.getClient().getHost());
+
+		executor.executeCommand("rm -rf " + getFolder());
 	}
 
 	/**
@@ -188,11 +191,21 @@ public class RemoteNodeManager implements NodeManager {
 	}
 
 	/**
-	 * Checks if remote node is a windows server.
+	 * Setter.
 	 *
-	 * @return true if remote node is a windows server
+	 * @param workingDirectory working directory
 	 */
-	public boolean isCygwin() {
-		return StringUtils.containsIgnoreCase(executor.executeCommandSilently("uname"), "cyg");
+	public void setWorkingDirectory(String workingDirectory) {
+		this.workingDirectory = workingDirectory;
+	}
+
+	/**
+	 * Checks if container is running using bin/status script.
+	 *
+	 * @return true if container is running otherwise false
+	 */
+	public boolean isRunning() {
+		log.info("Checking container");
+		return !StringUtils.containsIgnoreCase(executor.executeCommandSilently(productPath + "bin" + SEP + "status"), "not");
 	}
 }

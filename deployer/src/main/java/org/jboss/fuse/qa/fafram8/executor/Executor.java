@@ -41,20 +41,26 @@ public class Executor {
 	public static final long DEFAULT_TIMEOUT_PERIOD = TimeUnit.SECONDS.toMillis(3);
 
 	@Getter
-	private SSHClient client;
+	protected SSHClient client;
 	private int provisionRetries = 0;
 
 	@Getter
 	@Setter
-	private ExecutorCommandHistory history;
+	protected ExecutorCommandHistory history;
 
 	@Getter
 	@Setter
-	private String name;
+	protected String name;
 
 	private Timer timer;
 	private static final long TIMER_START_DELAY = 300000L;
 	private static final long TIMER_DELAY = 600000L;
+
+	/**
+	 * Constructor.
+	 */
+	public Executor() {
+	}
 
 	/**
 	 * Constructor.
@@ -624,7 +630,7 @@ public class Executor {
 	 *
 	 * @param time time in millis
 	 */
-	private static void sleep(long time) {
+	protected static void sleep(long time) {
 		try {
 			Thread.sleep(time);
 		} catch (InterruptedException e) {
@@ -728,5 +734,14 @@ public class Executor {
 		}
 		log.trace("Stopping timer for " + this.getName());
 		timer.cancel();
+	}
+
+	/**
+	 * Checks if remote node is a windows server.
+	 *
+	 * @return true if remote node is a windows server
+	 */
+	public boolean isCygwin() {
+		return StringUtils.containsIgnoreCase(executeCommandSilently("uname"), "cyg");
 	}
 }

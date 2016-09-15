@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.jboss.fuse.qa.fafram8.openstack.provision.OpenStackClient;
 
+import org.junit.After;
 import org.junit.Test;
 
 /**
@@ -24,5 +25,10 @@ public class DefaultValuesTest {
 		final String id = osm.getServerFromRegister(namePrefix + "-" + serverName).getImageId();
 
 		assertEquals("Image ID should be overwritten.", imageId, id);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		osm.deleteServer(namePrefix + "-" + serverName);
 	}
 }

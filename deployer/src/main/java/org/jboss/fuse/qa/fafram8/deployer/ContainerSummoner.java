@@ -2,6 +2,7 @@ package org.jboss.fuse.qa.fafram8.deployer;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
+import org.jboss.fuse.qa.fafram8.cluster.container.JoinContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.ThreadContainer;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
@@ -57,7 +58,7 @@ public class ContainerSummoner implements Callable {
 	@Override
 	public Container call() throws InterruptedException {
 		Thread.currentThread().setName(container.getName());
-		if (container instanceof ChildContainer || container instanceof SshContainer) {
+		if (container instanceof ChildContainer || container instanceof SshContainer || container instanceof JoinContainer) {
 			log.trace("Container " + container.getName() + " starting waiting for container thread: " + containerSummoner.getName());
 			while (!containerSummoner.isReady()) {
 				if (ContainerSummoner.stopWork) {
