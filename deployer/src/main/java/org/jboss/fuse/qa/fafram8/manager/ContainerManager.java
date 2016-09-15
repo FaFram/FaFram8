@@ -615,7 +615,7 @@ public class ContainerManager {
 			// In fafram tests, there can be no root, therefore do nothing
 			return;
 		}
-		if (SystemProperty.suppressStart() || root.getExecutor() == null) {
+		if (SystemProperty.suppressStart() || root.getExecutor() == null || !root.getExecutor().isConnected()) {
 			return;
 		}
 		for (Container container : containerList) {
