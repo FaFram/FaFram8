@@ -7,6 +7,7 @@ import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.downloader.Downloader;
 import org.jboss.fuse.qa.fafram8.exception.ContainerException;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
+import org.jboss.fuse.qa.fafram8.exception.ZipNotFoundException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
@@ -67,6 +68,10 @@ public class RemoteNodeManager implements NodeManager {
 		// Jar can't unzip to specified directory, so we need to change the dir first
 		if (executor.isCygwin()) {
 			productZipPath = "$(cygpath -w " + productZipPath + ")";
+		}
+
+		if (Integer.parseInt(executor.executeCommandSilently("stat -t " + productZipPath + " >/dev/null 2>&1; echo $?").trim()) != 0) {
+			throw new ZipNotFoundException("Zip file " + productZipPath + " does not exist!");
 		}
 
 		if (productZipPath.contains(getFolder())) {
