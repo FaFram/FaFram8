@@ -148,6 +148,7 @@ public class Fafram extends ExternalResource {
 	public void tearDown(boolean force) {
 		try {
 			CommandHistory.writeLogs();
+			ContainerManager.checkContainerLogs();
 			// There can be a problem with stopping containers
 			Deployer.destroy(force);
 		} catch (Exception ex) {

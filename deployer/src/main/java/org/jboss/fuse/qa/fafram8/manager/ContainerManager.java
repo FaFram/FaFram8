@@ -1,5 +1,6 @@
 package org.jboss.fuse.qa.fafram8.manager;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 
@@ -8,6 +9,7 @@ import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.exception.BundleUploadException;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
+import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.invoker.MavenPomInvoker;
 import org.jboss.fuse.qa.fafram8.patcher.Patcher;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
@@ -15,8 +17,13 @@ import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -430,7 +437,7 @@ public class ContainerManager {
 
 		for (Broker b : brokers) {
 			//add all necessary command into list - add them in the start of the list
-			final List<String> cmds = new ArrayList();
+			final List<String> cmds = new ArrayList<>();
 			cmds.addAll(b.getCreateCommands());
 			cmds.addAll(OptionUtils.get(root.getOptions(), Option.COMMANDS));
 			OptionUtils.overwrite(root.getOptions(), Option.COMMANDS, cmds);
@@ -594,5 +601,82 @@ public class ContainerManager {
 
 		return containers;
 	}
-}
 
+	/**
+	 * Checks container logs for exceptions.
+	 */
+	public static void checkContainerLogs() {
+		// Do this using container-connect, as it should be usable even without public ip addresses
+		final StringBuilder builder = new StringBuilder();
+		final Container root;
+		try {
+			root = getRoot();
+		} catch (FaframException ex) {
+			// In fafram tests, there can be no root, therefore do nothing
+			return;
+		}
+		if (SystemProperty.suppressStart() || root.getExecutor() == null) {
+			return;
+		}
+		for (Container container : containerList) {
+			final String response;
+			int warnCount = 0;
+			if (root.getName().equals(container.getName())) {
+				response = root.getExecutor().executeCommandSilently("log:display-exception", true);
+				warnCount = getWarnCount(root.getExecutor(), "log:display | grep WARN | wc -l");
+			} else {
+				response = root.getExecutor().executeCommandSilently("container-connect " + container.getName() + " log:display-exception", true);
+				warnCount = getWarnCount(root.getExecutor(), "container-connect " + container.getName() + " log:display | grep WARN | wc -l");
+			}
+			if (response != null && !response.trim().isEmpty()) {
+				builder.append("Container ").append(container.getName()).append(" contains exceptions in log!").append("\n");
+			}
+			if (warnCount == -1) {
+				builder.append("Couldn't get WARN count for container ").append(container.getName()).append("\n");
+			} else if (warnCount != 0) {
+				builder.append("Container ").append(container.getName()).append(" contains warnings in log! Warnings count: ").append(warnCount).append("\n");
+			}
+		}
+		dumpLogs(builder);
+	}
+
+	/**
+	 * Gets the WARN count from the log.
+	 * @param executor executor
+	 * @param cmd command to execute
+	 * @return warn count != -1 if everything went well
+	 */
+	private static int getWarnCount(Executor executor, String cmd) {
+		int warnCount = -1;
+		try {
+			warnCount = Integer.parseInt(executor.executeCommandSilently(cmd, true).trim());
+		} catch (Exception ex) {
+		}
+		return warnCount;
+	}
+
+	/**
+	 * Dumps the logs into warn and into file.
+	 * @param builder builder to dump
+	 */
+	private static void dumpLogs(StringBuilder builder) {
+		if (!builder.toString().isEmpty()) {
+			log.warn("* * * * * * * * * * * * * * *");
+			for (String s : builder.toString().split("\n")) {
+				if (!s.isEmpty()) {
+					log.warn(s);
+				}
+			}
+			log.warn("* * * * * * * * * * * * * * *");
+			final String fileName = "logs-analysis-" + new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()) + ".txt";
+			final File outputFile = new File(Paths.get(SystemProperty.getArchiveTarget(), fileName).toAbsolutePath().toString());
+			try {
+				FileUtils.write(outputFile, builder.toString(), true);
+				log.trace("Dumped log analysis to " + outputFile.getAbsolutePath());
+			} catch (IOException e) {
+				log.warn("Problem with dumping log analysis");
+				e.printStackTrace();
+			}
+		}
+	}
+}

@@ -287,10 +287,31 @@ actual test execution.
 
 ### External configuration
 
-OpenStack and JIRA configuration is done via the _fafram.properties_ file. Sample configuration file can be found in
-_deployer/src/main/resources/fafram.properties_ where all supported values are defined. If you will want to change these values in your tests,
+OpenStack and JIRA configuration is done via the _fafram.properties_ file. If you will want to change these values in your tests,
 you can place your own fafram.properties file in your test resources (you don't necessary need to overwrite all the properties). This file is
 then merged with our properties file (with your changes on top of the default values) and the final configuration is created and used.
+
+Sample fafram.properties file:
+
+```
+# OpenStack
+openstack.tenant=mytenant
+openstack.flavor=3
+openstack.url= http://os:5000/v2.0
+openstack.user=myuser
+openstack.password=mypw
+openstack.image=2ffe40b5-d925-4048-a723-021c43c86219
+openstack.keypair=mykeypair
+openstack.floatingIpPool=1.2.3.4/22
+openstack.networks=da2395a6-3787-4675-a8d0-e2a31a2ae5b8
+openstack.addressType=myaddrtype
+
+# Jira
+jira.url=https://issues.jboss.org
+jira.user=myuser
+jira.password=mypw
+
+```
 
 ### Wait for anything
 
