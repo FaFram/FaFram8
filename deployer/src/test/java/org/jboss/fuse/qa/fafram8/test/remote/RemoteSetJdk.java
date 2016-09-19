@@ -35,7 +35,7 @@ public class RemoteSetJdk {
 
 		fafram.setup();
 
-		assertTrue(fafram.executeNodeCommand("ps aux | grep karaf").contains(Openstack.JDK7.getPath()));
+		assertTrue(fafram.executeNodeCommand("ps aux | grep karaf").contains("/qa/tools/opt/x86_64/jdk1.7.0"));
 	}
 
 	@Test
@@ -55,6 +55,6 @@ public class RemoteSetJdk {
 		fafram = new Fafram().withFabric().containers(root).jdk(Openstack.JDK7);
 		fafram.setup();
 
-		assertTrue(fafram.executeNodeCommand("ps aux | grep karaf").contains(Openstack.JDK8.getPath()));
+		assertTrue(fafram.executeNodeCommand("ps aux | grep karaf").contains("/qa/tools/opt/x86_64/jdk1.8.0"));
 	}
 }

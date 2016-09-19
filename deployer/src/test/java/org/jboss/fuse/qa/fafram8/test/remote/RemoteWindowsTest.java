@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class RemoteWindowsTest {
+
 	private Container root = RootContainer.builder().name("windows-root").withFabric("--resolver localip").build();
 
 	private Container ssh = SshContainer.builder().name("windows-ssh").parent(root).build();
@@ -37,8 +38,8 @@ public class RemoteWindowsTest {
 	@BeforeClass
 	public static void Before() {
 		// For windows...
-		OpenStackProvisionProvider.getInstance().getClient().setFlavor("4");
-		OpenStackProvisionProvider.getInstance().getClient().setImage("3fe107d5-df68-4f43-954d-a71d2ae4a3aa");
+		System.setProperty(FaframConstant.OPENSTACK_WINDOWS, "");
+
 
 		System.setProperty(FaframConstant.HOST_USER, "hudson");
 		System.setProperty(FaframConstant.HOST_PASSWORD, "redhat");
@@ -55,6 +56,7 @@ public class RemoteWindowsTest {
 		System.clearProperty(FaframConstant.HOST_USER);
 		System.clearProperty(FaframConstant.HOST_PASSWORD);
 		System.clearProperty(FaframConstant.START_WAIT_TIME);
+		System.clearProperty(FaframConstant.OPENSTACK_WINDOWS);
 	}
 
 	@Test

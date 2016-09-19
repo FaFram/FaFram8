@@ -105,6 +105,7 @@ public class Fafram extends ExternalResource {
 	public Fafram setup() {
 		try {
 			SystemProperty.checkKeepAllProperty();
+			SystemProperty.checkOpenstackWindows();
 			printLogo();
 			initConfiguration();
 			ContainerManager.configureRoots();
@@ -176,6 +177,9 @@ public class Fafram extends ExternalResource {
 		Deployer.setFail(false);
 		Deployer.getAnnihilatingThreads().clear();
 		Deployer.getSummoningThreads().clear();
+
+		OpenStackProvisionProvider.getInstance().getClient().setFlavor(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_FLAVOR));
+		OpenStackProvisionProvider.getInstance().getClient().setImage(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_IMAGE));
 
 		TimerUtils.cancelTimers();
 		SystemProperty.clearAllProperties();

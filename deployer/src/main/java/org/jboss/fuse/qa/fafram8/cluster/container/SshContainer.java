@@ -95,18 +95,20 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		if (!SystemProperty.getJavaHome().isEmpty() && !SystemProperty.isWithoutPublicIp()) {
 			String javaHome = SystemProperty.getJavaHome();
-			String[] variables = StringUtils.substringsBetween(javaHome, "${", "}");
+			final String[] variables = StringUtils.substringsBetween(javaHome, "${", "}");
 
 			log.trace("Connecting to node executor " + super.getNode().getExecutor() + "before creating ssh container to check variables");
 			super.getNode().getExecutor().connect();
 
 			for (String variable : variables) {
-				String resolvedVariable = super.getNode().getExecutor().executeCommandSilently("echo $" + variable);
+				final String resolvedVariable = super.getNode().getExecutor().executeCommandSilently("echo $" + variable);
 				log.trace("Resolved variable for \"{}\"  is \"{}\"", variable, resolvedVariable);
 				if (resolvedVariable == null || resolvedVariable.isEmpty() || "null".equals(resolvedVariable)) {
 					throw new FaframException("System variable " + variable + " cannot be resolved on machine for container: " + this.getName());
 				} else {
-					javaHome = StringUtils.replace(javaHome, "${" + variable + "}", resolvedVariable);
+					String test = "${" + variable;
+					test = test.concat("}");
+					javaHome = StringUtils.replace(javaHome, test, resolvedVariable);
 				}
 			}
 

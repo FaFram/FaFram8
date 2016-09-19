@@ -157,6 +157,15 @@ public final class FaframConstant {
 	// Openstack Floating IP pool ID
 	public static final String OPENSTACK_FLOATING_IP_POOL = "openstack.floatingIpPool";
 
+	// Set if windows properties should be set for OpenStack client(a.k.a. spawn windows machines)
+	public static final String OPENSTACK_WINDOWS = "openstack.windows";
+
+	// Openstack windows image ID
+	public static final String OPENSTACK_WINDOWS_IMAGE = "openstack.windows.image";
+
+	// Openstack windows flavor ID
+	public static final String OPENSTACK_WINDOWS_FLAVOR = "openstack.windows.flavor";
+
 	// If offline environment should be used (a.k.a turn off internet in cluster)
 	public static final String OFFLINE = "fafram.offline";
 

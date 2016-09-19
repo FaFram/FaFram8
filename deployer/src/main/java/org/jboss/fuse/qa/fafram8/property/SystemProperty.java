@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
+import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -556,6 +557,16 @@ public class SystemProperty {
 	 */
 	public static boolean isWithoutPublicIp() {
 		return System.getProperty(FaframConstant.WITHOUT_PUBLIC_IP) != null;
+	}
+
+	/**
+	 * Checks if openstack.windows is set and if it is then it changes Openstack client properties.
+	 */
+	public static void checkOpenstackWindows() {
+		if (System.getProperty(FaframConstant.OPENSTACK_WINDOWS) != null) {
+			OpenStackProvisionProvider.getInstance().getClient().setFlavor(getExternalProperty(FaframConstant.OPENSTACK_WINDOWS_FLAVOR));
+			OpenStackProvisionProvider.getInstance().getClient().setImage(getExternalProperty(FaframConstant.OPENSTACK_WINDOWS_IMAGE));
+		}
 	}
 
 	/**

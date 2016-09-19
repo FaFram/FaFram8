@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -57,11 +58,13 @@ public class BrokerTest {
 	}
 
 	@Test
+	@Ignore
 	public void testBrokeratStartup() {
 		assertTrue(fafram.getContainer(template.getName()).executeCommand("bstat").contains(brokerTemplate.getName()));
 	}
 
 	@Test
+	@Ignore
 	public void testMasterSlaveConfiguration() {
 		Broker template = Broker.builder().name("ms").containers("ms1", "ms2").group("masterslave").kind(Broker.MASTERSLAVE).build();
 		fafram.containers(ChildContainer.builder().name("ms1").parentName("root").build(),
@@ -74,6 +77,7 @@ public class BrokerTest {
 	}
 
 	@Test
+	@Ignore
 	public void testMeshConfiguration() {
 		Broker bTemplate = Broker.builder()
 				.group("mesh")
