@@ -13,6 +13,7 @@ import org.junit.runners.MethodSorters;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 /**
  * Local archive files test.
@@ -28,10 +29,10 @@ public class LocalArchiveTest {
 		final String baseDir = SystemProperty.getBaseDir();
 		final String dirStructure;
 		if (System.getenv("WORKSPACE") != null) {
-			final String[] path = fafram.getProductPath().split(File.separator);
+			final String[] path = fafram.getProductPath().split(Pattern.quote(File.separator));
 			dirStructure = path[path.length - 2] + File.separator + path[path.length - 1];
 		} else {
-			dirStructure = StringUtils.substringAfter(fafram.getProductPath(), baseDir + "/target");
+			dirStructure = StringUtils.substringAfter(fafram.getProductPath(), baseDir + File.separator + "target");
 		}
 		fafram.tearDown();
 		if (System.getenv("WORKSPACE") != null) {
@@ -48,10 +49,10 @@ public class LocalArchiveTest {
 		final String baseDir = SystemProperty.getBaseDir();
 		final String dirStructure;
 		if (System.getenv("WORKSPACE") != null) {
-			final String[] path = fafram.getProductPath().split(File.separator);
+			final String[] path = fafram.getProductPath().split(Pattern.quote(File.separator));
 			dirStructure = path[path.length - 2] + File.separator + path[path.length - 1];
 		} else {
-			dirStructure = StringUtils.substringAfter(fafram.getProductPath(), baseDir + "/target");
+			dirStructure = StringUtils.substringAfter(fafram.getProductPath(), baseDir + File.separator + "target");
 		}
 		fafram.tearDown();
 		final String path;

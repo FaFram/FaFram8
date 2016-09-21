@@ -62,8 +62,10 @@ public class FaframTestRunner extends BlockJUnit4ClassRunner {
 			}
 		}
 		if (!skip) {
-			statusLine.deleteCharAt(statusLine.length() - 1);
-			log.info(String.format("Starting %s (%s)", method.getName(), statusLine.toString()));
+			if (statusLine.length() > 0) {
+				statusLine.deleteCharAt(statusLine.length() - 1);
+				log.info(String.format("Starting %s (%s)", method.getName(), statusLine.toString()));
+			}
 			statusLine = new StringBuilder();
 			super.runChild(method, notifier);
 		}
