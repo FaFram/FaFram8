@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -140,7 +141,7 @@ public class ArchiveModifier extends Modifier {
 					fileName).toAbsolutePath();
 		} else {
 			// Jenkins env
-			final String[] path = Paths.get(container.getFusePath()).toAbsolutePath().toString().split(File.separator);
+			final String[] path = Paths.get(container.getFusePath()).toAbsolutePath().toString().split(Pattern.quote(File.separator));
 			final String folder = path[path.length - 2] + File.separator + path[path.length - 1];
 			return Paths.get(archiveTargetPath.toString(), folder, fileName).toAbsolutePath();
 		}
