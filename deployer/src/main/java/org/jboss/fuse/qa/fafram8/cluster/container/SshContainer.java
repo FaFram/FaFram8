@@ -1,5 +1,7 @@
 package org.jboss.fuse.qa.fafram8.cluster.container;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.cluster.resolver.Resolver;
 import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
@@ -84,14 +86,33 @@ public class SshContainer extends Container implements ThreadContainer {
 		if (SystemProperty.suppressStart()) {
 			return;
 		}
+		log.info("Creating container " + this);
 
 		// If using static provider then clean
 		if (ProviderSingleton.INSTANCE.isStaticProvider() && !SystemProperty.isWithoutPublicIp()) {
 			clean();
 		}
 
-		if (!SystemProperty.getJavaHome().isEmpty()) {
-			OptionUtils.set(super.getOptions(), Option.ENV, "JAVA_HOME=" + SystemProperty.getJavaHome());
+		if (!SystemProperty.getJavaHome().isEmpty() && !SystemProperty.isWithoutPublicIp()) {
+			String javaHome = SystemProperty.getJavaHome();
+			final String[] variables = StringUtils.substringsBetween(javaHome, "${", "}");
+
+			log.trace("Connecting to node executor " + super.getNode().getExecutor() + "before creating ssh container to check variables");
+			super.getNode().getExecutor().connect();
+
+			for (String variable : variables) {
+				final String resolvedVariable = super.getNode().getExecutor().executeCommandSilently("echo $" + variable);
+				log.trace("Resolved variable for \"{}\"  is \"{}\"", variable, resolvedVariable);
+				if (resolvedVariable == null || resolvedVariable.isEmpty() || "null".equals(resolvedVariable)) {
+					throw new FaframException("System variable " + variable + " cannot be resolved on machine for container: " + this.getName());
+				} else {
+					String test = "${" + variable;
+					test = test.concat("}");
+					javaHome = StringUtils.replace(javaHome, test, resolvedVariable);
+				}
+			}
+
+			OptionUtils.set(super.getOptions(), Option.ENV, "JAVA_HOME=" + javaHome);
 		}
 
 		// Find out if system property or parameter on container of working directory was set
@@ -103,7 +124,6 @@ public class SshContainer extends Container implements ThreadContainer {
 			log.debug("Working directory was set. Setting working directory \"{}\" for container \"{}\".", path, super.getName());
 		}
 
-		log.info("Creating container " + this);
 		if (!executor.isConnected()) {
 			log.trace("Connecting executor " + executor + " before creating ssh container");
 			executor.connect();

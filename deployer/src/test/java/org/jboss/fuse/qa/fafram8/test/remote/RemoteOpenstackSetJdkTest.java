@@ -55,10 +55,10 @@ public class RemoteOpenstackSetJdkTest {
 		log.debug(fafram.executeNodeCommand("ps aux | grep " + root.getName()));
 		log.debug(fafram.executeNodeCommand("ps aux | grep " + rootChild.getName()));
 
-		assertTrue(ssh.executeNodeCommand("ps aux | grep " + ssh.getName()).contains(Openstack.JDK8.getPath()));
-		assertTrue(sshChild.executeNodeCommand("ps aux | grep " + sshChild.getName()).contains(Openstack.JDK8.getPath()));
+		assertTrue(ssh.executeNodeCommand("ps aux | grep " + ssh.getName()).contains(ssh.executeNodeCommand("echo " + Openstack.JDK8.getPath())));
+		assertTrue(sshChild.executeNodeCommand("ps aux | grep " + sshChild.getName()).contains("/qa/tools/opt/x86_64/jdk1.8.0"));
 		assertTrue(fafram.executeNodeCommand("ps aux | grep \"karaf.base=" + StringUtils.removeEnd(root.getFusePath(), "/") + "\"")
-				.contains(Openstack.JDK8.getPath()));
-		assertTrue(fafram.executeNodeCommand("ps aux | grep " + rootChild.getName()).contains(Openstack.JDK8.getPath()));
+				.contains(fafram.executeNodeCommand("echo " + Openstack.JDK8.getPath())));
+		assertTrue(fafram.executeNodeCommand("ps aux | grep " + rootChild.getName()).contains("/qa/tools/opt/x86_64/jdk1.8.0"));
 	}
 }

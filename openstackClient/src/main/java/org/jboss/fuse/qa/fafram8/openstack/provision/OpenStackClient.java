@@ -369,6 +369,7 @@ public final class OpenStackClient {
 
 	/**
 	 * Get the free cores on OS.
+	 *
 	 * @return free cores
 	 */
 	public int getFreeCores() {
@@ -379,6 +380,7 @@ public final class OpenStackClient {
 
 	/**
 	 * Get the free memory on OS.
+	 *
 	 * @return free memory
 	 */
 	public int getFreeMemory() {
@@ -389,6 +391,7 @@ public final class OpenStackClient {
 
 	/**
 	 * Waits for the OS resources until the requested amount is free.
+	 *
 	 * @param instanceCount instance count
 	 */
 	public void waitForResources(int instanceCount) {
@@ -589,6 +592,27 @@ public final class OpenStackClient {
 			this.image = p.getProperty("openstack.image");
 			this.namePrefix = p.getProperty("openstack.namePrefix");
 			this.flavor = p.getProperty("openstack.flavor");
+			this.keypair = p.getProperty("openstack.keypair");
+			this.networks = p.getProperty("openstack.networks");
+			this.floatingIpPool = p.getProperty("openstack.floatingIpPool");
+			this.addressType = p.getProperty("openstack.addressType");
+			return this;
+		}
+
+		/**
+		 * Setter for default parameters for spawning Windows machines on OpenStack 7.
+		 *
+		 * @return this
+		 */
+		public OpenStackClient.OpenStackClientBuilder defaultOS7WinClient() {
+			final Properties p = readProperties(OS7_PROPERTIES);
+			this.url = p.getProperty("openstack.url");
+			this.user = p.getProperty("openstack.user");
+			this.password = p.getProperty("openstack.password");
+			this.tenant = p.getProperty("openstack.tenant");
+			this.image = p.getProperty("openstack.windows.image");
+			this.namePrefix = p.getProperty("openstack.namePrefix");
+			this.flavor = p.getProperty("openstack.windows.flavor");
 			this.keypair = p.getProperty("openstack.keypair");
 			this.networks = p.getProperty("openstack.networks");
 			this.floatingIpPool = p.getProperty("openstack.floatingIpPool");
