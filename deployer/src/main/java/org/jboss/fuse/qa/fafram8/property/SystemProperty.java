@@ -563,7 +563,7 @@ public class SystemProperty {
 	 * Checks if openstack.windows is set and if it is then it changes Openstack client properties.
 	 */
 	public static void checkOpenstackWindows() {
-		if (System.getProperty(FaframConstant.OPENSTACK_WINDOWS) != null) {
+		if (System.getProperty(FaframConstant.OPENSTACK_WINDOWS) != null || System.getenv(FaframConstant.OPENSTACK_WINDOWS) != null) {
 			OpenStackProvisionProvider.getInstance().getClient().setFlavor(getExternalProperty(FaframConstant.OPENSTACK_WINDOWS_FLAVOR));
 			OpenStackProvisionProvider.getInstance().getClient().setImage(getExternalProperty(FaframConstant.OPENSTACK_WINDOWS_IMAGE));
 		}
