@@ -97,21 +97,22 @@ public class SshContainer extends Container implements ThreadContainer {
 			String javaHome = SystemProperty.getJavaHome();
 			final String[] variables = StringUtils.substringsBetween(javaHome, "${", "}");
 
-			log.trace("Connecting to node executor " + super.getNode().getExecutor() + "before creating ssh container to check variables");
-			super.getNode().getExecutor().connect();
+			if (variables != null) {
+				log.trace("Connecting to node executor " + super.getNode().getExecutor() + "before creating ssh container to check variables");
+				super.getNode().getExecutor().connect();
 
-			for (String variable : variables) {
-				final String resolvedVariable = super.getNode().getExecutor().executeCommandSilently("echo $" + variable);
-				log.trace("Resolved variable for \"{}\"  is \"{}\"", variable, resolvedVariable);
-				if (resolvedVariable == null || resolvedVariable.isEmpty() || "null".equals(resolvedVariable)) {
-					throw new FaframException("System variable " + variable + " cannot be resolved on machine for container: " + this.getName());
-				} else {
-					String test = "${" + variable;
-					test = test.concat("}");
-					javaHome = StringUtils.replace(javaHome, test, resolvedVariable);
+				for (String variable : variables) {
+					final String resolvedVariable = super.getNode().getExecutor().executeCommandSilently("echo $" + variable);
+					log.trace("Resolved variable for \"{}\"  is \"{}\"", variable, resolvedVariable);
+					if (resolvedVariable == null || resolvedVariable.isEmpty() || "null".equals(resolvedVariable)) {
+						throw new FaframException("System variable " + variable + " cannot be resolved on machine for container: " + this.getName());
+					} else {
+						String test = "${" + variable;
+						test = test.concat("}");
+						javaHome = StringUtils.replace(javaHome, test, resolvedVariable);
+					}
 				}
 			}
-
 			OptionUtils.set(super.getOptions(), Option.ENV, "JAVA_HOME=" + javaHome);
 		}
 
