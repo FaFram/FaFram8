@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.jboss.fuse.qa</groupId>
 		<artifactId>fafram8-parent</artifactId>
-		<version>0.7-SNAPSHOT</version>
+		<version>0.61</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
