@@ -27,7 +27,7 @@
 
 	<groupId>org.jboss.fuse.qa</groupId>
 	<artifactId>fafram8-parent</artifactId>
-	<version>0.61</version>
+	<version>0.7-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Fafram8</name>
 
