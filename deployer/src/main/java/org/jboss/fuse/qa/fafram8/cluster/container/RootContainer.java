@@ -131,8 +131,6 @@ public class RootContainer extends Container {
 		if ("localhost".equals(super.getNode().getHost())) {
 			nodeManager = new LocalNodeManager(super.getExecutor());
 		} else {
-			// Re-create the executor
-			super.getNode().setExecutor(super.getNode().createExecutor());
 			// Connect the node executor
 			if (!super.getNode().getExecutor().isConnected()) {
 				log.trace("First time connecting node executor");

@@ -23,24 +23,56 @@ public class Node {
 	protected Node() {
 	}
 
+	/**
+	 * Setter.
+	 * @param host host
+	 */
+	public void setHost(String host) {
+		this.host = host;
+		this.executor = createExecutor();
+	}
+
+	/**
+	 * Setter.
+	 * @param port port
+	 */
+	public void setPort(int port) {
+		this.port = port;
+		this.executor = createExecutor();
+	}
+
+	/**
+	 * Setter.
+	 * @param username username
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+		this.executor = createExecutor();
+	}
+
+	/**
+	 * Setter.
+	 * @param password password
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+		this.executor = createExecutor();
+	}
+
 	@Getter
 	@Setter
 	private String nodeId;
 
 	@Getter
-	@Setter
 	private String host;
 
 	@Getter
-	@Setter
 	private int port = SystemProperty.getHostPort();
 
 	@Getter
-	@Setter
 	private String username = SystemProperty.getHostUser();
 
 	@Getter
-	@Setter
 	private String password = SystemProperty.getHostPassword();
 
 	@Getter
