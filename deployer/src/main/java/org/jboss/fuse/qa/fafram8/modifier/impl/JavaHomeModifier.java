@@ -96,10 +96,10 @@ public final class JavaHomeModifier extends Modifier {
 		// Remove original files
 		if (super.getExecutor().isCygwin()) {
 			log.trace("Converting windows path to unix path");
-			javaHomePath= super.getExecutor().executeCommandSilently("cygpath -u \"" + javaHomePath + "\"");
+			javaHomePath = super.getExecutor().executeCommandSilently("cygpath -u \"" + javaHomePath + "\"");
 		}
 
-		String content = String.format("export JAVA_HOME=%s%n",  javaHomePath);
+		final String content = String.format("export JAVA_HOME=%s%n", javaHomePath);
 		// Print content into the files
 		super.getExecutor().executeCommandSilently("printf '" + content + "' >> " + path);
 	}
