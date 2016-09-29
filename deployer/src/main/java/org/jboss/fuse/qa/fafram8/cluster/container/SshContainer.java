@@ -1,7 +1,5 @@
 package org.jboss.fuse.qa.fafram8.cluster.container;
 
-import org.apache.commons.lang3.StringUtils;
-
 import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.cluster.resolver.Resolver;
 import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
@@ -95,24 +93,10 @@ public class SshContainer extends Container implements ThreadContainer {
 
 		if (!SystemProperty.getJavaHome().isEmpty() && !SystemProperty.isWithoutPublicIp()) {
 			String javaHome = SystemProperty.getJavaHome();
-			final String[] variables = StringUtils.substringsBetween(javaHome, "${", "}");
+			log.trace("Connecting to node executor " + this + "before creating ssh container to check variables");
+			super.getNode().getExecutor().connect();
 
-			if (variables != null) {
-				log.trace("Connecting to node executor " + super.getNode().getExecutor() + "before creating ssh container to check variables");
-				super.getNode().getExecutor().connect();
-
-				for (String variable : variables) {
-					final String resolvedVariable = super.getNode().getExecutor().executeCommandSilently("echo $" + variable);
-					log.trace("Resolved variable for \"{}\"  is \"{}\"", variable, resolvedVariable);
-					if (resolvedVariable == null || resolvedVariable.isEmpty() || "null".equals(resolvedVariable)) {
-						throw new FaframException("System variable " + variable + " cannot be resolved on machine for container: " + this.getName());
-					} else {
-						String test = "${" + variable;
-						test = test.concat("}");
-						javaHome = StringUtils.replace(javaHome, test, resolvedVariable);
-					}
-				}
-			}
+			javaHome = super.getNode().getExecutor().resolveVariablesInString(javaHome);
 			OptionUtils.set(super.getOptions(), Option.ENV, "JAVA_HOME=" + javaHome);
 		}
 

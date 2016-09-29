@@ -87,19 +87,20 @@ public final class JavaHomeModifier extends Modifier {
 	}
 
 	/**
-	 *Modifies JAVA_HOME on remote.
+	 * Modifies JAVA_HOME on remote.
 	 */
 	private void modifyRemoteJavaHome(Container container) {
 		final String path = container.getFusePath() + File.separator + "bin" + File.separator + "setenv";
-		String content = String.format("export JAVA_HOME=%s%n", javaHomePath);
+		// Resolve all properties in java home path
+		javaHomePath = super.getExecutor().resolveVariablesInString(javaHomePath);
 		// Remove original files
-		if ((System.getProperty("os.name").startsWith("Windows"))) {
-			// Changes to win
-			content = content.replaceAll("export", "SET");
-			super.getExecutor().executeCommandSilently("printf \"" + content + "\" >> " + path + ".bat");
-		} else {
-			// Print content into the files
-			super.getExecutor().executeCommandSilently("printf \"" + content + "\" >> " + path);
+		if (super.getExecutor().isCygwin()) {
+			log.trace("Converting windows path to unix path");
+			javaHomePath= super.getExecutor().executeCommandSilently("cygpath -u \"" + javaHomePath + "\"");
 		}
+
+		String content = String.format("export JAVA_HOME=%s%n",  javaHomePath);
+		// Print content into the files
+		super.getExecutor().executeCommandSilently("printf '" + content + "' >> " + path);
 	}
 }
