@@ -106,6 +106,7 @@ public class Executor {
 
 	/**
 	 * Executes a command.
+	 *
 	 * @param cmd command
 	 * @param silent do not log if true
 	 * @return command response
@@ -126,6 +127,7 @@ public class Executor {
 
 	/**
 	 * Executes a command silently.
+	 *
 	 * @param cmd command
 	 * @param ignoreExceptions true to not log any exceptions
 	 * @return response
@@ -742,6 +744,33 @@ public class Executor {
 	 * @return true if remote node is a windows server
 	 */
 	public boolean isCygwin() {
+		log.trace("Checking operating system");
 		return StringUtils.containsIgnoreCase(executeCommandSilently("uname"), "cyg");
+	}
+
+	/**
+	 * Resolves system variables in provided string.
+	 *
+	 * @param string variable that can contains system variables
+	 * @return string containing resolved variables
+	 */
+	public String resolveVariablesInString(String string) {
+		final String[] variables = StringUtils.substringsBetween(string, "${", "}");
+
+		if (variables != null) {
+			for (String variable : variables) {
+				final String resolvedVariable = executeCommandSilently("echo $" + variable);
+				log.trace("Resolved variable for \"{}\"  is \"{}\"", variable, resolvedVariable);
+				if (resolvedVariable == null || resolvedVariable.isEmpty() || "null".equals(resolvedVariable)) {
+					throw new FaframException("System variable " + variable + " cannot be resolved on machine for container: " + this.getName());
+				} else {
+					String test = "${" + variable;
+					test = test.concat("}");
+					string = StringUtils.replace(string, test, resolvedVariable);
+				}
+			}
+		}
+
+		return string;
 	}
 }

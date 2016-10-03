@@ -139,7 +139,7 @@ public class RootContainer extends Container {
 				super.getNode().getExecutor().connect();
 			}
 			if (super.getNode().getExecutor().isCygwin()) {
-				log.trace("Using RemoteWindowsNodeManager!");
+				log.trace("Using WindowsExecutor for RemoteNodeManager!");
 				nodeManager = new RemoteNodeManager(new WindowsExecutor(super.getNode().getExecutor()), super.getExecutor());
 			} else {
 				nodeManager = new RemoteNodeManager(super.getNode().getExecutor(), super.getExecutor());
