@@ -62,4 +62,12 @@ public enum ProviderSingleton {
 	public boolean isStaticProvider() {
 		return StaticProvider.class.getName().equals(name);
 	}
+
+	/**
+	 * Check if current provision provider is {@link OpenStackProvisionProvider}.
+	 * @return return true if current provision provider is OS provider
+	 */
+	public boolean isOpenstackProvider() {
+		return OpenStackProvisionProvider.class.getName().equals(name);
+	}
 }

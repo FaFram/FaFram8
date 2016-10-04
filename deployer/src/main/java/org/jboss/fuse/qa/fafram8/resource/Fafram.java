@@ -1,6 +1,5 @@
 package org.jboss.fuse.qa.fafram8.resource;
 
-import static org.jboss.fuse.qa.fafram8.modifier.impl.ArchiveModifier.registerArchiver;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.FileModifier.moveFile;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.JvmMemoryModifier.setDefaultJvmMemOpts;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.JvmMemoryModifier.setJvmMemOpts;
@@ -178,8 +177,10 @@ public class Fafram extends ExternalResource {
 		Deployer.getAnnihilatingThreads().clear();
 		Deployer.getSummoningThreads().clear();
 
-		OpenStackProvisionProvider.getInstance().getClient().setFlavor(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_FLAVOR));
-		OpenStackProvisionProvider.getInstance().getClient().setImage(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_IMAGE));
+		if (ProviderSingleton.INSTANCE.isOpenstackProvider()) {
+			OpenStackProvisionProvider.getInstance().getClient().setFlavor(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_FLAVOR));
+			OpenStackProvisionProvider.getInstance().getClient().setImage(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_IMAGE));
+		}
 
 		TimerUtils.cancelTimers();
 		SystemProperty.clearAllProperties();
@@ -700,7 +701,6 @@ public class Fafram extends ExternalResource {
 		if (!SystemProperty.skipDefaultJvmOpts()) {
 			ModifierExecutor.addModifiers(setDefaultJvmMemOpts());
 		}
-		ModifierExecutor.addPostModifiers(registerArchiver());
 	}
 
 	/**
