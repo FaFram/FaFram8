@@ -624,6 +624,9 @@ public class ContainerManager {
 			if (root.getName().equals(container.getName())) {
 				response = root.getExecutor().executeCommandSilently("log:display-exception", true);
 				warnCount = getWarnCount(root.getExecutor(), "log:display | grep WARN | wc -l");
+			} else if (container instanceof RootContainer) {
+				response = container.getExecutor().executeCommandSilently("log:display-exception", true);
+				warnCount = getWarnCount(container.getExecutor(), "log:display | grep WARN | wc -l");
 			} else {
 				response = root.getExecutor().executeCommandSilently("container-connect " + container.getName() + " log:display-exception", true);
 				warnCount = getWarnCount(root.getExecutor(), "container-connect " + container.getName() + " log:display | grep WARN | wc -l");
