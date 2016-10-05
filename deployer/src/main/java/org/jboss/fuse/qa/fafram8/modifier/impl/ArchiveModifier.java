@@ -31,9 +31,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class ArchiveModifier extends Modifier {
+public final class ArchiveModifier extends Modifier {
 	private Path archiveTargetPath = Paths.get(SystemProperty.getArchiveTarget()).toAbsolutePath();
 	private String[] archiveFiles = SystemProperty.getArchivePattern().split(" *, " + "*"); //ignore spaces around comma
+
+	/**
+	 * Constructor.
+	 * @param host host
+	 */
+	private ArchiveModifier(String host) {
+		super.setHost(host);
+	}
 
 	@Override
 	public void execute(Container container) {
@@ -120,10 +128,11 @@ public class ArchiveModifier extends Modifier {
 	/**
 	 * Factory method.
 	 *
+	 * @param host host
 	 * @return new archive modifier instance
 	 */
-	public static ArchiveModifier registerArchiver() {
-		return new ArchiveModifier();
+	public static ArchiveModifier registerArchiver(String host) {
+		return new ArchiveModifier(host);
 	}
 
 	/**

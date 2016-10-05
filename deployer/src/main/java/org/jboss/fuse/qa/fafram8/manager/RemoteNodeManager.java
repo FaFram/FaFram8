@@ -115,9 +115,7 @@ public class RemoteNodeManager implements NodeManager {
 
 	@Override
 	public void stopAndClean(boolean ignoreExceptions) {
-		// For remote deployment just clean modifiers and System properties
-		SystemProperty.clearAllProperties();
-		ModifierExecutor.clearAllModifiers();
+		// For remote deployment just clean modifiers and System properties - those will be cleaned in Fafram.tearDown()
 	}
 
 	@Override

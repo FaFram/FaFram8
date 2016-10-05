@@ -175,8 +175,6 @@ public class LocalNodeManager implements NodeManager {
 				deleteTargetDir(ignoreExceptions);
 			}
 		}
-
-		SystemProperty.clearAllProperties();
 	}
 
 	@Override

@@ -138,7 +138,6 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 			final String ip = client.assignFloatingAddress(server.getId());
 			log.info("Assigning public IP: " + ip + " for container: " + container.getName() + " on machine: " + server.getName());
 			container.getNode().setHost(ip);
-			container.getNode().setExecutor(container.getNode().createExecutor());
 		}
 	}
 

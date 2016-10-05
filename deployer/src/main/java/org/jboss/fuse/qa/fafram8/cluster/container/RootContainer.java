@@ -1,6 +1,7 @@
 package org.jboss.fuse.qa.fafram8.cluster.container;
 
 import static org.jboss.fuse.qa.fafram8.modifier.impl.AccessRightsModifier.setExecutable;
+import static org.jboss.fuse.qa.fafram8.modifier.impl.ArchiveModifier.registerArchiver;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.JavaHomeModifier.setJavaHome;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.JvmOptsModifier.addJvmOpts;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.PropertyModifier.putProperty;
@@ -121,6 +122,8 @@ public class RootContainer extends Container {
 			super.getExecutor().connect();
 			super.getNode().getExecutor().connect();
 		}
+
+		ModifierExecutor.addPostModifiers(registerArchiver(super.getNode().getHost()));
 	}
 
 	/**
@@ -131,8 +134,6 @@ public class RootContainer extends Container {
 		if ("localhost".equals(super.getNode().getHost())) {
 			nodeManager = new LocalNodeManager(super.getExecutor());
 		} else {
-			// Re-create the executor
-			super.getNode().setExecutor(super.getNode().createExecutor());
 			// Connect the node executor
 			if (!super.getNode().getExecutor().isConnected()) {
 				log.trace("First time connecting node executor");
