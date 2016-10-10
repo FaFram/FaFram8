@@ -120,7 +120,10 @@ public class RootContainer extends Container {
 		} else {
 			log.trace("Connecting both executors when using onlyConnect");
 			super.getExecutor().connect();
-			super.getNode().getExecutor().connect();
+			// There is no executor when using localhost, see Node.Builder.build()
+			if (!"localhost".equals(super.getNode().getHost())) {
+				super.getNode().getExecutor().connect();
+			}
 		}
 
 		ModifierExecutor.addPostModifiers(registerArchiver(super.getNode().getHost()));
