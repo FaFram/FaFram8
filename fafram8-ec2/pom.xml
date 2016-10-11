@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.jboss.fuse.qa</groupId>
+		<artifactId>fafram8-parent</artifactId>
+		<version>0.6-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>fafram8-ec2-client</artifactId>
+	<name>Fafram8 ec2 Client</name>
+
+	<properties>
+		<jclouds.version>2.0.0-eapqe.9</jclouds.version>
+		<maven-surefire.version>2.19</maven-surefire.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.jclouds.provider</groupId>
+			<artifactId>aws-ec2</artifactId>
+			<version>${jclouds.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven.surefire.version}</version>
+				<configuration combine.self="override">
+					<skipTests>false</skipTests>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
