@@ -119,10 +119,11 @@ public final class Ec2Client {
 		this.securityGroup = securityGroups;
 		this.namePrefix = namePrefix;
 
-		computeServiceContext = ContextBuilder.newBuilder("aws-ec2")
+		final ContextBuilder contextBuilder = ContextBuilder.newBuilder("aws-ec2")
 				.credentials(accessKey, secretKey)
-				.endpoint(url)
-				.buildView(ComputeServiceContext.class);
+				.endpoint(url);
+
+		computeServiceContext = contextBuilder.buildView(ComputeServiceContext.class);
 		computeService = computeServiceContext.getComputeService();
 		ec2Api = computeServiceContext.unwrapApi(EC2Api.class).getInstanceApiForRegion(region).get();
 	}
@@ -220,6 +221,7 @@ public final class Ec2Client {
 			computeService.destroyNode(initialNodeMetadata.getId());
 			throw e;
 		}
+		serverRegister.add(initialNodeMetadata);
 		return initialNodeMetadata;
 	}
 
@@ -249,9 +251,11 @@ public final class Ec2Client {
 	 * @return found server
 	 */
 	public NodeMetadata getServerFromRegister(String serverName) {
+
 		final List<NodeMetadata> registerList = new LinkedList<>();
 		for (NodeMetadata s : serverRegister) {
-			if (s.getName().equals(serverName)) {
+
+			if (s.getName().contains(serverName)) {
 				registerList.add(s);
 			}
 		}
@@ -280,8 +284,8 @@ public final class Ec2Client {
 	}
 
 	/**
-	 * Gets the count of the servers with name ("name"). Used to check if there are already some servers with defined
-	 * name.
+	 * Gets the count of the servers with name ("name" + "rand_has"). Used to check if there are already some servers
+	 * with defined name.
 	 *
 	 * @param name container name
 	 * @return list of servers with given name
@@ -292,6 +296,9 @@ public final class Ec2Client {
 		final Predicate<ComputeMetadata> filter = new Predicate<ComputeMetadata>() {
 			@Override
 			public boolean apply(ComputeMetadata input) {
+				if (input.getName().isEmpty() || input.getId().isEmpty()) {
+					return false;
+				}
 				return (input.getId().contains(region) && input.getName().equals(name));
 			}
 		};
@@ -300,7 +307,7 @@ public final class Ec2Client {
 
 		for (NodeMetadata server : servers) {
 
-			log.info("name: " + server.getName() + "  id: " + server.getId());
+			log.info("name: " + server.getName() + "  id: " + server.getId() + " status: " + server.getStatus());
 			serverList.add(server);
 		}
 		return serverList;
