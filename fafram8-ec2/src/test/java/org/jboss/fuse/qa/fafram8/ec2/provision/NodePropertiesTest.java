@@ -1,11 +1,10 @@
 package org.jboss.fuse.qa.fafram8.ec2.provision;
 
-import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Test;
 
 import org.jclouds.compute.domain.NodeMetadata;
-
-import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,22 +21,19 @@ public class NodePropertiesTest {
 	private static Ec2Client ec2Client;
 	private final String nodeName = "testserver";
 
-	@After
-	public void tearDown() {
+	@AfterClass
+	public static void tearDown() {
 		ec2Client.releaseResources();
 	}
 
 	@Test
 	public void testOverridingValues() throws Exception {
+
 		ec2Client = Ec2Client.builder().defaultEc2client().build();
 
 		ec2Client.spawnNewServer(nodeName);
-		final List<NodeMetadata> serverList = ec2Client.getServers(nodeName);
+		final NodeMetadata server = ec2Client.getServerFromRegister(ec2Client.getNamePrefix() + "-" + nodeName);
 
-		for (NodeMetadata server : serverList) {
-			log.debug("server list : {}", server.getName());
-		}
-
-		ec2Client.releaseResources();
+		Assert.assertNotNull("server discovered : {}", server.getName());
 	}
 }
