@@ -38,6 +38,13 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!-- Fafram8 EC2 Client -->
+		<dependency>
+			<groupId>org.jboss.fuse.qa</groupId>
+			<artifactId>fafram8-ec2-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 		<!-- Maven invoker dependencies -->
 		<dependency>
 			<groupId>org.apache.maven.shared</groupId>

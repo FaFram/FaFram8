@@ -166,6 +166,33 @@ public final class FaframConstant {
 	// Openstack windows flavor ID
 	public static final String OPENSTACK_WINDOWS_FLAVOR = "openstack.windows.flavor";
 
+	// EC2 URL
+	public static final String EC2_URL = "ec2.url";
+
+	// EC2 access key
+	public static final String EC2_ACCESS_KEY_ID = "ec2.accessKeyID";
+
+	// EC2 secret key
+	public static final String EC2_SECRET_KEY = "ec2.secretKey";
+
+	// EC2 region (us-east-1/us-east-2/us-west-1/...)
+	public static final String EC2_REGION = "ec2.region";
+
+	// EC2 instance size (m3.medium/m3.large/...) the default and recommended size is m3.large (2 cores, 7 GB ram)
+	public static final String EC2_INSTANCE_TYPE = "ec2.instanceType";
+
+	// EC2 image ID (AIM) to be used
+	public static final String EC2_IMAGE_ID = "ec2.imageId";
+
+	// EC2 ssh key pair to be used on new instance
+	public static final String EC2_KEY_PAIR = "ec2.keyPair";
+
+	// EC2 security group
+	public static final String EC2_SECURITY_GROUPS = "ec2.securityGroups";
+
+	// EC2 name prefix (fafram8 for instance)
+	public static final String EC2_NAME_PREFIX = "ec2.namePrefix";
+
 	// If offline environment should be used (a.k.a turn off internet in cluster)
 	public static final String OFFLINE = "fafram.offline";
 
