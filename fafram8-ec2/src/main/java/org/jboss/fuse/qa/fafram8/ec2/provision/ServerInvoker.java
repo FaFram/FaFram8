@@ -98,7 +98,6 @@ public class ServerInvoker implements Callable {
 
 		templateOptions.keyPair(ec2Client.getKeyPair());
 		templateOptions.securityGroupIds(ec2Client.getSecurityGroup());
-//		templateOptions.nameTask(nodeName);
 
 		return templateOptions;
 	}

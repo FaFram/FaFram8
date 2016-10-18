@@ -131,7 +131,7 @@ public final class Ec2Client {
 	/**
 	 * Ec2Client builder.
 	 *
-	 * @return OenStackClientBuilder
+	 * @return Ec2ClientBuilder
 	 */
 	public static Ec2ClientBuilder builder() {
 		return new Ec2ClientBuilder();
@@ -383,6 +383,11 @@ public final class Ec2Client {
 		return templateOptions;
 	}
 
+	/**
+	 * Starts suspended server on EC2 with specified name.
+	 *
+	 * @param serverName
+	 */
 	public void startServer(String serverName) {
 
 		final List<NodeMetadata> serverList = getServers(serverName);
@@ -396,6 +401,11 @@ public final class Ec2Client {
 		}
 	}
 
+	/**
+	 * Starts suspended servers on EC2 with specified names.
+	 *
+	 * @param servers
+	 */
 	public void startServers(String... servers) {
 
 		for (String server : servers) {
@@ -403,6 +413,11 @@ public final class Ec2Client {
 		}
 	}
 
+	/**
+	 * Stops running server on EC2 with specified name.
+	 *
+	 * @param serverName
+	 */
 	public void stopServer(String serverName) {
 
 		final List<NodeMetadata> serverList = getServers(serverName);
@@ -414,6 +429,11 @@ public final class Ec2Client {
 		}
 	}
 
+	/**
+	 * Stops running servers on EC2 with specified names.
+	 *
+	 * @param servers
+	 */
 	public void stopServers(String... servers) {
 
 		for (String server : servers) {
@@ -527,7 +547,7 @@ public final class Ec2Client {
 		/**
 		 * Setter.
 		 *
-		 * @param instanceTyp EC2 instance type
+		 * @param instanceType EC2 instance type
 		 * @return this
 		 */
 		public Ec2Client.Ec2ClientBuilder instanceType(String instanceType) {
