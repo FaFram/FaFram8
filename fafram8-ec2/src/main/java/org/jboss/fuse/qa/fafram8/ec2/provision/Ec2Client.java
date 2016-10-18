@@ -351,7 +351,6 @@ public final class Ec2Client {
 
 		final NodeMetadata server = getServerFromRegister(serverName);
 
-		//TODO(tplevko): before termination, you should first rename the server - so it won't be there with the same name.
 		ec2Api.terminateInstancesInRegion(region, server.getId().split("/")[1]);
 
 		serverRegister.remove(server);
@@ -384,12 +383,19 @@ public final class Ec2Client {
 		return templateOptions;
 	}
 
-	//TODO(tplevko): implement -- there has to be some sort of list of servers, that will be started/stopped
-	// provided prior to Fafram's start.
-	public void startServer(String server) {
+	public void startServer(String serverName) {
+
+		final List<NodeMetadata> serverList = getServers(serverName);
+
+		if (serverList.size() != 1) {
+			throw new RuntimeException("There are multiple servers in the inventory with specified name!");
+		} else {
+
+			final NodeMetadata server = serverList.get(0);
+			computeService.resumeNode(server.getId());
+		}
 	}
 
-	//TODO(tplevko): implement
 	public void startServers(String... servers) {
 
 		for (String server : servers) {
@@ -397,11 +403,17 @@ public final class Ec2Client {
 		}
 	}
 
-	//TODO(tplevko): implement
-	public void stopServer(String server) {
+	public void stopServer(String serverName) {
+
+		final List<NodeMetadata> serverList = getServers(serverName);
+		if (serverList.size() != 1) {
+			throw new RuntimeException("There are multiple servers (" + serverList.size() + ") in the inventory with specified name!");
+		} else {
+			final NodeMetadata server = serverList.get(0);
+			computeService.suspendNode(server.getId());
+		}
 	}
 
-	//TODO(tplevko): implement
 	public void stopServers(String... servers) {
 
 		for (String server : servers) {
