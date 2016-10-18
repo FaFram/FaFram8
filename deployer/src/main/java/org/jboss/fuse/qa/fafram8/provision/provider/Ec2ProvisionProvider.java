@@ -96,8 +96,8 @@ public class Ec2ProvisionProvider implements ProvisionProvider {
 			throw new RuntimeException("Container list is empty!");
 		}
 		for (Container container : containerList) {
-			final NodeMetadata server
-					= client.getServerFromRegister(client.getNamePrefix() + "-" + container.getName());
+			final NodeMetadata server = client.getServerFromRegister(client.getNamePrefix() + "-" + container.getName());
+
 			if (container.getNode() == null) {
 				container.setNode(Node.builder().port(SystemProperty.getHostPort()).username(SystemProperty.getHostUser())
 						.password(SystemProperty.getHostPassword()).build());
