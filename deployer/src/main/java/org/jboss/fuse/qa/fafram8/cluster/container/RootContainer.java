@@ -203,6 +203,9 @@ public class RootContainer extends Container {
 		}
 		super.setCreated(false);
 		ContainerManager.getContainerList().remove(this);
+
+		// Clean RootNameModifier from collection as it is no longer required
+		ModifierExecutor.clearRootNameModifier(this);
 	}
 
 	@Override
