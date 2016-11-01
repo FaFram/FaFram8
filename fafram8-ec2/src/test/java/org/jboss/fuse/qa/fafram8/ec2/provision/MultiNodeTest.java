@@ -39,12 +39,12 @@ public class MultiNodeTest {
 	}
 
 	@Test
-	public void testOverridingValues() throws Exception {
+	public void testServerValues() throws Exception {
 		ec2Client = Ec2Client.builder().defaultEc2client().imageId(imageIam).build();
 		ec2Client.spawnServersByNames(nodeNames);
 
-		final NodeMetadata server1 = ec2Client.getServerFromRegister("node1");
-		final NodeMetadata server2 = ec2Client.getServerFromRegister("node2");
+		final NodeMetadata server1 = ec2Client.getServerFromRegister(ec2Client.getNamePrefix() + "-node1");
+		final NodeMetadata server2 = ec2Client.getServerFromRegister(ec2Client.getNamePrefix() + "-node2");
 
 		log.info("The node info: imageId: {}, imageHostName: {}.", server1.getImageId(), server1.getHostname());
 		log.info("The node info: imageId: {}, imageHostName: {}.", server2.getImageId(), server2.getHostname());
