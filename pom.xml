@@ -36,6 +36,7 @@
 		<module>deployer</module>
 		<module>fafram</module>
 		<module>openstackClient</module>
+		<module>fafram8-ec2</module>
 	</modules>
 
 	<distributionManagement>
