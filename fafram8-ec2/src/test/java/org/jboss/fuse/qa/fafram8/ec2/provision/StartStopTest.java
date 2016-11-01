@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StartStopTest {
 
 	private static Ec2Client ec2Client;
-	private final String nodeName = "testserver";
+	private final String nodeName = "teststartstop";
 
 	@After
 	public void tearDown() {
@@ -32,19 +32,20 @@ public class StartStopTest {
 		ec2Client = Ec2Client.builder().defaultEc2client().build();
 
 		ec2Client.spawnNewServer(nodeName);
-		final NodeMetadata server = ec2Client.getServerFromRegister(ec2Client.getNamePrefix() + "-" + nodeName);
-		ec2Client.stopServer(server.getName());
+		final NodeMetadata serverData = ec2Client.getServerFromRegister(ec2Client.getNamePrefix() + "-" + nodeName);
+
+		ec2Client.stopServer(serverData.getName());
 
 		log.info("Wait 30 seconds for the server to stop");
 		Thread.sleep(30000);
 
-		Assert.assertEquals("SUSPENDED", ec2Client.getServers(server.getName()).get(0).getStatus().name());
+		Assert.assertEquals("SUSPENDED", ec2Client.getServers(serverData.getName()).get(0).getStatus().name());
 
-		ec2Client.startServer(server.getName());
+		ec2Client.startServer(serverData.getName());
 
 		log.info("Wait 30 seconds for the server to start");
 		Thread.sleep(30000);
 
-		Assert.assertEquals("RUNNING", ec2Client.getServers(server.getName()).get(0).getStatus().name());
+		Assert.assertEquals("RUNNING", ec2Client.getServers(serverData.getName()).get(0).getStatus().name());
 	}
 }

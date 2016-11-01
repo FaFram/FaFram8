@@ -222,6 +222,9 @@ public final class Ec2Client {
 			throw e;
 		}
 		serverRegister.add(initialNodeMetadata);
+
+		log.debug("added new server into server register: " + serverRegister.get(0).getName());
+
 		return initialNodeMetadata;
 	}
 
@@ -420,7 +423,9 @@ public final class Ec2Client {
 	 */
 	public void stopServer(String serverName) {
 
-		final List<NodeMetadata> serverList = getServers(serverName);
+		final List<NodeMetadata> serverList = new ArrayList<>();
+		serverList.addAll(getServers(serverName));
+
 		if (serverList.size() != 1) {
 			throw new RuntimeException("There are multiple servers (" + serverList.size() + ") in the inventory with specified name!");
 		} else {
