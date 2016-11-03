@@ -5,12 +5,12 @@ import org.apache.commons.io.FileUtils;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
-import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
-import org.jboss.fuse.qa.fafram8.ssh.SSHClient;
 
 import java.io.File;
 import java.io.IOException;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,7 +19,9 @@ import lombok.extern.slf4j.Slf4j;
  * Created by avano on 11.1.16.
  */
 @Slf4j
+@EqualsAndHashCode(callSuper = true)
 public final class RootNameModifier extends Modifier {
+	@Getter
 	private Container container;
 
 	/**
@@ -43,17 +45,21 @@ public final class RootNameModifier extends Modifier {
 
 	@Override
 	public void execute(Container container) {
-		if ("localhost".equals(this.container.getNode().getHost())) {
-			final File configFile = new File(container.getFusePath() + File.separator + "etc" + File.separator + "system.properties");
-			try {
-				String fileContent = FileUtils.readFileToString(configFile);
-				fileContent = fileContent.replaceAll("karaf.name = root", "karaf.name = " + container.getName());
-				FileUtils.write(configFile, fileContent);
-			} catch (IOException e) {
-				throw new FaframException("Error while setting root name: " + e);
+		if (this.container.equals(container)) {
+			if ("localhost".equals(this.container.getNode().getHost())) {
+				final File configFile = new File(container.getFusePath() + File.separator + "etc" + File.separator + "system.properties");
+				try {
+					String fileContent = FileUtils.readFileToString(configFile);
+					fileContent = fileContent.replaceAll("karaf.name = root", "karaf.name = " + container.getName());
+					FileUtils.write(configFile, fileContent);
+				} catch (IOException e) {
+					throw new FaframException("Error while setting root name: " + e);
+				}
+			} else {
+				modifyRemoteRootName(container);
 			}
 		} else {
-			modifyRemoteRootName();
+			log.debug("Skipping this modifier because this is not correct container");
 		}
 	}
 
@@ -61,21 +67,13 @@ public final class RootNameModifier extends Modifier {
 	 * Modifies the root name on remote. Creates a new ssh client, connects to the IP using supplied credentials
 	 * and modifies the remote system properties file.
 	 */
-	private void modifyRemoteRootName() {
-		final int defaultPort = 22;
-		final SSHClient c = new NodeSSHClient();
-		c.setHost(container.getNode().getHost());
-		c.setPort(container.getNode().getPort());
-		c.setUsername(container.getNode().getUsername());
-		c.setPassword(container.getNode().getPassword());
+	private void modifyRemoteRootName(Container container) {
 		try {
 			log.trace("Connecting own executor to set the remote root name");
-			c.connect(true);
 			log.debug("Setting root name to " + container.getName() + " on " + container.getNode().getHost());
-			c.executeCommand("sed -i 's#\\<karaf.name = root\\>#karaf.name = " + container.getName() + "#g' "
-					+ container.getFusePath() + "etc" + File.separator + "system.properties", true);
+			container.getNode().getExecutor().executeCommandSilently("sed -i 's#\\<karaf.name = root\\>#karaf.name = " + container.getName() + "#g' "
+					+ container.getFusePath() + "etc" + File.separator + "system.properties");
 			log.trace("Disconnecting the executor");
-			c.disconnect();
 		} catch (Exception e) {
 			throw new FaframException("Error while setting root name on " + container.getNode().getHost() + ": " + e);
 		}
@@ -83,6 +81,6 @@ public final class RootNameModifier extends Modifier {
 
 	@Override
 	public String toString() {
-		return String.format("RootNamesModifier(%s@%s)", container.getName(), container.getNode().getHost());
+		return String.format("RootNamesModifier(%s@%s)", this.container.getName(), this.container.getNode().getHost());
 	}
 }

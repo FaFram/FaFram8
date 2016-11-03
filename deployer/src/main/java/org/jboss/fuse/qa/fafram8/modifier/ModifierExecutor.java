@@ -3,6 +3,7 @@ package org.jboss.fuse.qa.fafram8.modifier;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
+import org.jboss.fuse.qa.fafram8.modifier.impl.RootNameModifier;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -187,5 +188,23 @@ public class ModifierExecutor {
 		modifiers.clear();
 		postModifiers.clear();
 		customModifiers.clear();
+	}
+
+	/**
+	 * Removes RootNameModifier for specific container from collection of modifiers.
+	 * Method is necessary when destroying RootContainer manually to keep collection of modifiers clean.
+	 *
+	 * @param container container to which RootNameModifier belongs to
+	 */
+	public static void clearRootNameModifier(Container container) {
+		final Set<Modifier> tempModifiers = new LinkedHashSet<>(modifiers);
+		for (Modifier modifier : tempModifiers) {
+			if (modifier instanceof RootNameModifier) {
+				if (((RootNameModifier) modifier).getContainer().equals(container)) {
+					log.debug("Removing RootNameModifier for container {} from modifiers collection", container.getName());
+					modifiers.remove(modifier);
+				}
+			}
+		}
 	}
 }
