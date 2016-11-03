@@ -810,16 +810,20 @@ public class Fafram extends ExternalResource {
 	public void prepareNodes(List<Container> containerList) {
 		// Create a temp list without child containers
 		final List<Container> temp = new ArrayList<>();
-		for (Container c : containerList) {
-			if (!(c instanceof ChildContainer) && (c.getNode() == null || c.getNode().getHost() == null || "".equals(c.getNode().getHost()))
-					&& OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
-				temp.add(c);
+		if (ProviderSingleton.INSTANCE.isStaticProvider()) {
+			temp.addAll(containerList);
+		} else {
+			for (Container c : containerList) {
+				if (!(c instanceof ChildContainer) && (c.getNode() == null || c.getNode().getHost() == null
+						|| "".equals(c.getNode().getHost())) && OptionUtils.getString(c.getOptions(), Option.SAME_NODE_AS).isEmpty()) {
+					temp.add(c);
+				}
 			}
-		}
 
-		// Do not allow provisioning on empty container list
-		if (temp.isEmpty()) {
-			return;
+			// Do not allow provisioning on empty container list
+			if (temp.isEmpty()) {
+				return;
+			}
 		}
 		// Check if there are nodes with the defined names
 		ProviderSingleton.INSTANCE.getProvider().checkNodes(temp);

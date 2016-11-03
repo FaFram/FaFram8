@@ -45,7 +45,7 @@ public class StaticProvider implements ProvisionProvider {
 			// Set for keeping track of already connected hosts and skipping them if necessary
 			final Set<String> ipAddresses = new HashSet<>();
 			for (Container c : containerList) {
-				if (c instanceof ChildContainer || ipAddresses.contains(c.getNode().getHost())) {
+				if (c instanceof ChildContainer || ipAddresses.contains(c.getNode().getHost()) || "localhost".equals(c.getNode().getHost())) {
 					continue;
 				}
 				ipAddresses.add(c.getNode().getHost());
@@ -128,7 +128,7 @@ public class StaticProvider implements ProvisionProvider {
 				// Copy iptables configuration file from local to all remote nodes
 				((NodeSSHClient) sshClient).copyFileToRemote(SystemProperty.getIptablesConfFilePath(), remoteFilePath);
 
-				final String response = executor.executeCommandSilently("stat " + SystemProperty.getIptablesConfFilePath());
+				final String response = executor.executeCommandSilently("stat " + remoteFilePath);
 
 				if (response == null || response.isEmpty()) {
 					throw new OfflineEnvironmentException("Configuration file for iptables"
