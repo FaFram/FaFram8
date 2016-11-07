@@ -98,7 +98,7 @@ public final class OpenStackClient {
 	private static final int LOG_WAIT_TIME = 5;
 
 	// Server boot timeout
-	private static final int BOOT_TIMEOUT = 120000;
+	private static final int BOOT_TIMEOUT = 600000;
 
 	// List of floating addresses allocated by OpenStackProvisionProvider
 	private static final List<FloatingIP> floatingIPs = new LinkedList<>();
