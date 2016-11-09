@@ -89,7 +89,7 @@ public class FaframTestRunner extends BlockJUnit4ClassRunner {
 		final String currentShortVersion = StringUtils.substringBefore(SystemProperty.getFuseVersion(), ".redhat");
 
 		for (Version v : fixVersions) {
-			final String versionShort = StringUtils.substringAfterLast(v.toString(), "-");
+			final String versionShort = extractVersionShort(issue.getKey(), v.toString());
 			if (currentShortVersion.compareTo(versionShort) >= 0) {
 				return true;
 			}
@@ -98,7 +98,32 @@ public class FaframTestRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
+	 * Extracts short version from jira fix versions for both ENTESB and ENTMQ projects.
+	 * example:
+	 * for ENTESB project the jboss-fuse-6.3 will be converted to 6.3
+	 * for ENTMQ project the JBoss A-MQ 6.3.x will be converted to 6.3
+	 *
+	 * @param issueId
+	 * @param version
+	 * @return String containing short version extracted from version argument or null if version cannot be extracted.
+	 */
+	private String extractVersionShort(String issueId, String version) {
+		final String versionShort;
+
+		if (issueId.startsWith("ENTMQ")) {
+			// ENTMQ issues have following fix version format: "Jboss A-MQ 6.3"
+			versionShort = StringUtils.substringAfterLast(version, " ");
+		} else {
+			// ENTESB issues have following fix version format: "jboss-fuse-6.3"
+			versionShort = StringUtils.substringAfterLast(version.toString(), "-");
+		}
+
+		return versionShort;
+	}
+
+	/**
 	 * Handles the jira status.
+	 *
 	 * @param method current method
 	 * @param notifier run notifier
 	 * @param jiraValue jira ID
