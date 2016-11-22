@@ -55,6 +55,8 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 		if (client == null) {
 			if (SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_NAME_PREFIX) == null) {
 				SystemProperty.set(FaframConstant.OPENSTACK_NAME_PREFIX, "fafram8." + new Date().getTime());
+			} else {
+				SystemProperty.set(FaframConstant.OPENSTACK_NAME_PREFIX, SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_NAME_PREFIX) + "." + new Date().getTime());
 			}
 			client = OpenStackClient.builder()
 					.url(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_URL))
