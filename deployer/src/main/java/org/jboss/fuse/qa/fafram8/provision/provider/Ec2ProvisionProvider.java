@@ -87,7 +87,7 @@ public class Ec2ProvisionProvider implements ProvisionProvider {
 	 * The public IP address is set to be assigned by default, this is there therefore, so the compatibility is not
 	 * broken.
 	 *
-	 * @param containerList
+	 * @param containerList container list
 	 */
 	@Override
 	public void assignAddresses(List<Container> containerList) {

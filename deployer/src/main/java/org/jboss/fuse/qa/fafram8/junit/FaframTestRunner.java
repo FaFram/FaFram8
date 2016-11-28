@@ -49,7 +49,9 @@ public class FaframTestRunner extends BlockJUnit4ClassRunner {
 		final Jira jira = method.getAnnotation(Jira.class);
 		if (jira == null) {
 			log.info("Starting " + method.getName());
+			TestNameSingleton.getInstance().setTestName(method.getName());
 			super.runChild(method, notifier);
+			TestNameSingleton.getInstance().setTestName(null);
 			return;
 		}
 
@@ -67,7 +69,9 @@ public class FaframTestRunner extends BlockJUnit4ClassRunner {
 				log.info(String.format("Starting %s (%s)", method.getName(), statusLine.toString()));
 			}
 			statusLine = new StringBuilder();
+			TestNameSingleton.getInstance().setTestName(method.getName());
 			super.runChild(method, notifier);
+			TestNameSingleton.getInstance().setTestName(null);
 		}
 	}
 
