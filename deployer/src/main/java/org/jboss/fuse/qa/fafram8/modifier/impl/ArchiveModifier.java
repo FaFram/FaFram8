@@ -7,6 +7,7 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exceptions.CopyFileException;
+import org.jboss.fuse.qa.fafram8.junit.TestNameSingleton;
 import org.jboss.fuse.qa.fafram8.modifier.Modifier;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
@@ -113,8 +114,14 @@ public final class ArchiveModifier extends Modifier {
 			if (!(response == null || response.isEmpty())) {
 				for (String filePath : response.split("\n")) {
 					try {
-						final File archivedFile = Paths.get(archiveTargetPath.toAbsolutePath().toString(), randomFolder,
-								StringUtils.substringAfterLast(filePath, File.separator)).toFile();
+						final File archivedFile;
+						if (TestNameSingleton.getInstance().getTestName() == null) {
+							archivedFile = Paths.get(archiveTargetPath.toAbsolutePath().toString(), randomFolder,
+									StringUtils.substringAfterLast(filePath, File.separator)).toFile();
+						} else {
+							archivedFile = Paths.get(archiveTargetPath.toAbsolutePath().toString(), randomFolder,
+									TestNameSingleton.getInstance().getTestName(), StringUtils.substringAfterLast(filePath, File.separator)).toFile();
+						}
 						FileUtils.writeStringToFile(archivedFile, sshClient.readFileFromRemote(filePath));
 					} catch (IOException | CopyFileException e) {
 						log.error("Failed to archived file {} from remote machine {}!", filePath, sshClient, e);
@@ -143,16 +150,34 @@ public final class ArchiveModifier extends Modifier {
 	 */
 	private Path getTargetPath(Container container, String fileName) {
 		if (System.getenv("WORKSPACE") == null) {
-			return Paths.get(archiveTargetPath.toString(), StringUtils.substringBetween(
+			// Get the generated path substring, for example for:
+			// Full path: /tmp/target/container/2016-11-28-09-52-52-434/jboss-fuse-6.2.1.redhat-084/data/log/fuse.log
+			// Open: /tmp/target
+			// Close: data/log/fuse.log
+			// It returns: container/2016-11-28-09-52-52-434/jboss-fuse-6.2.1.redhat-084
+			final String targetPath = StringUtils.substringBetween(
 					Paths.get(container.getFusePath(), fileName).toAbsolutePath().toString(),
 					Paths.get(SystemProperty.getBaseDir(), "target").toAbsolutePath().toString(),
-					fileName),
-					fileName).toAbsolutePath();
+					fileName);
+			return Paths.get(archiveTargetPath.toString(), targetPath, getFileName(fileName)).toAbsolutePath();
 		} else {
 			// Jenkins env
 			final String[] path = Paths.get(container.getFusePath()).toAbsolutePath().toString().split(Pattern.quote(File.separator));
 			final String folder = path[path.length - 2] + File.separator + path[path.length - 1];
-			return Paths.get(archiveTargetPath.toString(), folder, fileName).toAbsolutePath();
+			return Paths.get(archiveTargetPath.toString(), folder, getFileName(fileName)).toAbsolutePath();
 		}
+	}
+
+	/**
+	 * Returns the fileName with prepended test name if the testname is set.
+	 * @param fileName file name
+	 * @return file name with testname prepended if the testname is set
+	 */
+	private String getFileName(String fileName) {
+		if (TestNameSingleton.getInstance().getTestName() != null) {
+			return StringUtils.substringBeforeLast(fileName, File.separator) + File.separator + TestNameSingleton.getTestName()
+					+ File.separator + StringUtils.substringAfterLast(fileName, File.separator);
+		}
+		return fileName;
 	}
 }

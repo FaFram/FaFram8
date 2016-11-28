@@ -239,10 +239,11 @@ public class ContainerManager {
 	 * @param fabricString fabric:create options that will be added to fabric:create command
 	 */
 	public static void setupWindowsFabric(Container c, String fabricString) {
+		final long sleepPeriod = 20000L;
 		c.executeCommand("fabric:create" + (fabricString.startsWith(" ") ? StringUtils.EMPTY : " ") + fabricString);
 
 		try {
-			Thread.sleep(20000);
+			Thread.sleep(sleepPeriod);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
