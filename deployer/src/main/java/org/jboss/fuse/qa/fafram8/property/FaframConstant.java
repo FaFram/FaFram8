@@ -74,13 +74,13 @@ public final class FaframConstant {
 	public static final String KEEP_OS_RESOURCES = "keep.os.resources";
 
 	// Keep folder
-	public static final String KEEP_FOLDER = "keepFolder";
+	public static final String KEEP_FOLDER = "keep.folder";
 
 	// Keep containers running after the test
-	public static final String KEEP_CONTAINERS = "keepContainers";
+	public static final String KEEP_CONTAINERS = "keep.containers";
 
 	// Sets KEEP_OS_RESOURCES and KEEP_CONTAINERS to true
-	public static final String KEEP_ALL = "keepAll";
+	public static final String KEEP_ALL = "keep.all";
 
 	// Patches folder
 	public static final String PATCH_DIR = "fafram.patch.dir";
