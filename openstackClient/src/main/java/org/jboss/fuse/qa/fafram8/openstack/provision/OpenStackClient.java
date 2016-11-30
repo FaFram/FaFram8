@@ -190,7 +190,7 @@ public final class OpenStackClient {
 
 		for (Future<Server> future : futureServerSet) {
 			final Server server = future.get();
-			log.debug("Spawned server " + server.getName());
+			log.debug("Spawned server " + server.getName() + " (image: " + server.getImage().getName() + ")");
 			servers.add(server);
 			serverRegister.add(server);
 		}
@@ -340,7 +340,7 @@ public final class OpenStackClient {
 	 */
 	public Server spawnNewServer(String serverName, String imageID) {
 		this.waitForResources(1);
-		log.info("Spawning new server: " + this.namePrefix + "-" + serverName);
+		log.info("Spawning new server: " + this.namePrefix + "-" + serverName + "(image:" + getOsClient().compute().images().get(imageID).getName() + ")");
 		final ServerCreate server = getOsClient().compute().servers().serverBuilder().image(imageID)
 				.name(this.namePrefix + "-" + serverName)
 				.flavor(this.flavor)

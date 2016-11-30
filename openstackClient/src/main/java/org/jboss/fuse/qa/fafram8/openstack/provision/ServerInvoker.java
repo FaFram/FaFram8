@@ -45,8 +45,8 @@ public class ServerInvoker implements Callable {
 	 */
 	@Override
 	public Server call() {
-		log.info("Creating server inside thread for container: " + nodeName);
 		final OSClient os = OSFactory.clientFromAccess(client.getOsClient().getAccess());
+		log.info("Creating server inside thread for container: " + nodeName + " (image: " + os.compute().images().get(client.getImage()).getName() + ")");
 		final ServerCreate serverCreate = os
 				.compute()
 				.servers()
