@@ -71,6 +71,8 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 					.floatingIpPool(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_FLOATING_IP_POOL))
 					.namePrefix(SystemProperty.getOpenstackServerNamePrefix())
 					.build();
+
+			provider = this;
 		}
 	}
 

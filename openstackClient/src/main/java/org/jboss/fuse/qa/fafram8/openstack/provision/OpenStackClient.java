@@ -87,7 +87,6 @@ public final class OpenStackClient {
 	@Setter
 	private String addressType;
 
-	@Getter
 	@Setter
 	private OSClient osClient;
 
@@ -112,6 +111,18 @@ public final class OpenStackClient {
 	private static final int CORES_PER_INSTANCE = 2;
 	private static final int MEMORY_PER_INSTANCE = 4096;
 
+	public OSClient getOsClient() {
+		if (this.osClient == null) {
+			this.osClient = OSFactory.builder()
+					.endpoint(this.getUrl())
+					.credentials(this.getUser(), this.getPassword())
+					.tenantName(this.getTenant())
+					.authenticate();
+		}
+
+		return this.osClient;
+	}
+
 	@java.beans.ConstructorProperties({"url", "user", "password", "tenant", "image", "namePrefix", "flavor", "keypair", "networks", "floatingIpPool", "addressType", "osClient"})
 	OpenStackClient(String url, String user, String password, String tenant, String image, String namePrefix, String flavor, String keypair, String networks, String floatingIpPool, String addressType) {
 		this.url = url;
@@ -125,12 +136,6 @@ public final class OpenStackClient {
 		this.networks = networks;
 		this.floatingIpPool = floatingIpPool;
 		this.addressType = addressType;
-
-		this.osClient = OSFactory.builder()
-				.endpoint(this.getUrl())
-				.credentials(this.getUser(), this.getPassword())
-				.tenantName(this.getTenant())
-				.authenticate();
 	}
 
 	/**
@@ -185,7 +190,7 @@ public final class OpenStackClient {
 
 		for (Future<Server> future : futureServerSet) {
 			final Server server = future.get();
-			log.debug("Spawned server " + server.getName());
+			log.debug("Spawned server " + server.getName() + " (image: " + server.getImage().getName() + ")");
 			servers.add(server);
 			serverRegister.add(server);
 		}
@@ -200,10 +205,10 @@ public final class OpenStackClient {
 	 * @return floating IP assigned to server
 	 */
 	public String assignFloatingAddress(String serverID) {
-		final FloatingIP ip = osClient.compute().floatingIps().allocateIP(this.floatingIpPool);
+		final FloatingIP ip = getOsClient().compute().floatingIps().allocateIP(this.floatingIpPool);
 		floatingIPs.add(ip);
-		final Server server = osClient.compute().servers().get(serverID);
-		osClient.compute().floatingIps().addFloatingIP(server, ip.getFloatingIpAddress());
+		final Server server = getOsClient().compute().servers().get(serverID);
+		getOsClient().compute().floatingIps().addFloatingIP(server, ip.getFloatingIpAddress());
 		return ip.getFloatingIpAddress();
 	}
 
@@ -215,14 +220,14 @@ public final class OpenStackClient {
 		for (int i = floatingIPs.size() - 1; i >= 0; i--) {
 			final FloatingIP ip = floatingIPs.get(i);
 			log.info("Deallocating floating IP: " + ip.getFloatingIpAddress());
-			osClient.compute().floatingIps().deallocateIP(ip.getId());
+			getOsClient().compute().floatingIps().deallocateIP(ip.getId());
 			floatingIPs.remove(i);
 		}
 
 		for (int i = serverRegister.size() - 1; i >= 0; i--) {
 			final Server server = serverRegister.get(i);
 			log.info("Terminating server: " + server.getName());
-			osClient.compute().servers().delete(server.getId());
+			getOsClient().compute().servers().delete(server.getId());
 			serverRegister.remove(i);
 		}
 
@@ -295,7 +300,7 @@ public final class OpenStackClient {
 		final Map<String, String> filter = new HashMap<>();
 		filter.put("name", name);
 
-		final List<? extends Server> serverList = osClient.compute().servers().list(filter);
+		final List<? extends Server> serverList = getOsClient().compute().servers().list(filter);
 		final List<Server> equalsList = new ArrayList<>();
 
 		for (Server server : serverList) {
@@ -335,13 +340,13 @@ public final class OpenStackClient {
 	 */
 	public Server spawnNewServer(String serverName, String imageID) {
 		this.waitForResources(1);
-		log.info("Spawning new server: " + this.namePrefix + "-" + serverName);
-		final ServerCreate server = osClient.compute().servers().serverBuilder().image(imageID)
+		log.info("Spawning new server: " + this.namePrefix + "-" + serverName + "(image:" + getOsClient().compute().images().get(imageID).getName() + ")");
+		final ServerCreate server = getOsClient().compute().servers().serverBuilder().image(imageID)
 				.name(this.namePrefix + "-" + serverName)
 				.flavor(this.flavor)
 				.keypairName(this.keypair)
 				.networks(Arrays.asList(this.networks.split(","))).build();
-		final Server node = osClient.compute().servers().bootAndWaitActive(server, BOOT_TIMEOUT);
+		final Server node = getOsClient().compute().servers().bootAndWaitActive(server, BOOT_TIMEOUT);
 		serverRegister.add(node);
 		return node;
 	}
@@ -364,7 +369,7 @@ public final class OpenStackClient {
 	 * @param serverName server full name
 	 */
 	public void deleteServer(String serverName) {
-		osClient.compute().servers().delete(getServerByName(serverName).getId());
+		getOsClient().compute().servers().delete(getServerByName(serverName).getId());
 	}
 
 	/**
@@ -373,8 +378,8 @@ public final class OpenStackClient {
 	 * @return free cores
 	 */
 	public int getFreeCores() {
-		final int max = osClient.compute().quotaSets().limits().getAbsolute().getMaxTotalCores();
-		final int current = osClient.compute().quotaSets().limits().getAbsolute().getTotalCoresUsed();
+		final int max = getOsClient().compute().quotaSets().limits().getAbsolute().getMaxTotalCores();
+		final int current = getOsClient().compute().quotaSets().limits().getAbsolute().getTotalCoresUsed();
 		return max - current;
 	}
 
@@ -384,8 +389,8 @@ public final class OpenStackClient {
 	 * @return free memory
 	 */
 	public int getFreeMemory() {
-		final int max = osClient.compute().quotaSets().limits().getAbsolute().getMaxTotalRAMSize();
-		final int current = osClient.compute().quotaSets().limits().getAbsolute().getTotalRAMUsed();
+		final int max = getOsClient().compute().quotaSets().limits().getAbsolute().getMaxTotalRAMSize();
+		final int current = getOsClient().compute().quotaSets().limits().getAbsolute().getTotalRAMUsed();
 		return max - current;
 	}
 
