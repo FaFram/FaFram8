@@ -6,7 +6,6 @@ import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.cluster.container.SshContainer;
 import org.jboss.fuse.qa.fafram8.property.FaframConstant;
-import org.jboss.fuse.qa.fafram8.property.FaframProvider;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
 import org.jboss.fuse.qa.fafram8.resource.Fafram;
@@ -33,7 +32,7 @@ public class RemoteWindowsTest {
 	private Container ssh = SshContainer.builder().name("windows-ssh").parent(root).build();
 
 	@Rule
-	public Fafram fafram = new Fafram().provider(FaframProvider.OPENSTACK).containers(root, ssh);
+	public Fafram fafram = new Fafram().provider(new OpenStackProvisionProvider()).containers(root, ssh);
 
 	@BeforeClass
 	public static void Before() {
