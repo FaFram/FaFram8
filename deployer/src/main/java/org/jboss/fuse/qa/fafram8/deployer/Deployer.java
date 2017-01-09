@@ -286,6 +286,9 @@ public final class Deployer {
 	 * Connects to each node of SSH containers and check if OS is windows. If it is then convert SSHContainer to JoinContainer.
 	 */
 	private static void checkOSandConvertContainers() {
+		if (SystemProperty.isWithoutPublicIp()) {
+			return;
+		}
 		final List<Container> tempContainers = new ArrayList<>(ContainerManager.getContainerList());
 		for (int i = 0; i < tempContainers.size(); i++) {
 			final Container container = tempContainers.get(i);
@@ -308,7 +311,7 @@ public final class Deployer {
 						child.setParentName(joinContainer.getName());
 					}
 
-					// Remove SshContainer from ContainerList and replace it witj JoinContainer
+					// Remove SshContainer from ContainerList and replace it with JoinContainer
 					ContainerManager.getContainerList().remove(i);
 					ContainerManager.getContainerList().add(i, joinContainer);
 					((SshContainer) container).setJoinContainer((JoinContainer) joinContainer);
