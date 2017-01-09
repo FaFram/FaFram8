@@ -330,6 +330,9 @@ public class SshContainer extends Container implements ThreadContainer {
 	 * Delete SSH container folder from static node.
 	 */
 	private void clean() {
+		if (SystemProperty.isWithoutPublicIp()) {
+			return;
+		}
 		log.info("Deleting container folder on " + super.getNode().getHost());
 
 		final String path;

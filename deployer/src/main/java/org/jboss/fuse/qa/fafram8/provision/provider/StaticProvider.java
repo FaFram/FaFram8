@@ -49,17 +49,18 @@ public class StaticProvider implements ProvisionProvider {
 					continue;
 				}
 				ipAddresses.add(c.getNode().getHost());
-
-				log.trace("Connecting own executor to clean the node");
-				final SSHClient sshClient = new NodeSSHClient().defaultSSHPort().host(c.getNode().getHost())
-						.username(c.getNode().getUsername()).password(c.getNode().getPassword());
-				executor = new Executor(sshClient, c.getNode().getHost());
-				log.debug("Killing Fuse process on node: ", executor);
-				try {
-					executor.connect();
-					executor.executeCommandSilently("pkill -9 -f karaf.base");
-				} catch (Exception e) {
-					throw new FaframException("Exception when killing Fuse on provides nodes (StaticProvider):", e);
+				if (!SystemProperty.isWithoutPublicIp()) {
+					log.trace("Connecting own executor to clean the node");
+					final SSHClient sshClient = new NodeSSHClient().defaultSSHPort().host(c.getNode().getHost())
+							.username(c.getNode().getUsername()).password(c.getNode().getPassword());
+					executor = new Executor(sshClient, c.getNode().getHost());
+					log.debug("Killing Fuse process on node: ", executor);
+					try {
+						executor.connect();
+						executor.executeCommandSilently("pkill -9 -f karaf.base");
+					} catch (Exception e) {
+						throw new FaframException("Exception when killing Fuse on provides nodes (StaticProvider):", e);
+					}
 				}
 			}
 		}
