@@ -395,8 +395,11 @@ public class RootContainer extends Container {
 		 * @return this
 		 */
 		public RootBuilder addUser(String user, String pass, String roles) {
-			OptionUtils.set(container.getOptions(), Option.USER, user);
-			OptionUtils.set(container.getOptions(), Option.PASSWORD, pass);
+			/// Add only one admin user to options map for root container
+			if (roles.contains("admin") || roles.contains("Administrator") || roles.contains("SuperUser")) {
+				OptionUtils.set(container.getOptions(), Option.USER, user);
+				OptionUtils.set(container.getOptions(), Option.PASSWORD, pass);
+			}
 			((RootContainer) container).setUsersMod(putProperty("etc/users.properties", user, pass + "," + roles));
 			// We need to pass it to ModifierExecutor later when we will have the IP
 			return this;
