@@ -139,7 +139,7 @@ public class StaticProvider implements ProvisionProvider {
 				log.debug("Saving default iptables configuration on node {}.", executor);
 				executor.executeCommand("sudo iptables-save > " + SAVED_IPTABLES);
 
-				executor.executeCommand("sudo iptables-restore " + SystemProperty.getIptablesConfFilePath());
+				executor.executeCommand("sudo iptables-restore " + remoteFilePath);
 				log.debug("Iptables successfully configured on node {}.", executor);
 			} catch (Exception e) {
 				throw new OfflineEnvironmentException(e);
