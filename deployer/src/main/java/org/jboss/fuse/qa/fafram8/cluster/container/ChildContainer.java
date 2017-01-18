@@ -79,12 +79,27 @@ public class ChildContainer extends Container implements ThreadContainer {
 		}
 		String jmxUser = super.getUser();
 		String jmxPass = super.getPassword();
+
+		// Check if JMX user and password isn't different from parent. If they are different then override previous values
+		// Basically it means that addUser() was used on parent container and we need to reflect that
+		if (jmxUser != super.getParent().getUser()) {
+			jmxUser = super.getParent().getUser();
+		}
+		if (jmxPass != super.getParent().getPassword()) {
+			jmxPass = super.getParent().getPassword();
+		}
+
+		// This means that jmxUser and jmxPassword properties were implicitly set on child container and they should override previous values
 		if (super.getOptions().containsKey(Option.JMX_USER)) {
 			jmxUser = super.getOptions().get(Option.JMX_USER).get(0);
 		}
 		if (super.getOptions().containsKey(Option.JMX_PASSWORD)) {
 			jmxPass = super.getOptions().get(Option.JMX_PASSWORD).get(0);
 		}
+
+		// Override values in options map of this container with correct credentials (required for executors)
+		OptionUtils.set(super.getOptions(), Option.USER, jmxUser);
+		OptionUtils.set(super.getOptions(), Option.PASSWORD, jmxPass);
 
 		executor.executeCommand(String.format("container-create-child %s --jmx-user %s --jmx-password %s %s %s",
 				OptionUtils.getCommand(super.getOptions()), jmxUser, jmxPass, super.getParent().getName(), super.getName()));
@@ -402,6 +417,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param containerName container name
 		 * @return this
 		 */
@@ -412,6 +428,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 		/**
 		 * Setter.
+		 *
 		 * @param otherContainer other container
 		 * @return this
 		 */
