@@ -104,6 +104,9 @@ public class ChildContainer extends Container implements ThreadContainer {
 		executor.executeCommand(String.format("container-create-child %s --jmx-user %s --jmx-password %s %s %s",
 				OptionUtils.getCommand(super.getOptions()), jmxUser, jmxPass, super.getParent().getName(), super.getName()));
 		super.setCreated(true);
+		// Set node object before waiting for provisioning - because when the wait fails, the destroy will fail on
+		// ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor()); as the node will be null
+		super.setNode(super.getParent().getNode());
 		try {
 			executor.waitForProvisioning(this);
 		} catch (FaframException e) {
@@ -112,8 +115,6 @@ public class ChildContainer extends Container implements ThreadContainer {
 		}
 
 		super.setOnline(true);
-		// Set node object
-		super.setNode(super.getParent().getNode());
 		// Create a new executor
 		try {
 			final Executor childExecutor = super.createExecutor();
@@ -145,7 +146,10 @@ public class ChildContainer extends Container implements ThreadContainer {
 			return;
 		}
 
-		super.getExecutor().stopKeepAliveTimer();
+		if (super.getExecutor() != null) {
+			// This can happen when the child container isn't created successfully
+			super.getExecutor().stopKeepAliveTimer();
+		}
 
 		if ("localhost".equals(super.getNode().getHost())) {
 			ModifierExecutor.executePostModifiers(this);
@@ -161,8 +165,10 @@ public class ChildContainer extends Container implements ThreadContainer {
 		executor.executeCommand("container-delete --force " + super.getName());
 		super.setCreated(false);
 		ContainerManager.getContainerList().remove(this);
-		log.trace("Disconnecting executor after destroying container");
-		super.getExecutor().disconnect();
+		if (super.getExecutor() != null) {
+			log.trace("Disconnecting executor after destroying container");
+			super.getExecutor().disconnect();
+		}
 	}
 
 	@Override
