@@ -7,6 +7,8 @@ import static org.jboss.fuse.qa.fafram8.modifier.impl.JvmOptsModifier.addJvmOpts
 import static org.jboss.fuse.qa.fafram8.modifier.impl.PropertyModifier.putProperty;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.RootNameModifier.setRootName;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
@@ -246,7 +248,22 @@ public class RootContainer extends Container {
 
 	@Override
 	public void kill() {
-		super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());
+		log.info("Killing container " + super.getName());
+		// If container is on windows we need different approach to killing container
+		if (super.getNode().getExecutor().isCygwin()) {
+			// Need to convert path to Win path
+			final String path = super.getNode().getExecutor().executeCommand("cygpath -wa " + super.getFusePath()).replace("\\", "\\\\");
+
+			// Special command for getting command line parameters of processes and their PIDs
+			// Special grep because of inconsistencies of command line parameters on Windows
+			final String pid = StringUtils.substringAfter(super.getNode().getExecutor().executeCommand(
+					"WMIC PROCESS get Processid,Commandline /format:list | grep -E 'karaf.*org.apache.karaf.main.Main' -A 1 | grep 'karaf.base=\""
+							+ path + "\"\\|karaf.base=" + path + "' -A 1 | tail -n 1"), "=");
+			super.getNode().getExecutor().executeCommand("taskkill /f /pid " + pid);
+		} else {
+			super.getNode().getExecutor().executeCommand("pkill -9 -f \"karaf.base=" + super.getFusePath() + " \"");
+		}
+
 		super.setOnline(false);
 		log.trace("Disconnecting executor in root's kill()");
 		super.getExecutor().disconnect();
