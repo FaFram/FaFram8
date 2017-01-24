@@ -231,6 +231,7 @@ public class SshContainer extends Container implements ThreadContainer {
 
 	@Override
 	public void kill() {
+		log.info("Killing container " + super.getName());
 		if (getJoinContainer() == null) {
 			if (!SystemProperty.isWithoutPublicIp()) {
 				super.getNode().getExecutor().executeCommand("pkill -9 -f " + super.getName());

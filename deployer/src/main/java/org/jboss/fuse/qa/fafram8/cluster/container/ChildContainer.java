@@ -1,5 +1,7 @@
 package org.jboss.fuse.qa.fafram8.cluster.container;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.jboss.fuse.qa.fafram8.cluster.resolver.Resolver;
 import org.jboss.fuse.qa.fafram8.deployer.ContainerSummoner;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
@@ -196,9 +198,18 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 	@Override
 	public void kill() {
-		super.getExecutor().executeCommand("exec pkill -9 -f " + super.getName());
+		log.info("Killing container " + super.getName());
+		// If container is on windows we need different approach to killing container
+		if (super.getNode().getExecutor().isCygwin()) {
+			final String pid = StringUtils.substringAfter(super.getNode().getExecutor().executeCommand(
+					"WMIC PROCESS get Processid,Commandline /format:list | grep -E 'karaf.*org.apache.karaf.main.Main' -A 1 | grep "
+							+ super.getName() + " -A 1 | tail -n 1"), "=");
+			super.getNode().getExecutor().executeCommand("taskkill /f /pid " + pid);
+		} else {
+			super.getExecutor().executeCommand("exec pkill -9 -f " + super.getName());
+		}
 		super.setOnline(false);
-		log.trace("Disconnecting executor in childs's kill()");
+		log.trace("Disconnecting executor in child's kill()");
 		super.getExecutor().disconnect();
 	}
 
