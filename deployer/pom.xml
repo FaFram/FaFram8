@@ -16,9 +16,7 @@
 
 	<properties>
 		<maven.invoker.version>2.2</maven.invoker.version>
-		<plexus.utils.version>3.0.17</plexus.utils.version>
 		<zip4j.version>1.3.2</zip4j.version>
-		<openstack.version>2.0.5</openstack.version>
 		<ant.version>1.9.6</ant.version>
 		<jira.client.version>0.6-SNAPSHOT</jira.client.version>
 	</properties>
@@ -50,11 +48,6 @@
 			<groupId>org.apache.maven.shared</groupId>
 			<artifactId>maven-invoker</artifactId>
 			<version>${maven.invoker.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.plexus</groupId>
-			<artifactId>plexus-utils</artifactId>
-			<version>${plexus.utils.version}</version>
 		</dependency>
 
 		<!-- Local fuse dependencies -->
