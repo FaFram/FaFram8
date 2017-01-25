@@ -5,6 +5,7 @@ import org.jboss.fuse.qa.fafram8.exceptions.SSHClientException;
 import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -77,28 +78,34 @@ public class WindowsExecutor extends Executor {
 
 	@Override
 	public String executeCommandSilently(String cmd, boolean ignoreExceptions) {
-		log.trace("Reconnecting executor on Windows before executing commands silently");
+		log.trace("Reconnecting executor on Windows before executing commands silently: {}", cmd);
 		reconnectSilently();
 		return super.executeCommandSilently(cmd, ignoreExceptions);
 	}
 
 	@Override
 	public String executeCommand(String cmd) {
-		log.trace("Reconnecting executor on Windows before executing command");
+		log.trace("Reconnecting executor on Windows before executing command: {}", cmd);
 		reconnectSilently();
 		return super.executeCommand(cmd);
 	}
 
 	@Override
 	public List<String> executeCommands(String... commands) {
-		log.trace("Reconnecting executor on Windows before executing commands");
-		reconnectSilently();
-		return super.executeCommands(commands);
+		final List<String> responses = new ArrayList<>();
+
+		if (commands != null) {
+			for (String command : commands) {
+				responses.add(executeCommand(command));
+			}
+		}
+
+		return responses;
 	}
 
 	@Override
 	public String executeCommandSilently(String cmd) {
-		log.trace("Reconnecting executor on Windows before executing command silently");
+		log.trace("Reconnecting executor on Windows before executing command silently: {}", cmd);
 		reconnectSilently();
 		return super.executeCommandSilently(cmd);
 	}
