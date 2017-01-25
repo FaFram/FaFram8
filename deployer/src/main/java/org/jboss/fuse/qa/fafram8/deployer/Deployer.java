@@ -10,6 +10,7 @@ import org.jboss.fuse.qa.fafram8.cluster.node.Node;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exception.FaframThreadException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
+import org.jboss.fuse.qa.fafram8.executor.WindowsExecutor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.openstack.exception.InvokerPoolInterruptedException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
@@ -292,17 +293,28 @@ public final class Deployer {
 		final List<Container> tempContainers = new ArrayList<>(ContainerManager.getContainerList());
 		for (int i = 0; i < tempContainers.size(); i++) {
 			final Container container = tempContainers.get(i);
+			final Executor executor = container.getNode().createExecutor();
+
+			if (container instanceof RootContainer) {
+				if (isWindows(executor)) {
+					// replace root container's executor for windows executor
+					container.getNode().setExecutor(new WindowsExecutor(executor));
+				}
+			}
 
 			if (container instanceof SshContainer) {
-				final Executor executor = container.getNode().createExecutor();
-				log.trace("Connecting node executor for checking OS on the machine");
-				executor.connect();
 
-				final String os = executor.executeCommandSilently("uname");
-				if (StringUtils.containsIgnoreCase(os, "cyg")) {
+				if (isWindows(executor)) {
+					//replace node executor with windows executor
+					container.getNode().setExecutor(new WindowsExecutor(executor));
+
 					// Create JoinContainer from SshContainer
 					log.info("Container " + container.getName() + " running on Windows. Converting to join container!");
 					final Container joinContainer = JoinContainer.joinBuilder(container).build();
+
+					// replace joinContainer's executor for Windows executor
+					final Executor joinExecutor = joinContainer.getNode().createExecutor();
+					joinContainer.getNode().setExecutor(new WindowsExecutor(joinExecutor));
 
 					// Replace parent for all child containers
 					final Set<Container> children = ContainerManager.getChildContainers(container);
@@ -318,5 +330,22 @@ public final class Deployer {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Check if the executor is connected to windows.
+	 *
+	 * @param executor
+	 * @return true if the executor is connected to windows, else otherwise
+	 */
+	private static boolean isWindows(Executor executor) {
+		boolean isWindows = false;
+		log.trace("Connecting node executor for checking OS on the machine");
+		executor.connect();
+		final String os = executor.executeCommandSilently("uname");
+		if (StringUtils.containsIgnoreCase(os, "cyg")) {
+			isWindows = true;
+		}
+		return isWindows;
 	}
 }
