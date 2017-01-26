@@ -11,6 +11,8 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import lombok.extern.slf4j.Slf4j;
 import net.rcarz.jiraclient.BasicCredentials;
@@ -91,7 +93,6 @@ public class FaframTestRunner extends BlockJUnit4ClassRunner {
 		}
 
 		final String currentShortVersion = StringUtils.substringBefore(SystemProperty.getFuseVersion(), ".redhat");
-
 		for (Version v : fixVersions) {
 			final String versionShort = extractVersionShort(issue.getKey(), v.toString());
 			if (currentShortVersion.compareTo(versionShort) >= 0) {
@@ -107,8 +108,8 @@ public class FaframTestRunner extends BlockJUnit4ClassRunner {
 	 * for ENTESB project the jboss-fuse-6.3 will be converted to 6.3
 	 * for ENTMQ project the JBoss A-MQ 6.3.x will be converted to 6.3
 	 *
-	 * @param issueId
-	 * @param version
+	 * @param issueId issue id
+	 * @param version version
 	 * @return String containing short version extracted from version argument or null if version cannot be extracted.
 	 */
 	private String extractVersionShort(String issueId, String version) {
@@ -118,8 +119,15 @@ public class FaframTestRunner extends BlockJUnit4ClassRunner {
 			// ENTMQ issues have following fix version format: "Jboss A-MQ 6.3"
 			versionShort = StringUtils.substringAfterLast(version, " ");
 		} else {
-			// ENTESB issues have following fix version format: "jboss-fuse-6.3"
-			versionShort = StringUtils.substringAfterLast(version.toString(), "-");
+			// ENTESB issues have following fix version format: "jboss-fuse-6.3" or "jboss-fuse-6.3-patches"
+			final Pattern pattern = Pattern.compile("^.*([0-9]\\.[0-9]).*$");
+			final Matcher matcher = pattern.matcher(version.toString());
+			if (matcher.matches()) {
+				versionShort = matcher.group(1);
+			} else {
+				log.error("Coudln't parse short version from fix version, returning null");
+				return null;
+			}
 		}
 
 		return versionShort;
