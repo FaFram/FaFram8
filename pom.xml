@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -28,6 +28,11 @@
 		<maven.checkstyle.version>2.16</maven.checkstyle.version>
 		<checkstyle.version>5.8</checkstyle.version>
 		<checkstyle.extension.version>1.0.0</checkstyle.extension.version>
+		<nexus.stating.version>1.6.7</nexus.stating.version>
+		<maven.source.version>2.2.1</maven.source.version>
+		<maven.javadoc.version>2.9.1</maven.javadoc.version>
+		<maven.gpg.version>1.5</maven.gpg.version>
+
 	</properties>
 
 	<groupId>org.jboss.fuse.qa</groupId>
@@ -35,6 +40,67 @@
 	<version>0.7-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Fafram8</name>
+
+	<description>Fabric Framework for JBoss Fuse</description>
+	<url>https://developers.redhat.com/products/fuse/overview/</url>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Andrej Vano</name>
+			<email>avano@redhat.com</email>
+			<organization>Red Hat</organization>
+			<organizationUrl>http://www.redhat.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Roman Jakubco</name>
+			<email>rjakubco@redhat.com</email>
+			<organization>Red Hat</organization>
+			<organizationUrl>http://www.redhat.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Matej Melko</name>
+			<email>mmelko@redhat.com</email>
+			<organization>Red Hat</organization>
+			<organizationUrl>http://www.redhat.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Emil Cervenan</name>
+			<email>ecervena@redhat.com</email>
+			<organization>Red Hat</organization>
+			<organizationUrl>http://www.redhat.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Tomas Plevko</name>
+			<email>tplevko@redhat.com</email>
+			<organization>Red Hat</organization>
+			<organizationUrl>http://www.redhat.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Josef Ludvicek</name>
+			<email>jludvice@redhat.com</email>
+			<organization>Red Hat</organization>
+			<organizationUrl>http://www.redhat.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Jakub Knetl</name>
+			<email>jknetl@redhat.com</email>
+			<organization>Red Hat</organization>
+			<organizationUrl>http://www.redhat.com</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://github.com/fafram/fafram8.git</connection>
+		<developerConnection>scm:git:ssh://github.com:fafram/fafram8.git</developerConnection>
+		<url>http://github.com/fafram/fafram8/tree/master</url>
+	</scm>
 
 	<modules>
 		<module>sshClient</module>
@@ -266,6 +332,80 @@
 								<fuse.group>${fuse.group}</fuse.group>
 							</systemPropertyVariables>
 						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>maven-central</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>central</name>
+				</property>
+			</activation>
+			<distributionManagement>
+				<snapshotRepository>
+					<id>ossrh</id>
+					<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+				</snapshotRepository>
+				<repository>
+					<id>ossrh</id>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				</repository>
+			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>${nexus.stating.version}</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>${maven.source.version}</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>${maven.javadoc.version}</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>${maven.gpg.version}</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
