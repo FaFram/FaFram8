@@ -4,9 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
+import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -592,18 +594,43 @@ public class SystemProperty {
 	}
 
 	/**
+	 * Checks if we have some fafram.properties file.
+	 */
+	private static void checkConfiguration() {
+		// Check if we have some properties file
+		if (SystemProperty.getFaframConfigUrl() != null) {
+			if (!new File(SystemProperty.getFaframConfigUrl()).exists()) {
+				throw new FaframException("Specified configuration file " + SystemProperty.getFaframConfigUrl() + " does not exist!");
+			}
+			return;
+		}
+
+		try {
+			// Get the property files URLs from classpath
+			if (!SystemProperty.class.getClassLoader().getResources("fafram.properties").hasMoreElements()) {
+				throw new FaframException("No fafram.properties file found on classpath! Place one on the classpath or use "
+						+ FaframConstant.FAFRAM_CONFIG_URL + " system property!");
+			}
+		} catch (IOException ioe) {
+			throw new FaframException("Coudln't get classpath when validating configuration!");
+		}
+	}
+
+	/**
 	 * Inits the fafram properties - loads the properties from fafram.properties and merge user changes.
 	 *
 	 * @return properties instance
 	 */
 	public static Properties initProperties() {
+		checkConfiguration();
+
 		final Properties p = new Properties();
 
 		try {
 			final List<URL> urls = new LinkedList<>();
 			// If defined get property file from SystemProperty
 			if (SystemProperty.getFaframConfigUrl() != null) {
-				urls.add(new URL(SystemProperty.getFaframConfigUrl()));
+				urls.add(new File(SystemProperty.getFaframConfigUrl()).toURI().toURL());
 				log.info("Loading Fafram configuration file on path: " + SystemProperty.getFaframConfigUrl());
 			}
 			// Get the property files URLs from classpath
