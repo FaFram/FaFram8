@@ -125,8 +125,8 @@ public class FaframTestRunner extends BlockJUnit4ClassRunner {
 			if (matcher.matches()) {
 				versionShort = matcher.group(1);
 			} else {
-				log.error("Coudln't parse short version from fix version, returning null");
-				return null;
+				log.error("Coudln't parse short version from given fix version (" + version + "), returning empty string and the test will run");
+				return "";
 			}
 		}
 
