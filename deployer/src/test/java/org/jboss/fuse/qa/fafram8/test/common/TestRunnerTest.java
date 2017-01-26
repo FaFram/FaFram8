@@ -21,9 +21,8 @@ public class TestRunnerTest {
 	}
 
 	@Test
-	@Jira("ENTESB-1") // Let's hope it will remain closed
+	@Jira("ENTESB-2") // Let's hope it will remain closed
 	public void shouldRunClosedTest() {
-
 	}
 
 	@Test
@@ -59,7 +58,7 @@ public class TestRunnerTest {
 	}
 
 	@Test
-	@Jira({"ENTESB-3", "ENTESB-1"})
+	@Jira({"ENTESB-3", "ENTESB-2"})
 	public void shouldRunBothValid() {
 	}
 }
