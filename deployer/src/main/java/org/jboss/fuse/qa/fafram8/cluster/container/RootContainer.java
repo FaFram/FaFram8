@@ -123,7 +123,7 @@ public class RootContainer extends Container {
 			log.trace("Connecting both executors when using onlyConnect");
 			super.getExecutor().connect();
 			// There is no executor when using localhost, see Node.Builder.build()
-			if (!"localhost".equals(super.getNode().getHost())) {
+			if (!isLocal()) {
 				super.getNode().getExecutor().connect();
 			}
 		}
@@ -136,7 +136,7 @@ public class RootContainer extends Container {
 	 */
 	protected void modifyContainer() {
 		// Instantiate the node manager based on node.getHost()
-		if ("localhost".equals(super.getNode().getHost())) {
+		if (isLocal()) {
 			nodeManager = new LocalNodeManager(super.getExecutor());
 		} else {
 			// Connect the node executor
@@ -189,7 +189,7 @@ public class RootContainer extends Container {
 		super.getNode().getExecutor().stopKeepAliveTimer();
 		super.getExecutor().stopKeepAliveTimer();
 
-		if ("localhost".equals(super.getNode().getHost())) {
+		if (isLocal()) {
 			ModifierExecutor.executePostModifiers(this);
 		} else {
 			ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor());
@@ -296,12 +296,21 @@ public class RootContainer extends Container {
 
 	@Override
 	public List<String> executeNodeCommands(String... commands) {
-		if ("localhost".equals(super.getNode().getHost())) {
+		if (isLocal()) {
 			log.error("Execute node command is not supported on localhost");
 			return null;
 		}
 
 		return super.getNode().getExecutor().executeCommands(commands);
+	}
+
+	/**
+	 * Checks whether the container is assigned to local machine.
+	 *
+	 * @return True if the container is assigned to local machine. False otherwise.
+	 */
+	public boolean isLocal() {
+		return "localhost".equals(super.getNode().getHost());
 	}
 
 	/**

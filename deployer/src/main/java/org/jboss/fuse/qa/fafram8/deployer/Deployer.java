@@ -293,9 +293,9 @@ public final class Deployer {
 		final List<Container> tempContainers = new ArrayList<>(ContainerManager.getContainerList());
 		for (int i = 0; i < tempContainers.size(); i++) {
 			final Container container = tempContainers.get(i);
-			final Executor executor = container.getNode().createExecutor();
 
-			if (container instanceof RootContainer) {
+			if (container instanceof RootContainer && container.getNode() != null && !((RootContainer) container).isLocal()) {
+				final Executor executor = container.getNode().createExecutor();
 				if (isWindows(executor)) {
 					// replace root container's executor for windows executor
 					container.getNode().setExecutor(new WindowsExecutor(executor));
@@ -303,6 +303,7 @@ public final class Deployer {
 			}
 
 			if (container instanceof SshContainer) {
+				final Executor executor = container.getNode().createExecutor();
 
 				if (isWindows(executor)) {
 					//replace node executor with windows executor
