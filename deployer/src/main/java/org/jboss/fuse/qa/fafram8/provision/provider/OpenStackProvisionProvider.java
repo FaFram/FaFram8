@@ -45,6 +45,7 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 	private OpenStackClient client = null;
 
 	private static final String OFFLINE_IPTABLES_FILE = "iptables-no-internet";
+	private static final String OFFLINE_WINDOWS_POLICY_FILE = "windows-policy-no-internet.wfw";
 
 	private String ipTablesFilePath;
 
@@ -205,7 +206,11 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 		// This is special case when you want to use default offline configuration.
 		if (SystemProperty.isOffline()) {
 			// setting path to default iptables configuration file in home folder of user
-			this.ipTablesFilePath = OFFLINE_IPTABLES_FILE;
+			if (isWindowsEnv()) {
+				this.ipTablesFilePath = OFFLINE_WINDOWS_POLICY_FILE;
+			} else {
+				this.ipTablesFilePath = OFFLINE_IPTABLES_FILE;
+			}
 		} else {
 			// Otherwise you want to copy iptables configuration file from local machine to remote node -> create path to file on remote node
 			final String directory =
@@ -216,6 +221,10 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 					directory + File.separator + StringUtils.substringAfterLast(SystemProperty.getIptablesConfFilePath(), File.separator);
 		}
 		log.info("Setting iptables configuration in environment to {}.", this.ipTablesFilePath);
+	}
+
+	private boolean isWindowsEnv() {
+		return System.getProperty(FaframConstant.OPENSTACK_WINDOWS) != null;
 	}
 
 	/**
@@ -245,7 +254,11 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 						"Configuration file for iptables" + " doesn't exists on node: " + container.getNode().getHost() + ".",
 						new FileNotFoundException("File " + this.ipTablesFilePath + " doesn't exists."));
 			}
-			container.getNode().getExecutor().executeCommand("sudo iptables-restore " + this.ipTablesFilePath);
+			if (isWindowsEnv()) {
+				container.getNode().getExecutor().executeCommand("powershell.exe 'netsh advfirewall import " + this.ipTablesFilePath + "'");
+			} else {
+				container.getNode().getExecutor().executeCommand("sudo iptables-restore " + this.ipTablesFilePath);
+			}
 			log.debug("Iptables successfully configured on node {}.", container.getNode().getExecutor());
 		} catch (Exception e) {
 			throw new FaframException("There was problem setting iptables on node: " + container.getNode().getHost(), e);

@@ -99,18 +99,20 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 			nodeManager.unzipArtifact(this);
 			super.setCreated(true);
 			nodeManager.prepareFuse(this);
-			nodeManager.startFuse();
+			if (!SystemProperty.suppressStart()) {
+				nodeManager.startFuse();
 
-			// Parent info
-			final String uri = super.getParent().getExecutor().executeCommandSilently("fabric:info");
-			final String zookeeperUri = StringUtils.substringBetween(uri, "ZooKeeper URI:", "\n").trim();
-			final String options = parseOptions();
+				// Parent info
+				final String uri = super.getParent().getExecutor().executeCommandSilently("fabric:info");
+				final String zookeeperUri = StringUtils.substringBetween(uri, "ZooKeeper URI:", "\n").trim();
+				final String options = parseOptions();
 
-			// Name of the container should be changed in property files -> only join with correct password for root and zookeeperUri from root
-			log.trace("First time connecting join executor");
-			super.getExecutor().connect();
-			super.getExecutor().executeCommands("fabric:join " + options + " " + zookeeperUri);
-			super.getExecutor().waitForProvisioning(this);
+				// Name of the container should be changed in property files -> only join with correct password for root and zookeeperUri from root
+				log.trace("First time connecting join executor");
+				super.getExecutor().connect();
+				super.getExecutor().executeCommands("fabric:join " + options + " " + zookeeperUri);
+				super.getExecutor().waitForProvisioning(this);
+			}
 			ModifierExecutor.clearAllModifiers();
 		} catch (FaframException ex) {
 			ex.printStackTrace();
