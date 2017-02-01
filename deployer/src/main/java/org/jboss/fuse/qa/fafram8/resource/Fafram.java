@@ -698,15 +698,18 @@ public class Fafram extends ExternalResource {
 
 	/**
 	 * Centers the version string.
+	 *
 	 * @return centered version string
 	 */
 	private String centerVersion() {
+		if (getClass().getPackage().getImplementationVersion() == null) {
+			return "";
+		}
 		final int logoWidth = 40;
 		final StringBuilder sb = new StringBuilder();
 
 		//Loop as many times as specified; each time add a space to the string
-		for(int i=0; ((i < (logoWidth - getClass().getPackage().getImplementationVersion().length())/2)); i++)
-		{
+		for (int i = 0; ((i < (logoWidth - getClass().getPackage().getImplementationVersion().length()) / 2)); i++) {
 			sb.append(" ");
 		}
 
@@ -934,6 +937,7 @@ public class Fafram extends ExternalResource {
 
 	/**
 	 * Get reference to current {@link ProvisionProvider} instance.
+	 *
 	 * @return current {@link ProvisionProvider} instance
 	 */
 	public ProvisionProvider getProvisionProvider() {
