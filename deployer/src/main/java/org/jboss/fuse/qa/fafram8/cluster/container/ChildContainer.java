@@ -84,10 +84,10 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 		// Check if JMX user and password isn't different from parent. If they are different then override previous values
 		// Basically it means that addUser() was used on parent container and we need to reflect that
-		if (jmxUser.equals(super.getParent().getUser())) {
+		if (!jmxUser.equals(super.getParent().getUser())) {
 			jmxUser = super.getParent().getUser();
 		}
-		if (jmxPass.equals(super.getParent().getPassword())) {
+		if (!jmxPass.equals(super.getParent().getPassword())) {
 			jmxPass = super.getParent().getPassword();
 		}
 
