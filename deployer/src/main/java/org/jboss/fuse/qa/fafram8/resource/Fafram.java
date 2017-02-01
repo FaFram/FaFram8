@@ -691,7 +691,27 @@ public class Fafram extends ExternalResource {
 				+ "| |__ ____| |__ ____ ____ ____ ( (   ) )\n"
 				+ "|  __) _  |  __) ___) _  |    \\ > > < < \n"
 				+ "| | ( ( | | | | |  ( ( | | | | ( (___) )\n"
-				+ "|_|  \\_||_|_| |_|   \\_||_|_|_|_|\\_____/ \n\n");
+				+ "|_|  \\_||_|_| |_|   \\_||_|_|_|_|\\_____/ \n"
+				+ centerVersion()
+		);
+	}
+
+	/**
+	 * Centers the version string.
+	 * @return centered version string
+	 */
+	private String centerVersion() {
+		final int logoWidth = 40;
+		final StringBuilder sb = new StringBuilder();
+
+		//Loop as many times as specified; each time add a space to the string
+		for(int i=0; ((i < (logoWidth - getClass().getPackage().getImplementationVersion().length())/2)); i++)
+		{
+			sb.append(" ");
+		}
+
+		sb.append(getClass().getPackage().getImplementationVersion());
+		return sb.toString();
 	}
 
 	/**
