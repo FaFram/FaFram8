@@ -37,7 +37,7 @@
 
 	<groupId>com.github.fafram</groupId>
 	<artifactId>fafram8-parent</artifactId>
-	<version>0.7-SNAPSHOT</version>
+	<version>0.7</version>
 	<packaging>pom</packaging>
 	<name>Fafram8</name>
 

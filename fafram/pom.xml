@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.github.fafram</groupId>
 		<artifactId>fafram8-parent</artifactId>
-		<version>0.7-SNAPSHOT</version>
+		<version>0.7</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -48,6 +48,24 @@
 									<include>com.github.fafram:fafram8-deployer</include>
 								</includes>
 							</artifactSet>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+<!-- We must generate a -javadoc JAR file to publish on Maven Central -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>empty-javadoc-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>javadoc</classifier>
+							<classesDirectory>${basedir}/javadoc</classesDirectory>
 						</configuration>
 					</execution>
 				</executions>
