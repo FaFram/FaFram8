@@ -22,7 +22,7 @@ public class LocalCreateEnsembleTest {
 
 	@Test
 	public void ruleEnsembleTest() {
-		fafram = new Fafram().ensemble(root, child1, child2).containers(child1, child2, root).addUser("fafram", "fafram", "admin").setup();
+		fafram = new Fafram().ensemble(root, child1, child2).containers(child1, child2, root).addUser("admin", "admin", "admin").setup();
 		assertTrue(root.executeCommand("container-list").contains("-1"));
 		assertTrue(root.executeCommand("container-list").contains("-2"));
 		assertTrue(root.executeCommand("container-list").contains("-3"));
@@ -30,7 +30,7 @@ public class LocalCreateEnsembleTest {
 
 	@Test
 	public void inTestEnsembleTest() {
-		fafram = new Fafram().containers(child2, root, child1).addUser("fafram", "fafram", "admin").setup();
+		fafram = new Fafram().containers(child2, root, child1).addUser("admin", "admin", "admin").setup();
 		fafram.ensemble("root", "child1", "child2");
 		assertTrue(root.executeCommand("container-list").contains("-1"));
 		assertTrue(root.executeCommand("container-list").contains("-2"));
