@@ -200,7 +200,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 	public void kill() {
 		log.info("Killing container " + super.getName());
 		// If container is on windows we need different approach to killing container
-		if (super.getNode().getExecutor().isCygwin()) {
+		if (!"localhost".equals(super.getNode().getHost()) && super.getNode().getExecutor().isCygwin()) {
 			final String pid = StringUtils.substringAfter(super.getNode().getExecutor().executeCommand(
 					"WMIC PROCESS get Processid,Commandline /format:list | grep -E 'karaf.*org.apache.karaf.main.Main' -A 1 | grep "
 							+ super.getName() + " -A 1 | tail -n 1"), "=");
