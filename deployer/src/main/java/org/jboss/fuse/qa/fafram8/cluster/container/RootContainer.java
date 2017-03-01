@@ -583,7 +583,12 @@ public class RootContainer extends Container {
 			// because in this moment we don't know if we use local or openstack or anything else
 			// Port, user and pass are automatically set in Node object from system properties
 			container.setNode(Node.builder().build());
-			container.setName(SystemProperty.getDefaultRootName());
+
+			// Set name for container only if it wasn't set before by calling name()
+			if (container.getName() == null) {
+				container.setName(SystemProperty.getDefaultRootName());
+			}
+
 			OptionUtils.set(container.getOptions(), Option.USER, SystemProperty.getFuseUser());
 			OptionUtils.set(container.getOptions(), Option.PASSWORD, SystemProperty.getFusePassword());
 			return this;

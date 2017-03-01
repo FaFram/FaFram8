@@ -109,10 +109,10 @@ public final class OpenStackClient {
 	private static final String OS7_PROPERTIES = "OS7.properties";
 
 	@Getter
-	private int CORES_PER_INSTANCE = ("3".equals(this.flavor)) ? 2 : 4;
+	private int coresPerInstance = ("3".equals(this.flavor)) ? 2 : 4;
 
 	@Getter
-	private int MEMORY_PER_INSTANCE = ("3".equals(this.flavor)) ? 4096 : 8192;
+	private int memoryPerInstance = ("3".equals(this.flavor)) ? 4096 : 8192;
 
 	public OSClient getOsClient() {
 		if (this.osClient == null) {
@@ -409,8 +409,8 @@ public final class OpenStackClient {
 			final int freeCores = getFreeCores();
 			final int freeMemory = getFreeMemory();
 			log.trace(String.format("CPU needed: %s, CPU free: %s | Mem needed: %s, Mem free: %s",
-					(CORES_PER_INSTANCE * instanceCount), freeCores, (MEMORY_PER_INSTANCE * instanceCount), freeMemory));
-			if (freeCores >= (CORES_PER_INSTANCE * instanceCount) && freeMemory >= (MEMORY_PER_INSTANCE * instanceCount)) {
+					(coresPerInstance * instanceCount), freeCores, (memoryPerInstance * instanceCount), freeMemory));
+			if (freeCores >= (coresPerInstance * instanceCount) && freeMemory >= (memoryPerInstance * instanceCount)) {
 				break;
 			}
 			try {
