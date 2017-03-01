@@ -108,8 +108,11 @@ public final class OpenStackClient {
 	private static final String OS4_PROPERTIES = "OS4.properties";
 	private static final String OS7_PROPERTIES = "OS7.properties";
 
-	private static final int CORES_PER_INSTANCE = 2;
-	private static final int MEMORY_PER_INSTANCE = 4096;
+	@Getter
+	private int CORES_PER_INSTANCE = ("3".equals(this.flavor)) ? 2 : 4;
+
+	@Getter
+	private int MEMORY_PER_INSTANCE = ("3".equals(this.flavor)) ? 4096 : 8192;
 
 	public OSClient getOsClient() {
 		if (this.osClient == null) {
