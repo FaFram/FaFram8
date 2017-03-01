@@ -342,7 +342,7 @@ public final class Deployer {
 	private static boolean isWindows(Executor executor) {
 		boolean isWindows = false;
 		log.trace("Connecting node executor for checking OS on the machine");
-		executor.connect();
+		executor.connect(SystemProperty.getOpenstackWaitTime());
 		final String os = executor.executeCommandSilently("uname");
 		if (StringUtils.containsIgnoreCase(os, "cyg")) {
 			isWindows = true;

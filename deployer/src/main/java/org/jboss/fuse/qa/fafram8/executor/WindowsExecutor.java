@@ -40,7 +40,7 @@ public class WindowsExecutor extends Executor {
 		int elapsed = 0;
 		final long timeout = step * 1000L;
 
-		log.trace("Waiting for SSH connection ...");
+		log.trace("Waiting for SSH connection ({} seconds)...",  SystemProperty.getStartWaitTime());
 		while (!connected) {
 			// Check if the time is up
 			if (elapsed > SystemProperty.getStartWaitTime()) {
