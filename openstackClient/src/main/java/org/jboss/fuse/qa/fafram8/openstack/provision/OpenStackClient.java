@@ -423,6 +423,18 @@ public final class OpenStackClient {
 	}
 
 	/**
+	 * Read meta data about spawned image from OpenStack client and also adds image name to this map for information purposes.
+	 *
+	 * @return map containing all meta data about image that client uses
+	 */
+	public Map<String, Object> getImageMetaData() {
+		final Map<String, Object> meta = getOsClient().compute().images().get(this.image).getMetaData();
+		meta.put("image_name", getOsClient().compute().images().get(this.image).getName());
+
+		return meta;
+	}
+
+	/**
 	 * Builder class.
 	 */
 	public static class OpenStackClientBuilder {
