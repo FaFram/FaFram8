@@ -45,7 +45,7 @@ public class RemoteTurnOffInternetWindowsTest {
 	public static void before() {
 		System.setProperty(FaframConstant.FUSE_ZIP, FaframTestBase.CURRENT_WIN_LOCAL_URL);
 		System.setProperty(FaframConstant.OPENSTACK_WINDOWS, "true");
-		System.setProperty(FaframConstant.START_WAIT_TIME, "900");
+		System.setProperty(FaframConstant.OPENSTACK_WAIT_TIME, "900");
 		System.setProperty(FaframConstant.HOST_USER, "hudson");
 		System.setProperty(FaframConstant.HOST_PASSWORD, "redhat");
 	}
@@ -58,7 +58,7 @@ public class RemoteTurnOffInternetWindowsTest {
 		System.clearProperty(FaframConstant.FUSE_ZIP);
 		System.clearProperty(FaframConstant.HOST_USER);
 		System.clearProperty(FaframConstant.HOST_PASSWORD);
-		System.clearProperty(FaframConstant.START_WAIT_TIME);
+		System.clearProperty(FaframConstant.OPENSTACK_WAIT_TIME);
 		System.clearProperty(FaframConstant.OPENSTACK_WINDOWS);
 	}
 

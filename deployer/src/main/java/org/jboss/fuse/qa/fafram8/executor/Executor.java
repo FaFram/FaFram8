@@ -180,27 +180,36 @@ public class Executor {
 	 * Connects client to specified remote server.
 	 */
 	public void connect() {
+		connect(SystemProperty.getStartWaitTime());
+	}
+
+	/**
+	 * Connects client to specified remote server with specified wait time in seconds.
+	 *
+	 * @param waitTime seconds that connect should wait for connection
+	 */
+	public void connect(int waitTime) {
 		log.debug("Connecting: " + this.toString());
 		Boolean connected = false;
 		final int step = 5;
 		int elapsed = 0;
 		final long timeout = step * 1000L;
 
-		log.info("Waiting for SSH connection ...");
+		log.info("Waiting for SSH connection ({} seconds)...", waitTime);
 		while (!connected) {
 			// Check if the time is up
-			if (elapsed > SystemProperty.getStartWaitTime()) {
-				log.error("Connection couldn't be established after " + SystemProperty.getStartWaitTime()
+			if (elapsed > waitTime) {
+				log.error("Connection couldn't be established after " + waitTime
 						+ " seconds");
 				throw new ConnectionException("Connection couldn't be established after "
-						+ SystemProperty.getStartWaitTime() + " seconds");
+						+ waitTime + " seconds");
 			}
 			try {
 				client.connect(true);
 				connected = true;
 				log.info("Connected to SSH server");
 			} catch (VerifyFalseException ex) {
-				log.debug("Remaining time: " + (SystemProperty.getStartWaitTime() - elapsed) + " seconds. ");
+				log.debug("Remaining time: " + (waitTime - elapsed) + " seconds. ");
 				elapsed += step;
 			} catch (SSHClientException e) {
 				elapsed += step;

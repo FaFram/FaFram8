@@ -108,8 +108,11 @@ public final class OpenStackClient {
 	private static final String OS4_PROPERTIES = "OS4.properties";
 	private static final String OS7_PROPERTIES = "OS7.properties";
 
-	private static final int CORES_PER_INSTANCE = 2;
-	private static final int MEMORY_PER_INSTANCE = 4096;
+	@Getter
+	private int coresPerInstance = ("3".equals(this.flavor)) ? 2 : 4;
+
+	@Getter
+	private int memoryPerInstance = ("3".equals(this.flavor)) ? 4096 : 8192;
 
 	public OSClient getOsClient() {
 		if (this.osClient == null) {
@@ -406,8 +409,8 @@ public final class OpenStackClient {
 			final int freeCores = getFreeCores();
 			final int freeMemory = getFreeMemory();
 			log.trace(String.format("CPU needed: %s, CPU free: %s | Mem needed: %s, Mem free: %s",
-					(CORES_PER_INSTANCE * instanceCount), freeCores, (MEMORY_PER_INSTANCE * instanceCount), freeMemory));
-			if (freeCores >= (CORES_PER_INSTANCE * instanceCount) && freeMemory >= (MEMORY_PER_INSTANCE * instanceCount)) {
+					(coresPerInstance * instanceCount), freeCores, (memoryPerInstance * instanceCount), freeMemory));
+			if (freeCores >= (coresPerInstance * instanceCount) && freeMemory >= (memoryPerInstance * instanceCount)) {
 				break;
 			}
 			try {
@@ -417,6 +420,18 @@ public final class OpenStackClient {
 				Thread.currentThread().interrupt();
 			}
 		}
+	}
+
+	/**
+	 * Read meta data about spawned image from OpenStack client and also adds image name to this map for information purposes.
+	 *
+	 * @return map containing all meta data about image that client uses
+	 */
+	public Map<String, Object> getImageMetaData() {
+		final Map<String, Object> meta = getOsClient().compute().images().get(this.image).getMetaData();
+		meta.put("image_name", getOsClient().compute().images().get(this.image).getName());
+
+		return meta;
 	}
 
 	/**

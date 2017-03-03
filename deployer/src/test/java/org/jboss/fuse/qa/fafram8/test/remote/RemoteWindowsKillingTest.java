@@ -44,7 +44,7 @@ public class RemoteWindowsKillingTest {
 		System.setProperty(FaframConstant.HOST_PASSWORD, "redhat");
 		// add correct path on windows
 		System.setProperty(FaframConstant.FUSE_ZIP, FaframTestBase.CURRENT_WIN_LOCAL_URL);
-		System.setProperty(FaframConstant.START_WAIT_TIME, "600");
+		System.setProperty(FaframConstant.OPENSTACK_WAIT_TIME, "600");
 	}
 
 	@AfterClass
@@ -54,7 +54,7 @@ public class RemoteWindowsKillingTest {
 		System.clearProperty(FaframConstant.FUSE_ZIP);
 		System.clearProperty(FaframConstant.HOST_USER);
 		System.clearProperty(FaframConstant.HOST_PASSWORD);
-		System.clearProperty(FaframConstant.START_WAIT_TIME);
+		System.clearProperty(FaframConstant.OPENSTACK_WAIT_TIME);
 		System.clearProperty(FaframConstant.OPENSTACK_WINDOWS);
 	}
 

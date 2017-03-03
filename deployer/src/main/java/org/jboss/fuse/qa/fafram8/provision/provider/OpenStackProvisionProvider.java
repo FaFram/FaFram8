@@ -1,5 +1,6 @@
 package org.jboss.fuse.qa.fafram8.provision.provider;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.ChildContainer;
@@ -21,9 +22,12 @@ import org.openstack4j.model.compute.Server;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import lombok.Getter;
@@ -48,6 +52,9 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 	private static final String OFFLINE_WINDOWS_POLICY_FILE = "windows-policy-no-internet.wfw";
 
 	private String ipTablesFilePath;
+
+	private static final String OS_PROPERTIES_FILE_NAME = "fafram_openstack.properties";
+	private static final String OS_PROPERTIES_FILE_PATH = "target/fafram-prop/";
 
 	/**
 	 * Constructor.
@@ -151,10 +158,13 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 	 */
 	@Override
 	public void releaseResources() {
+		writeMetaData();
+
 		if (SystemProperty.isKeepOsResources()) {
 			log.warn("Keeping OpenStack resources. Don't forget to release them later!");
 			return;
 		}
+
 		client.releaseResources();
 	}
 
@@ -262,6 +272,28 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 			log.debug("Iptables successfully configured on node {}.", container.getNode().getExecutor());
 		} catch (Exception e) {
 			throw new FaframException("There was problem setting iptables on node: " + container.getNode().getHost(), e);
+		}
+	}
+
+	/**
+	 * Writes metadata of the OpenStack image to properties file. This is required for Polarion in Jenkins.
+	 */
+	private void writeMetaData() {
+		final StringBuilder builder = new StringBuilder();
+
+		for (Map.Entry<String, Object> entry : client.getImageMetaData().entrySet()) {
+			builder.append(entry.getKey()).append("=").append("\"").append(entry.getValue()).append("\"\n");
+		}
+
+		final File file = new File(Paths.get(OS_PROPERTIES_FILE_PATH, OS_PROPERTIES_FILE_NAME).toAbsolutePath().toString());
+		if (!file.exists()) {
+			try {
+				log.trace("Writing OpenStack image metadata to file {}", file.getAbsoluteFile());
+				FileUtils.writeStringToFile(file, builder.toString(), false);
+			} catch (IOException e) {
+				// This is problem for the polarion but not for the test itself
+				log.error("There was problem with writing meta data to file: {} ! But this didn't break functionality of tests!", file.getAbsoluteFile(), e);
+			}
 		}
 	}
 }
