@@ -51,8 +51,7 @@ public class StaticProvider implements ProvisionProvider {
 				ipAddresses.add(c.getNode().getHost());
 				if (!SystemProperty.isWithoutPublicIp()) {
 					log.trace("Connecting own executor to clean the node");
-					final SSHClient sshClient = new NodeSSHClient().defaultSSHPort().host(c.getNode().getHost())
-							.username(c.getNode().getUsername()).password(c.getNode().getPassword());
+					final SSHClient sshClient = new NodeSSHClient(c.getNode().getExecutor().getClient());
 					executor = new Executor(sshClient, c.getNode().getHost());
 					log.debug("Killing Fuse process on node: ", executor);
 					try {
@@ -111,8 +110,7 @@ public class StaticProvider implements ProvisionProvider {
 				continue;
 			}
 
-			sshClient = new NodeSSHClient().defaultSSHPort().host(c.getNode().getHost())
-					.username(c.getNode().getUsername()).password(c.getNode().getPassword());
+			sshClient = new NodeSSHClient(c.getNode().getExecutor().getClient());
 			executor = new Executor(sshClient, c.getNode().getHost());
 			log.debug("Loading iptables on node {}.", executor);
 			try {
@@ -181,8 +179,7 @@ public class StaticProvider implements ProvisionProvider {
 				continue;
 			}
 
-			sshClient = new NodeSSHClient().defaultSSHPort().host(c.getNode().getHost())
-					.username(c.getNode().getUsername()).password(c.getNode().getPassword());
+			sshClient = new NodeSSHClient(c.getNode().getExecutor().getClient());
 			executor = new Executor(sshClient, c.getNode().getHost());
 			log.debug("Restoring iptables on node {} back to default.", executor);
 			try {

@@ -127,8 +127,15 @@ public class SshContainer extends Container implements ThreadContainer {
 		// We can create executor even if the node does not have public IP
 		super.setExecutor(super.createExecutor());
 
-		executor.executeCommand(String.format("container-create-ssh --user %s --password %s --host %s %s %s",
-				super.getNode().getUsername(), super.getNode().getPassword(), super.getNode().getHost(), OptionUtils.getCommand(super.getOptions()), super.getName()));
+		// Do not use --password if specifying --private-key, because it will result in Auth fail
+		String command = String.format("container-create-ssh --user %s --host %s %s",
+				super.getNode().getUsername(), super.getNode().getHost(), OptionUtils.getCommand(super.getOptions()));
+		if (!command.contains(Option.PRIVATE_KEY.toString())) {
+			command += "--password " + super.getNode().getPassword();
+		}
+
+		executor.executeCommand(command + " " + super.getName());
+
 		super.setCreated(true);
 		try {
 			executor.waitForProvisioning(this);

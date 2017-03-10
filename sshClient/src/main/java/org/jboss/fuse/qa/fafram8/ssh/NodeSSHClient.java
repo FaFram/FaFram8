@@ -147,4 +147,23 @@ public class NodeSSHClient extends SSHClient {
 			throw new CopyFileException(ex);
 		}
 	}
+
+	/**
+	 * Constructor.
+	 */
+	public NodeSSHClient() {
+	}
+
+	/**
+	 * Copy constructor.
+	 * @param other other client instance
+	 */
+	public NodeSSHClient(SSHClient other) {
+		super.setHost(other.getHost());
+		super.setUsername(other.getUsername());
+		super.setPassword(other.getPassword());
+		super.setPort(other.getPort());
+		super.setPassphrase(other.getPassphrase());
+		super.setPrivateKey(other.getPrivateKey());
+	}
 }
