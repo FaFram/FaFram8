@@ -14,7 +14,7 @@ import lombok.ToString;
  * Class representing node.
  * Created by mmelko on 09/10/15.
  */
-@ToString
+@ToString(exclude = {"password", "passPhrase"})
 @AllArgsConstructor
 public class Node {
 	/**
