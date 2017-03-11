@@ -28,14 +28,21 @@ public class CommandHistoryTest {
 		fafram.executeCommand("echo hello");
 		fafram.executeCommand("echo hi");
 
-		// Now it is required to destroy fafram to wrote command history to file
+		// Now it is required to destroy fafram to write command history to file
 		fafram.tearDown();
+
+		Thread.sleep(10000L);
 
 		File path = new File(Paths.get("target", "archived").toAbsolutePath().toString());
 		String[] extensions = new String[] { "txt" };
 		List<File> files = (List<File>) FileUtils.listFiles(path, extensions, true);
-
-		String content = FileUtils.readFileToString(files.get(0));
+		String content = "";
+		for (File file : files) {
+			if (!file.getName().startsWith("log")) {
+				content = FileUtils.readFileToString(files.get(0));
+				break;
+			}
+		}
 		assertTrue(content.contains("echo hello"));
 		assertTrue(content.contains("echo hi"));
 	}

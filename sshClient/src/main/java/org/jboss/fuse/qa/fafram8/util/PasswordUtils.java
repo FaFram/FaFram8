@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class PasswordUtils {
-	private static final String[] PASSWORD_OPTIONS = new String[] {"--zookeeper-password", "password", "--jmx-password", "--pass-phrase"};
+	private static final String[] PASSWORD_OPTIONS = new String[] {"--zookeeper-password", "password", "jmx-password", "--pass-phrase", "--jmx-password"};
 	/**
 	 * Constructor.
 	 */
@@ -52,9 +52,16 @@ public final class PasswordUtils {
 		}
 
 		for (String opt : PASSWORD_OPTIONS) {
-			if (mapToString.contains(opt + "=[")) {
-				final String password = "password".equals(opt) ? StringUtils.substringBetween(mapToString, " " + opt + "=[", "]").trim()
-						: StringUtils.substringBetween(mapToString, opt + "=[", "]").trim();
+			if (mapToString.contains(" " + opt) || mapToString.contains("{" + opt)) {
+				String password;
+				if ("password".equals(opt)) {
+					password = StringUtils.substringBetween(mapToString, " " + opt + "=[", "]");
+					if (password == null) {
+						password = StringUtils.substringBetween(mapToString, "{" + opt + "=[", "]");
+					}
+				} else {
+					password = StringUtils.substringBetween(mapToString, opt + "=[", "]");
+				}
 				if ("password".equals(opt)) {
 					mapToString = mapToString.replaceAll("\\{" + opt + "=\\[" + password, "{" + opt + "=[" + getAsterisks(password.length()));
 					mapToString = mapToString.replaceAll(" " + opt + "=\\[" + password, " " + opt + "=[" + getAsterisks(password.length()));

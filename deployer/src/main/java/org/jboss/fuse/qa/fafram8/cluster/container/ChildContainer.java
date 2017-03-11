@@ -93,10 +93,10 @@ public class ChildContainer extends Container implements ThreadContainer {
 
 		// This means that jmxUser and jmxPassword properties were implicitly set on child container and they should override previous values
 		if (super.getOptions().containsKey(Option.JMX_USER)) {
-			jmxUser = super.getOptions().get(Option.JMX_USER).get(0);
+			jmxUser = OptionUtils.getString(super.getOptions(), Option.JMX_USER);
 		}
 		if (super.getOptions().containsKey(Option.JMX_PASSWORD)) {
-			jmxPass = super.getOptions().get(Option.JMX_PASSWORD).get(0);
+			jmxPass = OptionUtils.getString(super.getOptions(), Option.JMX_PASSWORD);
 		}
 
 		// Override values in options map of this container with correct credentials (required for executors)
