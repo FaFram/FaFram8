@@ -9,12 +9,12 @@ import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
+import org.jboss.fuse.qa.fafram8.util.MaskingOptionMap;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -260,7 +260,7 @@ public class ChildContainer extends Container implements ThreadContainer {
 			if (copy == null) {
 				this.container = new ChildContainer();
 			} else {
-				final Map<Option, List<String>> opts = new HashMap<>();
+				final Map<Option, List<String>> opts = new MaskingOptionMap();
 				for (Map.Entry<Option, List<String>> optionListEntry : copy.getOptions().entrySet()) {
 					// We need to copy the lists aswell
 					final List<String> listCopy = new ArrayList<>();

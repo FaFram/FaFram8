@@ -10,12 +10,12 @@ import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.FaframConstant;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
+import org.jboss.fuse.qa.fafram8.util.MaskingOptionMap;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -372,7 +372,7 @@ public class SshContainer extends Container implements ThreadContainer {
 		 */
 		public SshBuilder(Container copy) {
 			if (copy != null) {
-				final Map<Option, List<String>> opts = new HashMap<>();
+				final Map<Option, List<String>> opts = new MaskingOptionMap();
 				for (Map.Entry<Option, List<String>> optionListEntry : copy.getOptions().entrySet()) {
 					// We need to copy the lists aswell
 					final List<String> listCopy = new ArrayList<>();

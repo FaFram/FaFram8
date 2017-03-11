@@ -39,7 +39,7 @@ public class CommandHistoryTest {
 		String content = "";
 		for (File file : files) {
 			if (!file.getName().startsWith("log")) {
-				content = FileUtils.readFileToString(files.get(0));
+				content = FileUtils.readFileToString(file);
 				break;
 			}
 		}

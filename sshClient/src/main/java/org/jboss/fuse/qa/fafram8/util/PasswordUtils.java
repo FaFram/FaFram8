@@ -10,7 +10,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class PasswordUtils {
-	private static final String[] PASSWORD_OPTIONS = new String[] {"--zookeeper-password", "password", "jmx-password", "--pass-phrase", "--jmx-password"};
+	private static final String[] PASSWORD_OPTIONS = new String[] {"--zookeeper-password", "password", "--password",
+			"jmx-password", "--pass-phrase", "--jmx-password"};
 	/**
 	 * Constructor.
 	 */
