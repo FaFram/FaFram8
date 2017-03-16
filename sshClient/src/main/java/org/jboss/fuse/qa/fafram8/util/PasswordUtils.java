@@ -30,7 +30,15 @@ public final class PasswordUtils {
 
 		for (String opt : PASSWORD_OPTIONS) {
 			if (input.contains(" " + opt)) {
-				final String password = StringUtils.substringBetween(input, " " + opt + " ", " ").trim();
+				String password = StringUtils.substringBetween(input, " " + opt + " ", " ");
+				if (password == null || password.isEmpty()) {
+					// Probably when this option is the last one
+					password = StringUtils.substringAfter(input, " " + opt + " ");
+					if (password == null || password.isEmpty()) {
+						log.error("Couldn't parse password for option \'" + opt + "\', not masking anything!");
+						return input;
+					}
+				}
 				if (password.startsWith("\"") && password.endsWith("\"")) {
 					input = input.replaceAll(" " + opt + " " + password, " " + opt + " \"" + getAsterisks(password.length() - 2) + "\"");
 				} else {
