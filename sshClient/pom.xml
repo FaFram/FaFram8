@@ -15,7 +15,7 @@
 	<name>Fafram8 SSH Client</name>
 
 	<properties>
-		<jsch.version>0.1.53</jsch.version>
+		<jsch.version>0.1.54</jsch.version>
 	</properties>
 
 	<dependencies>
