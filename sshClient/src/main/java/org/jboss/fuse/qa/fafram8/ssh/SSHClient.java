@@ -2,10 +2,12 @@ package org.jboss.fuse.qa.fafram8.ssh;
 
 import org.apache.commons.io.IOUtils;
 
+import org.jboss.fuse.qa.fafram8.exceptions.AuthFailException;
 import org.jboss.fuse.qa.fafram8.exceptions.ConnectionRefusedException;
 import org.jboss.fuse.qa.fafram8.exceptions.KarafSessionDownException;
 import org.jboss.fuse.qa.fafram8.exceptions.NoRouteToHostException;
 import org.jboss.fuse.qa.fafram8.exceptions.SSHClientException;
+import org.jboss.fuse.qa.fafram8.exceptions.SessionTimeoutException;
 import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
 
 import com.jcraft.jsch.Channel;
@@ -106,7 +108,7 @@ public abstract class SSHClient {
 	 * @throws VerifyFalseException throw this exception when JschClient drop connection
 	 * @throws SSHClientException common exception for sshclient when there is some problem in executing command
 	 */
-	public void connect(boolean suppressLog) throws VerifyFalseException, SSHClientException, ConnectionRefusedException, NoRouteToHostException {
+	public void connect(boolean suppressLog) throws VerifyFalseException, SSHClientException {
 		final int sessionTimeout = 20000;
 		try {
 			if (!"none".equals(privateKey)) {
@@ -136,9 +138,11 @@ public abstract class SSHClient {
 			}
 
 			if (ex.getMessage().contains("timeout: socket is not established")) {
-				log.error("Unable to connect to specified host: " + session.getHost() + ":" + session.getPort()
-						+ " after " + sessionTimeout + " miliseconds");
-				throw new SSHClientException("Unable to connect to specified host: " + session.getHost() + ":"
+				if (!suppressLog) {
+					log.error("Unable to connect to specified host: " + session.getHost() + ":" + session.getPort()
+							+ " after " + sessionTimeout + " miliseconds");
+				}
+				throw new SessionTimeoutException("Unable to connect to specified host: " + session.getHost() + ":"
 						+ session.getPort() + " after " + sessionTimeout + " miliseconds");
 			}
 
@@ -151,9 +155,15 @@ public abstract class SSHClient {
 			}
 
 			if (ex.getMessage().contains("No route to host")) {
-				// This happens if few first seconds when spawning machines but it can be also serious issue when wrong IP so log it as warn.
-				log.warn(ex.getLocalizedMessage());
+				// This happens if few first seconds when spawning machines but it can be also serious issue when wrong IP so log it in TRACE.
+				log.trace(ex.getLocalizedMessage());
 				throw new NoRouteToHostException("No route to host", ex);
+			}
+
+			if (ex.getMessage().contains("Auth fail")) {
+				// This happens if few first seconds when spawning machines but it can be also serious issue so at least log it in TRACE
+				log.trace(ex.getLocalizedMessage());
+				throw new AuthFailException("Auth fail", ex);
 			}
 
 			if (!suppressLog) {

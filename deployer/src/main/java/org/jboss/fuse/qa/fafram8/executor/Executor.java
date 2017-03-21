@@ -7,9 +7,13 @@ import org.jboss.fuse.qa.fafram8.exception.ConnectionException;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.exception.PatchException;
 import org.jboss.fuse.qa.fafram8.exception.ProvisionException;
+import org.jboss.fuse.qa.fafram8.exceptions.AuthFailException;
+import org.jboss.fuse.qa.fafram8.exceptions.ConnectionRefusedException;
 import org.jboss.fuse.qa.fafram8.exceptions.CopyFileException;
 import org.jboss.fuse.qa.fafram8.exceptions.KarafSessionDownException;
+import org.jboss.fuse.qa.fafram8.exceptions.NoRouteToHostException;
 import org.jboss.fuse.qa.fafram8.exceptions.SSHClientException;
+import org.jboss.fuse.qa.fafram8.exceptions.SessionTimeoutException;
 import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
@@ -208,11 +212,12 @@ public class Executor {
 				client.connect(true);
 				connected = true;
 				log.info("Connected to SSH server");
-			} catch (VerifyFalseException ex) {
+			} catch (VerifyFalseException | ConnectionRefusedException | NoRouteToHostException | AuthFailException | SessionTimeoutException ex) {
 				log.debug("Remaining time: " + (waitTime - elapsed) + " seconds. ");
 				elapsed += step;
-			} catch (SSHClientException e) {
-				elapsed += step;
+			} catch (SSHClientException ex) {
+				log.error(ex.getLocalizedMessage());
+				throw new ConnectionException("Connection couldn't be established", ex);
 			}
 			sleep(timeout);
 		}

@@ -5,7 +5,7 @@ package org.jboss.fuse.qa.fafram8.exceptions;
  *
  * @author : Roman Jakubco (rjakubco@redhat.com)
  */
-public class NoRouteToHostException extends Exception {
+public class NoRouteToHostException extends SSHClientException {
 	/**
 	 * Constructor.
 	 */
