@@ -2,8 +2,12 @@ package org.jboss.fuse.qa.fafram8.ssh;
 
 import org.apache.commons.io.IOUtils;
 
+import org.jboss.fuse.qa.fafram8.exceptions.AuthFailException;
+import org.jboss.fuse.qa.fafram8.exceptions.ConnectionRefusedException;
 import org.jboss.fuse.qa.fafram8.exceptions.KarafSessionDownException;
+import org.jboss.fuse.qa.fafram8.exceptions.NoRouteToHostException;
 import org.jboss.fuse.qa.fafram8.exceptions.SSHClientException;
+import org.jboss.fuse.qa.fafram8.exceptions.SessionTimeoutException;
 import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
 
 import com.jcraft.jsch.Channel;
@@ -28,6 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 @ToString(of = {"host", "port", "username", "password"})
 @EqualsAndHashCode
 public abstract class SSHClient {
+	static {
+		// Set static logger for JSCH
+		JSch.setLogger(new JSCHLogger());
+	}
 
 	@Getter
 	@Setter
@@ -81,6 +89,7 @@ public abstract class SSHClient {
 
 	/**
 	 * Same as executeCommand(String command, boolean suppressLog), but with option to ignore exception logging.
+	 *
 	 * @param command command to be executed
 	 * @param suppressLog supress exception/command logging
 	 * @param ignoreExceptions ignore exceptions if true
@@ -129,10 +138,32 @@ public abstract class SSHClient {
 			}
 
 			if (ex.getMessage().contains("timeout: socket is not established")) {
-				log.error("Unable to connect to specified host: " + session.getHost() + ":" + session.getPort()
-						+ " after " + sessionTimeout + " miliseconds");
-				throw new SSHClientException("Unable to connect to specified host: " + session.getHost() + ":"
+				if (!suppressLog) {
+					log.error("Unable to connect to specified host: " + session.getHost() + ":" + session.getPort()
+							+ " after " + sessionTimeout + " miliseconds");
+				}
+				throw new SessionTimeoutException("Unable to connect to specified host: " + session.getHost() + ":"
 						+ session.getPort() + " after " + sessionTimeout + " miliseconds");
+			}
+
+			// This is common exception when host is still unreachable
+			if (ex.getMessage().contains("Connection refused")) {
+				if (!suppressLog) {
+					log.error(ex.getLocalizedMessage());
+				}
+				throw new ConnectionRefusedException("Connection refused", ex);
+			}
+
+			if (ex.getMessage().contains("No route to host")) {
+				// This happens if few first seconds when spawning machines but it can be also serious issue when wrong IP so log it in TRACE.
+				log.trace(ex.getLocalizedMessage());
+				throw new NoRouteToHostException("No route to host", ex);
+			}
+
+			if (ex.getMessage().contains("Auth fail")) {
+				// This happens if few first seconds when spawning machines but it can be also serious issue so at least log it in TRACE
+				log.trace(ex.getLocalizedMessage());
+				throw new AuthFailException("Auth fail", ex);
 			}
 
 			if (!suppressLog) {

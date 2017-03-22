@@ -1,7 +1,11 @@
 package org.jboss.fuse.qa.fafram8.executor;
 
 import org.jboss.fuse.qa.fafram8.exception.ConnectionException;
+import org.jboss.fuse.qa.fafram8.exceptions.AuthFailException;
+import org.jboss.fuse.qa.fafram8.exceptions.ConnectionRefusedException;
+import org.jboss.fuse.qa.fafram8.exceptions.NoRouteToHostException;
 import org.jboss.fuse.qa.fafram8.exceptions.SSHClientException;
+import org.jboss.fuse.qa.fafram8.exceptions.SessionTimeoutException;
 import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 
@@ -53,11 +57,12 @@ public class WindowsExecutor extends Executor {
 				client.connect(true);
 				connected = true;
 				log.trace("Connected to SSH server");
-			} catch (VerifyFalseException ex) {
-				log.trace("Remaining time: " + (SystemProperty.getStartWaitTime() - elapsed) + " seconds. ");
+			} catch (VerifyFalseException | ConnectionRefusedException | NoRouteToHostException | AuthFailException | SessionTimeoutException ex) {
+				log.debug("Remaining time: " + (SystemProperty.getStartWaitTime() - elapsed) + " seconds. ");
 				elapsed += step;
-			} catch (SSHClientException e) {
-				elapsed += step;
+			} catch (SSHClientException ex) {
+				log.error(ex.getLocalizedMessage());
+				throw new ConnectionException("Connection couldn't be established", ex);
 			}
 			Executor.sleep(timeout);
 		}

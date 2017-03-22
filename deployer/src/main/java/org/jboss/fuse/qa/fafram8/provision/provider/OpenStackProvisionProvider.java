@@ -246,7 +246,7 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 	 */
 	private void executeIpTables(Container container) {
 		log.trace("Connnecting node executor to set the IPTables");
-		container.getNode().getExecutor().connect();
+		container.getNode().getExecutor().connect(SystemProperty.getOpenstackWaitTime());
 		setCorrectIpTablesFilePath(container.getNode().getExecutor());
 		try {
 			// if offline environment then skip this. The iptables configuration should be present in the image itself.
