@@ -14,7 +14,7 @@ import lombok.ToString;
  * Class representing node.
  * Created by mmelko on 09/10/15.
  */
-@ToString
+@ToString(exclude = {"password", "passPhrase"})
 @AllArgsConstructor
 public class Node {
 	/**
@@ -96,7 +96,9 @@ public class Node {
 				.host(this.getHost())
 				.port(this.getPort())
 				.username(this.getUsername())
-				.password(this.getPassword());
+				.password(this.getPassword())
+				.privateKey(privateKey)
+				.passphrase(passPhrase);
 		return new Executor(nodeClient, this.host);
 	}
 

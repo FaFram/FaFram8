@@ -6,6 +6,7 @@ import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.FuseSSHClient;
 import org.jboss.fuse.qa.fafram8.ssh.SSHClient;
+import org.jboss.fuse.qa.fafram8.util.MaskingOptionMap;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
@@ -13,7 +14,6 @@ import com.google.common.collect.Lists;
 
 import javax.annotation.Nonnull;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -457,7 +457,7 @@ public abstract class Container implements Comparable<Container> {
 	 * @return initialized options map
 	 */
 	private Map<Option, List<String>> getInitialOptionsMap() {
-		final Map<Option, List<String>> map = new HashMap<>();
+		final Map<Option, List<String>> map = new MaskingOptionMap();
 		map.put(Option.USER, Lists.newArrayList(SystemProperty.getFuseUser()));
 		map.put(Option.PASSWORD, Lists.newArrayList(SystemProperty.getFusePassword()));
 

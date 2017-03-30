@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author : Roman Jakubco (rjakubco@redhat.com)
  */
 @Slf4j
-@ToString(of = {"host", "port", "username", "password"})
+@ToString(of = {"host", "username", "privateKey"})
 @EqualsAndHashCode
 public abstract class SSHClient {
 	static {
@@ -55,7 +55,7 @@ public abstract class SSHClient {
 
 	@Getter
 	@Setter
-	protected String privateKey = "none";
+	protected String privateKey;
 
 	@Getter
 	@Setter
@@ -111,7 +111,7 @@ public abstract class SSHClient {
 	public void connect(boolean suppressLog) throws VerifyFalseException, SSHClientException {
 		final int sessionTimeout = 20000;
 		try {
-			if (!"none".equals(privateKey)) {
+			if (privateKey != null) {
 				if (passphrase != null) {
 					ssh.addIdentity(privateKey, passphrase);
 				} else {

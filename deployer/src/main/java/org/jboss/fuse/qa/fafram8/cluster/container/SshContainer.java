@@ -10,12 +10,12 @@ import org.jboss.fuse.qa.fafram8.modifier.ModifierExecutor;
 import org.jboss.fuse.qa.fafram8.property.FaframConstant;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.provision.provider.ProviderSingleton;
+import org.jboss.fuse.qa.fafram8.util.MaskingOptionMap;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -127,8 +127,15 @@ public class SshContainer extends Container implements ThreadContainer {
 		// We can create executor even if the node does not have public IP
 		super.setExecutor(super.createExecutor());
 
-		executor.executeCommand(String.format("container-create-ssh --user %s --password %s --host %s %s %s",
-				super.getNode().getUsername(), super.getNode().getPassword(), super.getNode().getHost(), OptionUtils.getCommand(super.getOptions()), super.getName()));
+		// Do not use --password if specifying --private-key, because it will result in Auth fail
+		String command = String.format("container-create-ssh --user %s --host %s %s",
+				super.getNode().getUsername(), super.getNode().getHost(), OptionUtils.getCommand(super.getOptions()));
+		if (!command.contains(Option.PRIVATE_KEY.toString())) {
+			command += "--password " + super.getNode().getPassword();
+		}
+
+		executor.executeCommand(command + " " + super.getName());
+
 		super.setCreated(true);
 		try {
 			executor.waitForProvisioning(this);
@@ -365,7 +372,7 @@ public class SshContainer extends Container implements ThreadContainer {
 		 */
 		public SshBuilder(Container copy) {
 			if (copy != null) {
-				final Map<Option, List<String>> opts = new HashMap<>();
+				final Map<Option, List<String>> opts = new MaskingOptionMap();
 				for (Map.Entry<Option, List<String>> optionListEntry : copy.getOptions().entrySet()) {
 					// We need to copy the lists aswell
 					final List<String> listCopy = new ArrayList<>();

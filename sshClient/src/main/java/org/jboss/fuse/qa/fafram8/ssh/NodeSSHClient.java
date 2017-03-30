@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jboss.fuse.qa.fafram8.exceptions.CopyFileException;
 import org.jboss.fuse.qa.fafram8.exceptions.KarafSessionDownException;
 import org.jboss.fuse.qa.fafram8.exceptions.SSHClientException;
+import org.jboss.fuse.qa.fafram8.util.PasswordUtils;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -36,7 +37,7 @@ public class NodeSSHClient extends SSHClient {
 		String returnString;
 
 		if (!suppressLog) {
-			log.debug("Command: " + command);
+			log.debug("Command: " + PasswordUtils.maskPassword(command));
 		}
 		try {
 			channel = session.openChannel("exec");
@@ -146,5 +147,24 @@ public class NodeSSHClient extends SSHClient {
 			log.error("Exception thrown during uploading file to remote machine ", ex);
 			throw new CopyFileException(ex);
 		}
+	}
+
+	/**
+	 * Constructor.
+	 */
+	public NodeSSHClient() {
+	}
+
+	/**
+	 * Copy constructor.
+	 * @param other other client instance
+	 */
+	public NodeSSHClient(SSHClient other) {
+		super.setHost(other.getHost());
+		super.setUsername(other.getUsername());
+		super.setPassword(other.getPassword());
+		super.setPort(other.getPort());
+		super.setPassphrase(other.getPassphrase());
+		super.setPrivateKey(other.getPrivateKey());
 	}
 }

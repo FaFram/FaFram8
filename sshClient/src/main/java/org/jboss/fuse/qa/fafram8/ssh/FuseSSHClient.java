@@ -2,6 +2,7 @@ package org.jboss.fuse.qa.fafram8.ssh;
 
 import org.jboss.fuse.qa.fafram8.exceptions.KarafSessionDownException;
 import org.jboss.fuse.qa.fafram8.exceptions.SSHClientException;
+import org.jboss.fuse.qa.fafram8.util.PasswordUtils;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
@@ -43,7 +44,7 @@ public class FuseSSHClient extends SSHClient {
 	@Override
 	public String executeCommand(String command, boolean suppressLog, boolean ignoreExceptions) throws KarafSessionDownException, SSHClientException {
 		if (!suppressLog) {
-			log.info("Executing command: " + command);
+			log.info("Executing command: " + PasswordUtils.maskPassword(command));
 		}
 		final int retriesCount = 2;
 		final long commandRetryTimeout = 1000 * Long.parseLong(System.getProperty("command.retry.timeout", "5"));

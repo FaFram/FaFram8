@@ -7,6 +7,7 @@ import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
 import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.provision.provider.OpenStackProvisionProvider;
+import org.jboss.fuse.qa.fafram8.util.PasswordUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,7 +73,8 @@ public class SystemProperty {
 
 		// Check if such property exists - if yes do nothing
 		if (System.getProperty(property) == null) {
-			log.trace(String.format("Setting system property %s to value '%s'", property, value));
+			log.trace(String.format("Setting system property %s to value '%s'", property,
+					property.toLowerCase().contains("password") || property.toLowerCase().contains("passphrase") ? PasswordUtils.maskString(value) : value));
 			System.setProperty(property, value);
 			getSystemProperties().add(property);
 		}

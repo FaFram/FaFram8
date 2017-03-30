@@ -69,11 +69,10 @@ public final class RootNameModifier extends Modifier {
 	 */
 	private void modifyRemoteRootName(Container container) {
 		try {
-			log.trace("Connecting own executor to set the remote root name");
+			log.trace("Connecting the executor to set the remote root name");
 			log.debug("Setting root name to " + container.getName() + " on " + container.getNode().getHost());
 			container.getNode().getExecutor().executeCommandSilently("sed -i 's#\\<karaf.name = root\\>#karaf.name = " + container.getName() + "#g' "
 					+ container.getFusePath() + "etc" + File.separator + "system.properties");
-			log.trace("Disconnecting the executor");
 		} catch (Exception e) {
 			throw new FaframException("Error while setting root name on " + container.getNode().getHost() + ": " + e);
 		}
