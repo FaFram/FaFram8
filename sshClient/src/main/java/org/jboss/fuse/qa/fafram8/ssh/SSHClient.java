@@ -1,6 +1,7 @@
 package org.jboss.fuse.qa.fafram8.ssh;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import org.jboss.fuse.qa.fafram8.exceptions.AuthFailException;
 import org.jboss.fuse.qa.fafram8.exceptions.ConnectionRefusedException;
@@ -146,29 +147,22 @@ public abstract class SSHClient {
 						+ session.getPort() + " after " + sessionTimeout + " miliseconds");
 			}
 
+			if (!suppressLog) {
+				log.error(ExceptionUtils.getStackTrace(ex.getCause()));
+			}
 			// This is common exception when host is still unreachable
 			if (ex.getMessage().contains("Connection refused")) {
-				if (!suppressLog) {
-					log.error(ex.getLocalizedMessage());
-				}
 				throw new ConnectionRefusedException("Connection refused", ex);
 			}
 
 			if (ex.getMessage().contains("No route to host")) {
-				// This happens if few first seconds when spawning machines but it can be also serious issue when wrong IP so log it in TRACE.
-				log.trace(ex.getLocalizedMessage());
 				throw new NoRouteToHostException("No route to host", ex);
 			}
 
 			if (ex.getMessage().contains("Auth fail")) {
-				// This happens if few first seconds when spawning machines but it can be also serious issue so at least log it in TRACE
-				log.trace(ex.getLocalizedMessage());
 				throw new AuthFailException("Auth fail", ex);
 			}
 
-			if (!suppressLog) {
-				log.error(ex.getLocalizedMessage());
-			}
 			throw new SSHClientException(ex);
 		}
 	}
