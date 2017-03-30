@@ -84,6 +84,15 @@ public final class PasswordUtils {
 	}
 
 	/**
+	 * Returns asterisks according to string length.
+	 * @param s string
+	 * @return masked string
+	 */
+	public static String maskString(String s) {
+		return getAsterisks(s.length());
+	}
+
+	/**
 	 * Returns string with given amount of asterisks.
 	 * @param count asterisks count
 	 * @return string with given amount of asterisks
