@@ -113,11 +113,11 @@ public class FaframTestRunner extends BlockJUnit4ClassRunner {
 	 * @return String containing short version extracted from version argument or null if version cannot be extracted.
 	 */
 	private String extractVersionShort(String issueId, String version) {
-		final String versionShort;
+		String versionShort;
 
 		if (issueId.startsWith("ENTMQ")) {
-			// ENTMQ issues have following fix version format: "Jboss A-MQ 6.3"
-			versionShort = StringUtils.substringAfterLast(version, " ");
+			// ENTMQ issues have following fix version format: "JBoss A-MQ 6.3" or "JBoss A-MQ 6.3.x"
+			versionShort = StringUtils.substringBefore(StringUtils.substringAfterLast(version, " "), ".x");
 		} else {
 			// ENTESB issues have following fix version format: "jboss-fuse-6.3" or "jboss-fuse-6.3-patches"
 			final Pattern pattern = Pattern.compile("^.*([0-9]\\.[0-9]).*$");
