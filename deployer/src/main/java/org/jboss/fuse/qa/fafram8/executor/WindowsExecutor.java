@@ -1,5 +1,7 @@
 package org.jboss.fuse.qa.fafram8.executor;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import org.jboss.fuse.qa.fafram8.exception.ConnectionException;
 import org.jboss.fuse.qa.fafram8.exceptions.AuthFailException;
 import org.jboss.fuse.qa.fafram8.exceptions.ConnectionRefusedException;
@@ -61,8 +63,9 @@ public class WindowsExecutor extends Executor {
 				log.debug("Remaining time: " + (SystemProperty.getStartWaitTime() - elapsed) + " seconds. ");
 				elapsed += step;
 			} catch (SSHClientException ex) {
-				log.error(ex.getLocalizedMessage());
-				throw new ConnectionException("Connection couldn't be established", ex);
+				log.trace(ExceptionUtils.getStackTrace(ex.getCause()));
+				log.debug("Remaining time: " + (SystemProperty.getStartWaitTime() - elapsed) + " seconds. (Exception: " + ex.getLocalizedMessage() + ")");
+				elapsed += step;
 			}
 			Executor.sleep(timeout);
 		}

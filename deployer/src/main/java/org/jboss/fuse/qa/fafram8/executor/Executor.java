@@ -1,6 +1,7 @@
 package org.jboss.fuse.qa.fafram8.executor;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.exception.ConnectionException;
@@ -216,8 +217,9 @@ public class Executor {
 				log.debug("Remaining time: " + (waitTime - elapsed) + " seconds. ");
 				elapsed += step;
 			} catch (SSHClientException ex) {
-				log.error(ex.getLocalizedMessage());
-				throw new ConnectionException("Connection couldn't be established", ex);
+				log.trace(ExceptionUtils.getStackTrace(ex.getCause()));
+				log.debug("Remaining time: " + (waitTime - elapsed) + " seconds. (Exception: " + ex.getLocalizedMessage() + ")");
+				elapsed += step;
 			}
 			sleep(timeout);
 		}
