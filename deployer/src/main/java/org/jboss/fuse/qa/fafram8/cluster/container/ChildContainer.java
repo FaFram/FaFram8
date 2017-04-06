@@ -13,6 +13,7 @@ import org.jboss.fuse.qa.fafram8.util.MaskingOptionMap;
 import org.jboss.fuse.qa.fafram8.util.Option;
 import org.jboss.fuse.qa.fafram8.util.OptionUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -109,6 +110,8 @@ public class ChildContainer extends Container implements ThreadContainer {
 		// Set node object before waiting for provisioning - because when the wait fails, the destroy will fail on
 		// ModifierExecutor.executePostModifiers(this, super.getNode().getExecutor()); as the node will be null
 		super.setNode(super.getParent().getNode());
+		// To make the archive modifier work in case of failed provision, set fuse path before waiting for provision
+		super.setFusePath(super.getParent().getFusePath() + File.separator + "instances" + File.separator + super.getName());
 		try {
 			executor.waitForProvisioning(this);
 		} catch (FaframException e) {
@@ -128,12 +131,6 @@ public class ChildContainer extends Container implements ThreadContainer {
 			super.setExecutor(childExecutor);
 		} catch (Exception ex) {
 			log.warn("Couldn't create executor / couldn't parse ssh port, child.executeCommand() won't work!");
-		}
-		// Set the fuse path
-		try {
-			super.setFusePath(super.getExecutor().executeCommandSilently("shell:info | grep \"Karaf base\"").trim().replaceAll(" +", " ").split(" ")[2]);
-		} catch (Exception ex) {
-			log.warn("Setting fuse path failed, it won't be available");
 		}
 	}
 

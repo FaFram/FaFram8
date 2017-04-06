@@ -137,6 +137,19 @@ public class SshContainer extends Container implements ThreadContainer {
 		executor.executeCommand(command + " " + super.getName());
 
 		super.setCreated(true);
+		// To make the archive modifier work in case of failed provision, set fuse path before waiting for provision
+		if (OptionUtils.getString(super.getOptions(), Option.PATH).isEmpty()) {
+			if (SystemProperty.isWithoutPublicIp()) {
+				log.warn("Container doesn't have a public ip, not setting fuse path!");
+			} else {
+				String path = super.executeNodeCommand("pwd");
+				path += File.separator + "containers" + File.separator + super.getName();
+				super.setFusePath(path);
+			}
+		} else {
+			super.setFusePath(OptionUtils.getString(super.getOptions(), Option.PATH) + File.separator + super.getName());
+		}
+
 		try {
 			executor.waitForProvisioning(this);
 		} catch (FaframException e) {
