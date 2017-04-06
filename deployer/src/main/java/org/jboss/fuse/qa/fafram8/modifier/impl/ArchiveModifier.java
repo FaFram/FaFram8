@@ -108,9 +108,9 @@ public final class ArchiveModifier extends Modifier {
 		}
 
 		for (String s : archiveFiles) {
-			final String response = super.getExecutor().executeCommand(
-					"find " + container.getFusePath() + " -type f -wholename \""
-							+ container.getFusePath() + (container.getFusePath().endsWith(File.separator) ? "" : File.separator) + s + "\"");
+			final String escapedPath = container.getFusePath().replaceAll("\\\\", "/");
+			final String response = super.getExecutor().executeCommand("find " + escapedPath + " -type f -wholename \""
+							+ escapedPath + (escapedPath.endsWith(File.separator) ? "" : File.separator) + s + "\"");
 			if (!(response == null || response.isEmpty())) {
 				for (String filePath : response.split("\n")) {
 					try {
