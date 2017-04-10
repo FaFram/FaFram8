@@ -110,8 +110,8 @@ public class JoinContainer extends RootContainer implements ThreadContainer {
 				// Name of the container should be changed in property files -> only join with correct password for root and zookeeperUri from root
 				log.trace("First time connecting join executor");
 				super.getExecutor().connect();
-				super.getExecutor().executeCommands("fabric:join " + options + " " + zookeeperUri);
-				super.getExecutor().waitForProvisioning(this);
+				super.getExecutor().executeCommands("fabric:join --resolver localip " + options + " " + zookeeperUri);
+				super.getParent().getExecutor().waitForProvisioning(this);
 			}
 			ModifierExecutor.clearAllModifiers();
 		} catch (FaframException ex) {
