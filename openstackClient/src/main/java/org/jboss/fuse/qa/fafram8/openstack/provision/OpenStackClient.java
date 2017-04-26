@@ -108,6 +108,9 @@ public final class OpenStackClient {
 	private static final String OS4_PROPERTIES = "OS4.properties";
 	private static final String OS7_PROPERTIES = "OS7.properties";
 
+	// threshold for OpenStack resources (no more resources will be allocated if OpenStack usage is larger than this threshold)
+	private static final double OPENSTACK_USAGE_THRESHOLD = 0.7;
+
 	@Getter
 	private int coresPerInstance = ("3".equals(this.flavor)) ? 2 : 4;
 
@@ -376,25 +379,27 @@ public final class OpenStackClient {
 	}
 
 	/**
-	 * Get the free cores on OS.
+	 * Get the free cores on OS usable for Fafram8.
 	 *
 	 * @return free cores
 	 */
 	public int getFreeCores() {
-		final int max = getOsClient().compute().quotaSets().limits().getAbsolute().getMaxTotalCores();
+		final int max = (int) (getOsClient().compute().quotaSets().limits().getAbsolute().getMaxTotalCores() * OPENSTACK_USAGE_THRESHOLD);
 		final int current = getOsClient().compute().quotaSets().limits().getAbsolute().getTotalCoresUsed();
-		return max - current;
+		final int free = max - current;
+		return (free < 0) ? 0 : free;
 	}
 
 	/**
-	 * Get the free memory on OS.
+	 * Get the free memory on OS usable for Fafram8.
 	 *
 	 * @return free memory
 	 */
 	public int getFreeMemory() {
-		final int max = getOsClient().compute().quotaSets().limits().getAbsolute().getMaxTotalRAMSize();
+		final int max = (int) (getOsClient().compute().quotaSets().limits().getAbsolute().getMaxTotalRAMSize() * OPENSTACK_USAGE_THRESHOLD);
 		final int current = getOsClient().compute().quotaSets().limits().getAbsolute().getTotalRAMUsed();
-		return max - current;
+		final int free = max - current;
+		return (free < 0) ? 0 : free;
 	}
 
 	/**
@@ -408,7 +413,7 @@ public final class OpenStackClient {
 		while (true) {
 			final int freeCores = getFreeCores();
 			final int freeMemory = getFreeMemory();
-			log.trace(String.format("CPU needed: %s, CPU free: %s | Mem needed: %s, Mem free: %s",
+			log.trace(String.format("CPU needed: %s, CPU free (for Faram8): %s | Mem needed: %s, Mem free (for Fafram8): %s",
 					(coresPerInstance * instanceCount), freeCores, (memoryPerInstance * instanceCount), freeMemory));
 			if (freeCores >= (coresPerInstance * instanceCount) && freeMemory >= (memoryPerInstance * instanceCount)) {
 				break;
