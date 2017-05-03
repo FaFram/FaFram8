@@ -176,8 +176,17 @@ public class RemoteNodeManager implements NodeManager {
 	@Override
 	public void restart() {
 		executor.executeCommand(productPath + SEP + "bin" + SEP + "stop");
-		fuseExecutor.waitForShutdown();
-		startFuse();
+		try {
+			fuseExecutor.waitForShutdown();
+		} catch (Exception e) {
+			throw new ContainerException("Could not stop root container: ", e);
+		}
+		// Root restarts are handled through system property, so the container will start automatically
+		try {
+			fuseExecutor.waitForBoot();
+		} catch (Exception e) {
+			throw new ContainerException("Could not start root container: ", e);
+		}
 	}
 
 	@Override
