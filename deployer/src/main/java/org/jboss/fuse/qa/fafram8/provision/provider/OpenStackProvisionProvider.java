@@ -66,6 +66,12 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 			} else {
 				SystemProperty.set(FaframConstant.OPENSTACK_NAME_PREFIX, SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_NAME_PREFIX) + "." + new Date().getTime());
 			}
+
+			if (SystemProperty.getOpenstackThreshold() == 1.0) {
+				log.warn("OpenStack threshold limit is disabled. This is supposed to be used only for test debugging."
+						+ " Please remove {} property for automated testing.", FaframConstant.OPENSTACK_DISABLE_THRESHOLD);
+			}
+
 			client = OpenStackClient.builder()
 					.url(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_URL))
 					.tenant(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_TENANT))
@@ -78,6 +84,7 @@ public class OpenStackProvisionProvider implements ProvisionProvider {
 					.addressType(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_ADDRESS_TYPE))
 					.floatingIpPool(SystemProperty.getExternalProperty(FaframConstant.OPENSTACK_FLOATING_IP_POOL))
 					.namePrefix(SystemProperty.getOpenstackServerNamePrefix())
+					.resourcesThreshold(SystemProperty.getOpenstackThreshold())
 					.build();
 
 			provider = this;

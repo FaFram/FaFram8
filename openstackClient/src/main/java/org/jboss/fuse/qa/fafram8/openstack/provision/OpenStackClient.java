@@ -90,6 +90,11 @@ public final class OpenStackClient {
 	@Setter
 	private OSClient osClient;
 
+	@Getter
+	@Setter
+	// threshold for OpenStack resources (no more resources will be allocated if OpenStack usage is larger than this threshold)
+	private double resourcesThreshold;
+
 	// Number of threads
 	private static final int POOL_SIZE = 5;
 
@@ -107,9 +112,6 @@ public final class OpenStackClient {
 
 	private static final String OS4_PROPERTIES = "OS4.properties";
 	private static final String OS7_PROPERTIES = "OS7.properties";
-
-	// threshold for OpenStack resources (no more resources will be allocated if OpenStack usage is larger than this threshold)
-	private static final double OPENSTACK_USAGE_THRESHOLD = 0.7;
 
 	@Getter
 	private int coresPerInstance = ("3".equals(this.flavor)) ? 2 : 4;
@@ -129,8 +131,8 @@ public final class OpenStackClient {
 		return this.osClient;
 	}
 
-	@java.beans.ConstructorProperties({"url", "user", "password", "tenant", "image", "namePrefix", "flavor", "keypair", "networks", "floatingIpPool", "addressType", "osClient"})
-	OpenStackClient(String url, String user, String password, String tenant, String image, String namePrefix, String flavor, String keypair, String networks, String floatingIpPool, String addressType) {
+	@java.beans.ConstructorProperties({"url", "user", "password", "tenant", "image", "namePrefix", "flavor", "keypair", "networks", "floatingIpPool", "addressType", "osClient", "resourcesThreshold"})
+	OpenStackClient(String url, String user, String password, String tenant, String image, String namePrefix, String flavor, String keypair, String networks, String floatingIpPool, String addressType, double resourcesThreshold) {
 		this.url = url;
 		this.user = user;
 		this.password = password;
@@ -142,6 +144,7 @@ public final class OpenStackClient {
 		this.networks = networks;
 		this.floatingIpPool = floatingIpPool;
 		this.addressType = addressType;
+		this.resourcesThreshold = resourcesThreshold;
 	}
 
 	/**
@@ -384,7 +387,7 @@ public final class OpenStackClient {
 	 * @return free cores
 	 */
 	public int getFreeCores() {
-		final int max = (int) (getOsClient().compute().quotaSets().limits().getAbsolute().getMaxTotalCores() * OPENSTACK_USAGE_THRESHOLD);
+		final int max = (int) (getOsClient().compute().quotaSets().limits().getAbsolute().getMaxTotalCores() * resourcesThreshold);
 		final int current = getOsClient().compute().quotaSets().limits().getAbsolute().getTotalCoresUsed();
 		final int free = max - current;
 		return (free < 0) ? 0 : free;
@@ -396,7 +399,7 @@ public final class OpenStackClient {
 	 * @return free memory
 	 */
 	public int getFreeMemory() {
-		final int max = (int) (getOsClient().compute().quotaSets().limits().getAbsolute().getMaxTotalRAMSize() * OPENSTACK_USAGE_THRESHOLD);
+		final int max = (int) (getOsClient().compute().quotaSets().limits().getAbsolute().getMaxTotalRAMSize() * resourcesThreshold);
 		final int current = getOsClient().compute().quotaSets().limits().getAbsolute().getTotalRAMUsed();
 		final int free = max - current;
 		return (free < 0) ? 0 : free;
@@ -443,6 +446,9 @@ public final class OpenStackClient {
 	 * Builder class.
 	 */
 	public static class OpenStackClientBuilder {
+
+		public static final double DEFAULT_RESOURCES_THRESHOLD = 0.7;
+
 		private String url;
 		private String user;
 		private String password;
@@ -454,6 +460,7 @@ public final class OpenStackClient {
 		private String networks;
 		private String floatingIpPool;
 		private String addressType;
+		private double resourcesThreshold = DEFAULT_RESOURCES_THRESHOLD;
 
 		/**
 		 * Default constructor.
@@ -583,6 +590,17 @@ public final class OpenStackClient {
 		}
 
 		/**
+		 * Setter.
+		 *
+		 * @param resourcesThreshold OpenStack resources threshold
+		 * @return this
+		 */
+		public OpenStackClient.OpenStackClientBuilder resourcesThreshold(double resourcesThreshold) {
+			this.resourcesThreshold = resourcesThreshold;
+			return this;
+		}
+
+		/**
 		 * Setter for default parameters for OpenStack 4.
 		 *
 		 * @return this
@@ -600,6 +618,7 @@ public final class OpenStackClient {
 			this.networks = p.getProperty("openstack.networks");
 			this.floatingIpPool = p.getProperty("openstack.floatingIpPool");
 			this.addressType = p.getProperty("openstack.addressType");
+			this.resourcesThreshold = Double.valueOf(p.getProperty("openstack.resourcesThreshold"));
 			return this;
 		}
 
@@ -621,6 +640,7 @@ public final class OpenStackClient {
 			this.networks = p.getProperty("openstack.networks");
 			this.floatingIpPool = p.getProperty("openstack.floatingIpPool");
 			this.addressType = p.getProperty("openstack.addressType");
+			this.resourcesThreshold = Double.valueOf(p.getProperty("openstack.resourcesThreshold"));
 			return this;
 		}
 
@@ -642,6 +662,7 @@ public final class OpenStackClient {
 			this.networks = p.getProperty("openstack.networks");
 			this.floatingIpPool = p.getProperty("openstack.floatingIpPool");
 			this.addressType = p.getProperty("openstack.addressType");
+			this.resourcesThreshold = Double.valueOf(p.getProperty("openstack.resourcesThreshold"));
 			return this;
 		}
 
@@ -651,7 +672,7 @@ public final class OpenStackClient {
 		 * @return OpenStackClient instance
 		 */
 		public OpenStackClient build() {
-			return new OpenStackClient(url, user, password, tenant, image, namePrefix, flavor, keypair, networks, floatingIpPool, addressType);
+			return new OpenStackClient(url, user, password, tenant, image, namePrefix, flavor, keypair, networks, floatingIpPool, addressType, resourcesThreshold);
 		}
 
 		private Properties readProperties(String fileName) {

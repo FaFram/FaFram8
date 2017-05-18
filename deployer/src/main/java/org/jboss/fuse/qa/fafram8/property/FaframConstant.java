@@ -166,6 +166,9 @@ public final class FaframConstant {
 	// Openstack windows flavor ID
 	public static final String OPENSTACK_WINDOWS_FLAVOR = "openstack.windows.flavor";
 
+	// Disables Openstack threshold, thus allowing to use all resources. (use for manual testing only)
+	public static final String OPENSTACK_DISABLE_THRESHOLD = "openstack.disable.threshold";
+
 	// EC2 URL
 	public static final String EC2_URL = "ec2.url";
 
