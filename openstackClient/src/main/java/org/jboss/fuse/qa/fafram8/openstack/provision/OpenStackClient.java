@@ -411,18 +411,26 @@ public final class OpenStackClient {
 	 * @param instanceCount instance count
 	 */
 	public void waitForResources(int instanceCount) {
-		final long sleepPeriod = 30000L;
+		final long reportPeriod = TimeUnit.MINUTES.toMillis(30);
+		final long sleepPeriod = TimeUnit.SECONDS.toMillis(30);
 		log.info("Waiting for OS resources");
+		long elapsedTime = 0L;
 		while (true) {
 			final int freeCores = getFreeCores();
 			final int freeMemory = getFreeMemory();
-			log.trace(String.format("CPU needed: %s, CPU free (for Faram8): %s | Mem needed: %s, Mem free (for Fafram8): %s",
+			if (elapsedTime > reportPeriod) {
+				log.info(String.format("CPU needed: %s, CPU free (for Fafram8): %s | Mem needed: %s, Mem free (for Fafram8): %s",
+						(coresPerInstance * instanceCount), freeCores, (memoryPerInstance * instanceCount), freeMemory));
+				elapsedTime = 0L;
+			}
+			log.trace(String.format("CPU needed: %s, CPU free (for Fafram8): %s | Mem needed: %s, Mem free (for Fafram8): %s",
 					(coresPerInstance * instanceCount), freeCores, (memoryPerInstance * instanceCount), freeMemory));
 			if (freeCores >= (coresPerInstance * instanceCount) && freeMemory >= (memoryPerInstance * instanceCount)) {
 				break;
 			}
 			try {
 				Thread.sleep(sleepPeriod);
+				elapsedTime += sleepPeriod;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				Thread.currentThread().interrupt();
