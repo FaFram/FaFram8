@@ -491,6 +491,20 @@ public class SystemProperty {
 	/**
 	 * Getter.
 	 *
+	 * @return openstack resources threshold
+	 */
+	public static double getOpenstackThreshold() {
+		double threshold = 0.7;
+		if (System.getProperty(FaframConstant.OPENSTACK_DISABLE_THRESHOLD) != null) {
+			threshold = 1.0;
+		}
+
+		return threshold;
+	}
+
+	/**
+	 * Getter.
+	 *
 	 * @return java home path
 	 */
 	public static String getJavaHome() {
