@@ -137,7 +137,7 @@ public class Fafram extends ExternalResource {
 	 * Stop method.
 	 */
 	public void tearDown() {
-		tearDown(false);
+		tearDown(true);
 	}
 
 	/**
