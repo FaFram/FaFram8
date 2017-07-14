@@ -408,6 +408,17 @@ public class ContainerManager {
 	}
 
 	/**
+	 * Patches fabric to previously set default version.
+	 *
+	 * @param c Container instance
+	 */
+	public static void patchFabricToDefaultVersion(Container c) {
+		final String version = c.executeCommand("fabric:version-list | grep true").split("\\s+")[0];
+		c.executeCommand("container-upgrade " + version + " " + c.getName());
+		c.getExecutor().waitForProvisioning(c);
+	}
+
+	/**
 	 * Gets the patch name from the patch-add response.
 	 *
 	 * @param patchAddResponse patch-add command response.
