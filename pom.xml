@@ -114,12 +114,12 @@
 		<repository>
 			<id>fuse-qe-repo</id>
 			<name>Fuse QE Repository</name>
-			<url>http://fusewin.tpb.lab.eng.brq.redhat.com:8081/nexus/content/repositories/fuse-qe-repo/</url>
+			<url>http://jawa49.tpb.lab.eng.brq.redhat.com:8081/repository/fuse-qe-repo/</url>
 		</repository>
 		<snapshotRepository>
 			<id>fuse-qe-snapshots</id>
 			<name>Fuse QE Snapshots Repository</name>
-			<url>http://fusewin.tpb.lab.eng.brq.redhat.com:8081/nexus/content/repositories/fuse-qe-snapshots/</url>
+			<url>http://jawa49.tpb.lab.eng.brq.redhat.com:8081/repository/fuse-qe-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -426,32 +426,12 @@
 
 	<repositories>
 		<repository>
-			<id>fusewin-ea</id>
-			<url>http://fusewin.tpb.lab.eng.brq.redhat.com:8081/nexus/content/repositories/ea/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>ea</id>
-			<url>http://repository.jboss.org/nexus/content/repositories/ea/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
 			<id>jboss-soa-qa-maven-repository</id>
 			<url>http://dl.bintray.com/jboss-soa-qa/maven/</url>
 		</repository>
 		<repository>
 			<id>fusewin-fuseqe-snapshots</id>
-			<url>http://fusewin.tpb.lab.eng.brq.redhat.com:8081/nexus/content/repositories/fuse-qe-snapshots/</url>
+			<url>http://jawa49.tpb.lab.eng.brq.redhat.com:8081/repository/fuse-qe-snapshots/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -459,26 +439,6 @@
 	</repositories>
 
 	<pluginRepositories>
-		<pluginRepository>
-			<id>fusewin-ea</id>
-			<url>http://fusewin.tpb.lab.eng.brq.redhat.com:8081/nexus/content/repositories/ea/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</pluginRepository>
-		<pluginRepository>
-			<id>ea</id>
-			<url>http://repository.jboss.org/nexus/content/repositories/ea/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</pluginRepository>
 		<pluginRepository>
 			<id>jboss-soa-qa-maven-repository</id>
 			<url>http://dl.bintray.com/jboss-soa-qa/maven/</url>
