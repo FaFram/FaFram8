@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Properties;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -216,7 +217,9 @@ public final class Downloader {
 	private static String getMavenLocalRepository() {
 		// Get effective settings from maven
 		final InvocationRequest req = new DefaultInvocationRequest();
-		req.setGoals(Collections.singletonList("help:effective-settings"));
+		req.setGoals(Collections.singletonList("help:evaluate"));
+		req.setProperties(new Properties());
+		req.getProperties().setProperty("expression", "settings.localRepository");
 
 		final Invoker invoker = new DefaultInvoker();
 
@@ -229,13 +232,18 @@ public final class Downloader {
 		} catch (IOException | MavenInvocationException e) {
 			e.printStackTrace();
 		}
-
-		// Parse local repository
-		output = StringUtils.substringAfter(output, "localRepository");
-		output = StringUtils.substringBetween(output, ">", "<");
-
-		log.debug("Local repository path is " + output);
-		return output;
+		String repoPath = null;
+		for (String line : output.split(System.lineSeparator())) {
+			if (!line.startsWith("[")) {
+				repoPath = line;
+				break;
+			}
+		}
+		if (repoPath == null) {
+			log.error("Couldn't find local maven repo in '{}'", output);
+		}
+		log.debug("Local repository path is " + repoPath);
+		return repoPath;
 	}
 
 	/**
