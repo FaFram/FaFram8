@@ -5,6 +5,7 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.StringUtils;
 
+import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.SSHClient;
 
@@ -71,6 +72,23 @@ public final class Patcher {
 			default:
 				return getPatchByName();
 		}
+	}
+
+	/**
+	 * Returns list of available patches.
+	 *
+	 * @param c container to check fot patches
+	 * @return list of names of patches
+	 */
+	public static List<String> getPatchNames(Container c) {
+		final List<String> patchNames = new ArrayList<>();
+		final String[] result = c.executeCommand("patch:list | grep -v installed").split("\\r?\\n");
+
+		for (String patch : result) {
+			patchNames.add(patch.split("\\s+")[0].trim());
+		}
+
+		return patchNames;
 	}
 
 	/**

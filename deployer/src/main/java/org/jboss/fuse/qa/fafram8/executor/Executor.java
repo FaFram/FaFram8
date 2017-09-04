@@ -16,6 +16,7 @@ import org.jboss.fuse.qa.fafram8.exceptions.NoRouteToHostException;
 import org.jboss.fuse.qa.fafram8.exceptions.SSHClientException;
 import org.jboss.fuse.qa.fafram8.exceptions.SessionTimeoutException;
 import org.jboss.fuse.qa.fafram8.exceptions.VerifyFalseException;
+import org.jboss.fuse.qa.fafram8.manager.ContainerManager;
 import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import org.jboss.fuse.qa.fafram8.ssh.NodeSSHClient;
 import org.jboss.fuse.qa.fafram8.ssh.SSHClient;
@@ -592,18 +593,29 @@ public class Executor {
 	}
 
 	/**
-	 * Waits for the patch defined status.
+	 * Waits for the patch defined status of root container.
 	 *
 	 * @param patchName patch name
 	 * @param status status of patch to wait for
 	 */
 	public void waitForPatchStatus(String patchName, boolean status) {
+		waitForPatchStatus(patchName, status, ContainerManager.getRoot().getName());
+	}
+
+	/**
+	 * Waits for the patch defined status.
+	 *
+	 * @param patchName patch name
+	 * @param status status of patch to wait for
+	 * @param cName container name
+	 */
+	public void waitForPatchStatus(String patchName, boolean status, String cName) {
 		final int step = 3;
 		final long timeout = step * 1000L;
 		int retries = 0;
 		boolean isSuccessful = false;
 
-		log.info("Waiting for patch to be installed");
+		log.info("Waiting for patch to " + (status ? "install" : "rollback"));
 
 		while (!isSuccessful) {
 			sleep(timeout);
@@ -622,8 +634,13 @@ public class Executor {
 			String reason = "";
 
 			try {
-				isSuccessful =
-						client.executeCommand("patch:list | grep " + patchName, true).contains(String.valueOf(status));
+				if (!status) {
+					isSuccessful =
+							client.executeCommand("patch:list | grep " + patchName, true).contains(String.valueOf(status));
+				} else {
+					isSuccessful = StringUtils.containsAny(client.executeCommand("patch:list | grep " + patchName, true),
+							String.valueOf(status), cName);
+				}
 			} catch (Exception e) {
 				reason = e.getMessage();
 				shouldReconnect = true;
