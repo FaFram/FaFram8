@@ -9,6 +9,7 @@ import org.jboss.fuse.qa.fafram8.cluster.container.Container;
 import org.jboss.fuse.qa.fafram8.cluster.container.RootContainer;
 import org.jboss.fuse.qa.fafram8.exception.BundleUploadException;
 import org.jboss.fuse.qa.fafram8.exception.FaframException;
+import org.jboss.fuse.qa.fafram8.exception.PatchException;
 import org.jboss.fuse.qa.fafram8.executor.Executor;
 import org.jboss.fuse.qa.fafram8.invoker.MavenPomInvoker;
 import org.jboss.fuse.qa.fafram8.patcher.Patcher;
@@ -357,6 +358,38 @@ public class ContainerManager {
 	}
 
 	/**
+	 * Rollbacks all patches on given container.
+	 *
+	 * @param c container to rollback
+	 */
+	public static void rollbackPatches(Container c) {
+		if (SystemProperty.isFabric()) {
+			rollbackFabric(c);
+		} else {
+			rollbackStandalone(c);
+		}
+	}
+
+	/**
+	 * Rollbacks all patches on fabric.
+	 *
+	 * @param c fabric container
+	 */
+	private static void rollbackFabric(Container c) {
+		getRoot().executeCommand("fabric:container-rollback 1.0 " + c.getName());
+		c.waitForProvisioning();
+	}
+
+	private static void rollbackStandalone(Container c) {
+		final List<String> patches = Patcher.getPatchNames(c);
+
+		for (String patchName : patches) {
+			c.executeCommand("patch:rollback " + patchName);
+			c.getExecutor().waitForPatchStatus(patchName, false, c.getName());
+		}
+	}
+
+	/**
 	 * If the container list is empty, it adds the default root built from system properties.
 	 */
 	private static void createRootIfNecessary() {
@@ -376,7 +409,7 @@ public class ContainerManager {
 		for (String s : Patcher.getPatches()) {
 			final String patchName = getPatchName(c.executeCommand("patch:add " + s));
 			c.executeCommand("patch:install " + patchName);
-			c.getExecutor().waitForPatchStatus(patchName, true);
+			c.getExecutor().waitForPatchStatus(patchName, true, c.getName());
 		}
 	}
 
@@ -413,9 +446,14 @@ public class ContainerManager {
 	 * @param c Container instance
 	 */
 	public static void patchFabricToDefaultVersion(Container c) {
-		final String version = c.executeCommand("fabric:version-list | grep true").split("\\s+")[0];
-		c.executeCommand("container-upgrade " + version + " " + c.getName());
-		c.getExecutor().waitForProvisioning(c);
+		final String version = getRoot().executeCommand("fabric:version-list | grep true").split("\\s+")[0];
+		getRoot().executeCommand("container-upgrade " + version + " " + c.getName());
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			throw new PatchException(e);
+		}
+		c.waitForProvisioning();
 	}
 
 	/**
@@ -657,6 +695,7 @@ public class ContainerManager {
 
 	/**
 	 * Gets the WARN count from the log.
+	 *
 	 * @param executor executor
 	 * @param cmd command to execute
 	 * @return warn count != -1 if everything went well
@@ -672,6 +711,7 @@ public class ContainerManager {
 
 	/**
 	 * Dumps the logs into warn and into file.
+	 *
 	 * @param builder builder to dump
 	 */
 	private static void dumpLogs(StringBuilder builder) {
