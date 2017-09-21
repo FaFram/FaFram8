@@ -122,6 +122,7 @@ public final class ArchiveModifier extends Modifier {
 							archivedFile = Paths.get(archiveTargetPath.toAbsolutePath().toString(), randomFolder,
 									TestNameSingleton.getInstance().getTestName(), StringUtils.substringAfterLast(filePath, File.separator)).toFile();
 						}
+						log.info("Archiving " + archivedFile);
 						FileUtils.writeStringToFile(archivedFile, sshClient.readFileFromRemote(filePath));
 					} catch (IOException | CopyFileException e) {
 						log.error("Failed to archived file {} from remote machine {}!", filePath, sshClient, e);
