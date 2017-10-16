@@ -108,6 +108,13 @@ public class RemoteNodeManager implements NodeManager {
 			if (!SystemProperty.isFabric() && !SystemProperty.skipBrokerWait()) {
 				fuseExecutor.waitForBroker();
 			}
+			if (!SystemProperty.isFabric() && !ContainerManager.getBundles().isEmpty()) {
+				for (String bundle : ContainerManager.getBundles()) {
+					log.info("Deploying bundle " + bundle + " to deploy folder");
+					executor.executeCommand("cp " + bundle + " " + productPath + SEP + "deploy");
+					executor.waitForBundle(new File(bundle).getName());
+				}
+			}
 		} catch (Exception e) {
 			throw new ContainerException("Could not start root container: ", e);
 		}

@@ -1,5 +1,7 @@
 package org.jboss.fuse.qa.fafram8.manager;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import org.apache.commons.io.FileUtils;
 
 import org.jboss.fuse.qa.fafram8.cluster.container.Container;
@@ -15,6 +17,9 @@ import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -142,6 +147,14 @@ public class LocalNodeManager implements NodeManager {
 			executor.waitForBoot();
 			if (!SystemProperty.isFabric() && !SystemProperty.skipBrokerWait()) {
 				executor.waitForBroker();
+			}
+			if (!SystemProperty.isFabric() && !ContainerManager.getBundles().isEmpty()) {
+				for (String bundle : ContainerManager.getBundles()) {
+					log.info("Deploying bundle " + bundle + " to deploy folder");
+					final String fileName = new File(bundle).getName();
+					Files.copy(Paths.get(bundle), Paths.get(productPath, "deploy", fileName), REPLACE_EXISTING);
+					executor.waitForBundle(fileName);
+				}
 			}
 		} catch (Exception e) {
 			throw new ContainerException("Could not start root container: " + e);

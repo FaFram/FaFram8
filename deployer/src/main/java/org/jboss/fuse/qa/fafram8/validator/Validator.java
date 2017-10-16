@@ -54,6 +54,18 @@ public final class Validator {
 				validateSshContainer(c);
 			}
 		}
+		validateBundles();
+	}
+
+	private static void validateBundles() {
+		if (!"localhost".equals(ContainerManager.getRoot().getNode().getHost())) {
+			return;
+		}
+		for (String bundle : ContainerManager.getBundles()) {
+			if (!new File(bundle).exists()) {
+				throw new ValidatorException("Bundle " + bundle + " does not exist!");
+			}
+		}
 	}
 
 	/**
