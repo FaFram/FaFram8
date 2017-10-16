@@ -827,8 +827,6 @@ public class Executor {
 				throw new ProvisionException("Container failed to install file after " + SystemProperty.getProvisionWaitTime() + " seconds.");
 			}
 
-			String reason = "";
-
 			try {
 				isSuccessful = client.executeCommand("log:display | grep fileinstall", true).contains(bundleFileName);
 			} catch (KarafSessionDownException e) {
@@ -838,8 +836,7 @@ public class Executor {
 			}
 
 			if (!isSuccessful) {
-				log.debug("Remaining time: " + (SystemProperty.getPatchWaitTime() - retries) + " seconds. " + (""
-						.equals(reason) ? "" : "(" + reason + ")"));
+				log.debug("Remaining time: " + (SystemProperty.getPatchWaitTime() - retries) + " seconds. ");
 			}
 		}
 	}

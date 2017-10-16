@@ -17,7 +17,6 @@ import org.jboss.fuse.qa.fafram8.property.SystemProperty;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;

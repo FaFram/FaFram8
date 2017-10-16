@@ -57,8 +57,14 @@ public final class Validator {
 		validateBundles();
 	}
 
+	/**
+	 * Validates if the bundle exist.
+	 */
 	private static void validateBundles() {
-		if (!"localhost".equals(ContainerManager.getRoot().getNode().getHost())) {
+		if (!ProviderSingleton.INSTANCE.isStaticProvider()) {
+			return;
+		}
+		if ("localhost".equals(ContainerManager.getRoot().getNode().getHost())) {
 			return;
 		}
 		for (String bundle : ContainerManager.getBundles()) {
