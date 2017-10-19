@@ -64,7 +64,7 @@ public final class Validator {
 		if (!ProviderSingleton.INSTANCE.isStaticProvider()) {
 			return;
 		}
-		if ("localhost".equals(ContainerManager.getRoot().getNode().getHost())) {
+		if (!"localhost".equals(ContainerManager.getRoot().getNode().getHost())) {
 			return;
 		}
 		for (String bundle : ContainerManager.getBundles()) {
