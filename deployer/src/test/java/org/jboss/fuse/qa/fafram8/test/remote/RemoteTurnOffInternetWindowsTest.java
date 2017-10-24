@@ -33,7 +33,7 @@ public class RemoteTurnOffInternetWindowsTest {
 
 	public static final String ROOT_NAME = "windows-offline-root";
 
-	public static final String ERROR_STATEMENT = "couldn't connect";
+	public static final String ERROR_STATEMENT = "Failed to connect";
 
 	private Container root = RootContainer.builder().name(ROOT_NAME).withFabric().build();
 	private Container ssh = SshContainer.builder().name("windows-offline-ssh").parentName(ROOT_NAME).build();
