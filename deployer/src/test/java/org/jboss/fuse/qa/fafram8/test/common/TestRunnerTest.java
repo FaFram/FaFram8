@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
 @RunWith(FaframTestRunner.class)
 public class TestRunnerTest {
 	@Test
-	@Jira("ENTESB-64") // Let's hope it will remain open
+	@Jira("ENTESB-4679") // Let's hope it will remain open
 	public void shouldSkipOpenTest() {
 		fail("Test shouldn't be run when the issue is still in open state");
 	}
@@ -52,7 +52,7 @@ public class TestRunnerTest {
 	}
 
 	@Test
-	@Jira({"ENTESB-3", "ENTESB-64"})
+	@Jira({"ENTESB-3", "ENTESB-4679"})
 	public void shouldSkipOneOpen() {
 		fail("Test shouldn't run because one issue is still open");
 	}

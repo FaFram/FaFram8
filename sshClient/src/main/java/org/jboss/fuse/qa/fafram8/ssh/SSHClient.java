@@ -148,7 +148,11 @@ public abstract class SSHClient {
 			}
 
 			if (!suppressLog) {
-				log.error(ExceptionUtils.getStackTrace(ex.getCause()));
+				if (ex.getCause() != null) {
+					log.error(ExceptionUtils.getStackTrace(ex.getCause()));
+				} else {
+					log.error(ex.toString());
+				}
 			}
 			// This is common exception when host is still unreachable
 			if (ex.getMessage().contains("Connection refused")) {

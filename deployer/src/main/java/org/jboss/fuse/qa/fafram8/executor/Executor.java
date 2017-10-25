@@ -806,4 +806,38 @@ public class Executor {
 
 		return string;
 	}
+
+	/**
+	 * Waits for bundle to be installed. Checks the log if the fileinstall contains file name.
+	 * @param bundleFileName bundle file name
+	 */
+	public void waitForBundle(String bundleFileName) {
+		final int step = 1;
+		final long timeout = step * 1000L;
+		int retries = 0;
+		boolean isSuccessful = false;
+
+		log.info("Waiting for bundle to be installed");
+
+		while (!isSuccessful) {
+			sleep(timeout);
+			retries += step;
+			if (retries > SystemProperty.getProvisionWaitTime()) {
+				log.error("Container failed to install file after " + SystemProperty.getProvisionWaitTime() + " seconds.");
+				throw new ProvisionException("Container failed to install file after " + SystemProperty.getProvisionWaitTime() + " seconds.");
+			}
+
+			try {
+				isSuccessful = client.executeCommand("log:display | grep fileinstall", true).contains(bundleFileName);
+			} catch (KarafSessionDownException e) {
+				e.printStackTrace();
+			} catch (SSHClientException e) {
+				e.printStackTrace();
+			}
+
+			if (!isSuccessful) {
+				log.debug("Remaining time: " + (SystemProperty.getPatchWaitTime() - retries) + " seconds. ");
+			}
+		}
+	}
 }
