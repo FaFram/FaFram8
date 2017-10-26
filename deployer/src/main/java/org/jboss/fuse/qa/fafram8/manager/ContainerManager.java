@@ -28,6 +28,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -733,5 +735,35 @@ public class ContainerManager {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	/**
+	 * Gets the full product path. Functional only for Fafram with one root container.
+	 *
+	 * @return product path
+	 */
+	public static String getProductPath() {
+		return getRoot().getFusePath();
+	}
+
+	/**
+	 * Get product version (from {@link ContainerManager#getProductPath()}).
+	 *
+	 * @return product version, eg {@code 6.2.1.redhat-084} or empty string if regex doesn't match.
+	 */
+	public static String getProductVersion() {
+		final Pattern p = Pattern.compile(
+				// jboss-fuse-6.3.0.redhat-045 || jboss-a-mq-6.2.1.redhat-084
+				".*jboss-(?<id>.+)-(?<version>\\d\\.\\d\\.\\d\\.(fuse|redhat)-\\d{2,6}).*", Pattern.CASE_INSENSITIVE
+		);
+
+		final Matcher m = p.matcher(getProductPath());
+
+		if (m.matches()) {
+			log.debug("{} version detected", m.group("version"));
+			return m.group("version");
+		}
+		log.debug("Couldn't get version from path '{}'.", getProductPath());
+		return "";
 	}
 }

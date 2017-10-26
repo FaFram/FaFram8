@@ -54,24 +54,6 @@ public final class Validator {
 				validateSshContainer(c);
 			}
 		}
-		validateBundles();
-	}
-
-	/**
-	 * Validates if the bundle exist.
-	 */
-	private static void validateBundles() {
-		if (!ProviderSingleton.INSTANCE.isStaticProvider()) {
-			return;
-		}
-		if (!"localhost".equals(ContainerManager.getRoot().getNode().getHost())) {
-			return;
-		}
-		for (String bundle : ContainerManager.getBundles()) {
-			if (!new File(bundle).exists()) {
-				throw new ValidatorException("Bundle " + bundle + " does not exist!");
-			}
-		}
 	}
 
 	/**
