@@ -46,8 +46,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -772,7 +770,7 @@ public class Fafram extends ExternalResource {
 	 * @return product path
 	 */
 	public String getProductPath() {
-		return getRoot().getFusePath();
+		return ContainerManager.getProductPath();
 	}
 
 	/**
@@ -781,19 +779,7 @@ public class Fafram extends ExternalResource {
 	 * @return product version, eg {@code 6.2.1.redhat-084} or empty string if regex doesn't match.
 	 */
 	public String getProductVersion() {
-		final Pattern p = Pattern.compile(
-				// jboss-fuse-6.3.0.redhat-045 || jboss-a-mq-6.2.1.redhat-084
-				".*jboss-(?<id>.+)-(?<version>\\d\\.\\d\\.\\d\\.redhat-\\d{2,4}).*", Pattern.CASE_INSENSITIVE
-		);
-
-		final Matcher m = p.matcher(getProductPath());
-
-		if (m.matches()) {
-			log.debug("{} version detected '{}'", m.group("id"), m.group("version"));
-			return m.group("version");
-		}
-		log.debug("Couldn't get version from path '{}'.", getProductPath());
-		return "";
+		return ContainerManager.getProductVersion();
 	}
 
 	/**

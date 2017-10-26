@@ -19,6 +19,8 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ToString
 @EqualsAndHashCode(callSuper = true, exclude = {"executor"})
+@Setter
+@Getter
 public final class PropertyModifier extends Modifier {
 	private String filePath;
 	private String key;

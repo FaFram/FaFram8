@@ -2,6 +2,7 @@ package org.jboss.fuse.qa.fafram8.cluster.container;
 
 import static org.jboss.fuse.qa.fafram8.modifier.impl.AccessRightsModifier.setExecutable;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.ArchiveModifier.registerArchiver;
+import static org.jboss.fuse.qa.fafram8.modifier.impl.DefaultUserModifier.addDefaultUser;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.JavaHomeModifier.setJavaHome;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.JvmOptsModifier.addJvmOpts;
 import static org.jboss.fuse.qa.fafram8.modifier.impl.PropertyModifier.putProperty;
@@ -160,8 +161,10 @@ public class RootContainer extends Container {
 		// If we shouldn't skip default user and the usersMod is null == we dont add specific user to the container, so add fafram/fafram
 		if (usersMod == null && !SystemProperty.skipDefaultUser()) {
 			// Add default user which is now fafram/fafram with only role Administrator for more transparent tests
+			// Do not specify role here, the role is determined in the modifier itself
 			ModifierExecutor.addModifiers(
-					putProperty(super.getNode().getHost(), "etc/users.properties", super.getUser(), super.getPassword() + ",Administrator"));
+					addDefaultUser(super.getNode().getHost(), "etc/users.properties", super.getUser(), super.getPassword()));
+
 			// If we should skip default user and the usersMod is set, use usersMod, otherwise the modifier from Fafram.addUser() will be used
 		} else if (usersMod != null) {
 			usersMod.setHost(super.getNode().getHost());
