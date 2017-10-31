@@ -23,7 +23,7 @@
 		<fuse.version>6.2.1.redhat-084</fuse.version>
 		<guava.version>17.0</guava.version>
 		<log4j.version>2.4.1</log4j.version>
-		<maven.surefire.version>2.19.1</maven.surefire.version>
+		<maven.surefire.version>2.20</maven.surefire.version>
 		<maven.compiler.version>3.3</maven.compiler.version>
 		<maven.checkstyle.version>2.16</maven.checkstyle.version>
 		<checkstyle.version>5.8</checkstyle.version>

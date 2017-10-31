@@ -46,6 +46,9 @@ public final class DefaultUserModifier extends Modifier {
 				log.info("Setting role for default user to group admingroup");
 			}
 		}
+		if (super.getExecutor() != null) {
+			mod.setExecutor(super.getExecutor());
+		}
 		mod.execute(container);
 	}
 }
