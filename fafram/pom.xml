@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.jboss.fuse.qa</groupId>
+		<groupId>com.github.fafram8</groupId>
 		<artifactId>fafram8-parent</artifactId>
 		<version>0.8-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
@@ -16,12 +16,12 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.jboss.fuse.qa</groupId>
+			<groupId>com.github.fafram8</groupId>
 			<artifactId>fafram8-ssh-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.fuse.qa</groupId>
+			<groupId>com.github.fafram8</groupId>
 			<artifactId>fafram8-deployer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -44,8 +44,8 @@
 							<promoteTransitiveDependencies>true</promoteTransitiveDependencies>
 							<artifactSet>
 								<includes>
-									<include>org.jboss.fuse.qa:fafram8-ssh-client</include>
-									<include>org.jboss.fuse.qa:fafram8-deployer</include>
+									<include>com.github.fafram8:fafram8-ssh-client</include>
+									<include>com.github.fafram8:fafram8-deployer</include>
 								</includes>
 							</artifactSet>
 						</configuration>

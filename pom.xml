@@ -35,7 +35,7 @@
 
 	</properties>
 
-	<groupId>org.jboss.fuse.qa</groupId>
+	<groupId>com.github.fafram8</groupId>
 	<artifactId>fafram8-parent</artifactId>
 	<version>0.8-SNAPSHOT</version>
 	<packaging>pom</packaging>
